@@ -1,0 +1,6 @@
+allowBuilds:
+  # Downloads the mongod binary used by the data-access tests.
+  mongodb-memory-server: true
+  # Installs the platform-native esbuild binary that `tsx` (seed script) runs on.
+  esbuild: true
+  unrs-resolver: true

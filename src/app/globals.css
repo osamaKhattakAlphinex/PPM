@@ -1,0 +1,353 @@
+@import "tailwindcss";
+
+/* =========================================================================
+   PPM Platform design tokens — see /docs/DESIGN.md for the full rationale.
+   ========================================================================= */
+
+/* ---- Static palette ramps (theme-independent) — "Steel & Brass" ------- */
+@theme {
+  --color-petrol-50: #f1f8f8;
+  --color-petrol-100: #e0f0ef;
+  --color-petrol-200: #beeae7;
+  --color-petrol-300: #93dcd8;
+  --color-petrol-400: #58dad2;
+  --color-petrol-500: #2dccc3;
+  --color-petrol-600: #25a79f;
+  --color-petrol-700: #1e8680;
+  --color-petrol-800: #145a56;
+  --color-petrol-900: #0f4d49;
+
+  --color-brass-50: #f8f6f2;
+  --color-brass-100: #efeae1;
+  --color-brass-200: #e8d9bf;
+  --color-brass-300: #d9c096;
+  --color-brass-400: #d4a95e;
+  --color-brass-500: #bd8a32;
+  --color-brass-600: #a1762b;
+  --color-brass-700: #815e22;
+  --color-brass-800: #654a1b;
+  --color-brass-900: #4a3512;
+
+  --color-rust-50: #f8f3f2;
+  --color-rust-100: #efe3e1;
+  --color-rust-200: #e7c7c0;
+  --color-rust-300: #d8a297;
+  --color-rust-400: #d3725f;
+  --color-rust-500: #c44e36;
+  --color-rust-600: #ae4530;
+  --color-rust-700: #803323;
+  --color-rust-800: #64281c;
+  --color-rust-900: #491c13;
+
+  --color-moss-50: #f3f6f5;
+  --color-moss-100: #e5ebe8;
+  --color-moss-200: #caddd2;
+  --color-moss-300: #a8c7b5;
+  --color-moss-400: #7db595;
+  --color-moss-500: #5b9f78;
+  --color-moss-600: #45785b;
+  --color-moss-700: #3c684f;
+  --color-moss-800: #2f513d;
+  --color-moss-900: #213b2c;
+
+  --color-stone-50: #f6f5f4;
+  --color-stone-100: #e7e2d9;
+  --color-stone-200: #dbd6cc;
+  --color-stone-300: #c4bbab;
+  --color-stone-400: #b0a082;
+  --color-stone-500: #998561;
+  --color-stone-600: #7d6d4f;
+  --color-stone-700: #64573f;
+  --color-stone-800: #4e4431;
+  --color-stone-900: #393123;
+
+  --color-mist-50: #f5f5f5;
+  --color-mist-100: #e8e9e8;
+  --color-mist-200: #d2d5d4;
+  --color-mist-300: #b5bab9;
+  --color-mist-400: #959d9b;
+  --color-mist-500: #7c8683;
+  --color-mist-600: #626a68;
+  --color-mist-700: #4e5553;
+  --color-mist-800: #3d4241;
+  --color-mist-900: #2c302f;
+
+  --color-ink: #0e1917;
+
+  /* ---- Type scale — modular 1.25, base 16px (see DESIGN.md §2) -------- */
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.75rem;
+  --text-xl--letter-spacing: -0.01em;
+  --text-2xl: 1.5625rem;
+  --text-2xl--line-height: 2rem;
+  --text-2xl--letter-spacing: -0.015em;
+  --text-3xl: 1.9375rem;
+  --text-3xl--line-height: 2.375rem;
+  --text-3xl--letter-spacing: -0.02em;
+  --text-4xl: 2.4375rem;
+  --text-4xl--line-height: 2.875rem;
+  --text-4xl--letter-spacing: -0.02em;
+  --text-5xl: 3.0625rem;
+  --text-5xl--line-height: 3.5rem;
+  --text-5xl--letter-spacing: -0.025em;
+
+  /* ---- Radius — restrained on purpose (see DESIGN.md §4) --------------- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+}
+
+/* ---- Semantic tokens: light theme (default) ---------------------------- */
+:root {
+  color-scheme: light;
+
+  --background: #f6f4ef;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-sunken: #efebe2;
+  --border: #dcd6c8;
+  --border-strong: #c7bfac;
+
+  --foreground: #0e1917;
+  --muted-foreground: #565f5c;
+  --on-primary: #f6f4ef;
+  /* Brass is light even at its base value, so white-on-brass fails contrast
+     (2.79:1) — text/icons placed on a solid accent fill use dark ink instead. */
+  --on-accent: #0e1917;
+  /* Brass used AS text/icon color on a plain surface (not a solid fill) also
+     needs a darker shade than the swatch value to clear 4.5:1 on a light bg. */
+  --accent-text: #815e22;
+
+  --primary: #145a56;
+  --primary-hover: #0f4643;
+  --accent: #bd8a32;
+  --accent-hover: #a1762b;
+  --danger: #ae4530;
+  --danger-hover: #803323;
+  --success: #45785b;
+  --success-hover: #3c684f;
+  --warning: var(--accent);
+  --warning-hover: var(--accent-hover);
+  --ring: #bd8a32;
+
+  --elevation-sm: 0 1px 2px rgb(14 25 23 / 0.06);
+  --elevation-md: 0 4px 12px rgb(14 25 23 / 0.1);
+  --elevation-lg: 0 12px 32px rgb(14 25 23 / 0.16);
+}
+
+/* ---- Semantic tokens: dark theme (system preference) -------------------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --background: #0e1917;
+    --surface: #152522;
+    --surface-raised: #1b302c;
+    --surface-sunken: #0a1412;
+    --border: #25403a;
+    --border-strong: #33534b;
+
+    --foreground: #edeae1;
+    --muted-foreground: #a7b0ab;
+    --on-primary: #0e1917;
+    --on-accent: #0e1917;
+    --accent-text: #d9a853;
+
+    --primary: #3fa89b;
+    --primary-hover: #5cc0b2;
+    --accent: #d9a853;
+    --accent-hover: #e6bd74;
+    --danger: #d97a5f;
+    --danger-hover: #e2957d;
+    --success: #6fae86;
+    --success-hover: #8ac29d;
+    --warning: var(--accent);
+    --warning-hover: var(--accent-hover);
+    --ring: #d9a853;
+
+    --elevation-sm: 0 1px 2px rgb(0 0 0 / 0.24);
+    --elevation-md: 0 4px 12px rgb(0 0 0 / 0.32);
+    --elevation-lg: 0 12px 32px rgb(0 0 0 / 0.4);
+  }
+}
+
+/* ---- Semantic tokens: dark theme (explicit user override) --------------- */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --background: #0e1917;
+  --surface: #152522;
+  --surface-raised: #1b302c;
+  --surface-sunken: #0a1412;
+  --border: #25403a;
+  --border-strong: #33534b;
+
+  --foreground: #edeae1;
+  --muted-foreground: #a7b0ab;
+  --on-primary: #0e1917;
+  --on-accent: #0e1917;
+  --accent-text: #d9a853;
+
+  --primary: #3fa89b;
+  --primary-hover: #5cc0b2;
+  --accent: #d9a853;
+  --accent-hover: #e6bd74;
+  --danger: #d97a5f;
+  --danger-hover: #e2957d;
+  --success: #6fae86;
+  --success-hover: #8ac29d;
+  --warning: var(--accent);
+  --warning-hover: var(--accent-hover);
+  --ring: #d9a853;
+
+  --elevation-sm: 0 1px 2px rgb(0 0 0 / 0.24);
+  --elevation-md: 0 4px 12px rgb(0 0 0 / 0.32);
+  --elevation-lg: 0 12px 32px rgb(0 0 0 / 0.4);
+}
+
+/* Explicit light override wins even inside a dark-preferring system. */
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+/* ---- Fonts: Latin defaults, Arabic swap on dir="rtl" -------------------- */
+:root {
+  --font-display-family: var(--font-space-grotesk);
+  --font-body-family: var(--font-plex-sans);
+}
+
+:root[dir="rtl"] {
+  --font-display-family: var(--font-plex-sans-arabic);
+  --font-body-family: var(--font-plex-sans-arabic);
+
+  /* Arabic sets taller line-boxes at every step — see DESIGN.md §2 */
+  --text-xs--line-height: 1.25rem;
+  --text-sm--line-height: 1.5rem;
+  --text-base--line-height: 1.75rem;
+  --text-lg--line-height: 2rem;
+  --text-xl--line-height: 2rem;
+  --text-2xl--line-height: 2.25rem;
+  --text-3xl--line-height: 2.75rem;
+  --text-4xl--line-height: 3.25rem;
+  --text-5xl--line-height: 4rem;
+}
+
+/* ---- Wire semantic + runtime tokens into Tailwind's theme --------------- */
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-on-primary: var(--on-primary);
+  --color-on-accent: var(--on-accent);
+  --color-accent-text: var(--accent-text);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-danger: var(--danger);
+  --color-danger-hover: var(--danger-hover);
+  --color-success: var(--success);
+  --color-success-hover: var(--success-hover);
+  --color-warning: var(--warning);
+  --color-warning-hover: var(--warning-hover);
+  --color-ring: var(--ring);
+
+  --shadow-sm: var(--elevation-sm);
+  --shadow-md: var(--elevation-md);
+  --shadow-lg: var(--elevation-lg);
+
+  --font-display: var(--font-display-family);
+  --font-body: var(--font-body-family);
+  --font-sans: var(--font-body-family);
+}
+
+/* ---- Base layer ---------------------------------------------------------- */
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-body);
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+/*
+ * Any LTR code/token fragment (var names, IDs) embedded in RTL prose.
+ * `unicode-bidi: isolate` alone is not enough — it isolates the run but
+ * still resolves its base direction from the inherited `direction`, so
+ * inside an RTL ancestor it stays RTL and can drag leading punctuation
+ * (e.g. the "--" in a CSS variable name) to the visual end. Forcing
+ * `direction: ltr` alongside it fixes that. DESIGN.md §5
+ */
+.bidi-isolate {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* Numerals stay LTR inside RTL prose (amounts, dates) — DESIGN.md §5 */
+.numeric-isolate {
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Skeleton shimmer — opacity-only, reduced-motion-safe ---------------- */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 150% 0;
+  }
+  100% {
+    background-position: -50% 0;
+  }
+}
+
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.skeleton {
+  background-image: linear-gradient(
+    100deg,
+    var(--color-surface-sunken) 40%,
+    var(--color-surface) 50%,
+    var(--color-surface-sunken) 60%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: skeleton-pulse 1.4s ease-in-out infinite;
+    background-image: none;
+    background-color: var(--color-surface-sunken);
+  }
+}
