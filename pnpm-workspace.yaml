@@ -4,3 +4,19 @@ allowBuilds:
   # Installs the platform-native esbuild binary that `tsx` (seed script) runs on.
   esbuild: true
   unrs-resolver: true
+  '@parcel/watcher': set this to true or false
+  '@swc/core': set this to true or false
+
+# `eslint-config-next` is consumed through FlatCompat in eslint.config.mjs, and
+# FlatCompat resolves plugin names relative to the PROJECT ROOT, not relative to
+# the config that names them. Under pnpm's strict layout those plugins live in
+# .pnpm/ and are invisible from the root, so ESLint dies with "couldn't find the
+# plugin eslint-plugin-react-hooks" — which is why `next build` prints an ESLint
+# failure and the DAL-boundary test cannot load the real config.
+#
+# Scoped to eslint deliberately: this is not `shamefully-hoist`, so nothing else
+# gains a phantom dependency it never declared. Also mirrored in `.npmrc`,
+# because pnpm 10 (which Vercel selects) reads it from there and pnpm 11 reads
+# it from here.
+publicHoistPattern:
+  - '*eslint*'

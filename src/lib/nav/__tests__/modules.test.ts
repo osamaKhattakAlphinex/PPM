@@ -5,20 +5,20 @@ import { ROLES, type Role } from "../../auth/roles";
 import { activeModuleKey, MODULES, MODULE_KEYS, moduleHref, modulesForRole } from "../modules";
 
 describe("the module table", () => {
-  it("has exactly the eleven modules the product ships", () => {
-    expect(MODULES).toHaveLength(11);
-    expect(MODULES.map((module) => module.key)).toEqual([...MODULE_KEYS]);
+  it("has exactly the thirteen modules the product ships", () => {
+    expect(MODULES).toHaveLength(13);
+    expect(MODULES.map((entry) => entry.key)).toEqual([...MODULE_KEYS]);
   });
 
   it("gives every module at least one role — an unreachable module is a mistake", () => {
-    for (const module of MODULES) {
-      expect(module.roles.length, `${module.key} has no roles`).toBeGreaterThan(0);
+    for (const entry of MODULES) {
+      expect(entry.roles.length, `${entry.key} has no roles`).toBeGreaterThan(0);
     }
   });
 
   it("keeps the mobile bottom bar to four destinations per role", () => {
     for (const role of ROLES) {
-      const primary = modulesForRole(role).filter((module) => module.primary);
+      const primary = modulesForRole(role).filter((entry) => entry.primary);
       expect(primary.length, `${role} has ${primary.length} primary modules`).toBeLessThanOrEqual(4);
     }
   });
@@ -35,8 +35,8 @@ describe("the module table", () => {
 describe("nav and route access agree", () => {
   it("lets every role open every module its sidebar offers", () => {
     for (const role of ROLES) {
-      for (const module of modulesForRole(role)) {
-        const href = moduleHref(module, role);
+      for (const entry of modulesForRole(role)) {
+        const href = moduleHref(entry, role);
         expect(canAccessPath(role, href), `${role} cannot open ${href}`).toBe(true);
       }
     }
@@ -44,27 +44,27 @@ describe("nav and route access agree", () => {
 
   it("refuses every module a role's sidebar does not offer", () => {
     for (const role of ROLES) {
-      const offered = new Set(modulesForRole(role).map((module) => moduleHref(module, role)));
+      const offered = new Set(modulesForRole(role).map((entry) => moduleHref(entry, role)));
 
-      for (const module of MODULES) {
-        if (offered.has(module.href)) continue;
+      for (const entry of MODULES) {
+        if (offered.has(entry.href)) continue;
         expect(
-          canAccessPath(role, module.href),
-          `${role} can reach ${module.href} but has no nav entry for it`,
+          canAccessPath(role, entry.href),
+          `${role} can reach ${entry.href} but has no nav entry for it`,
         ).toBe(false);
       }
     }
   });
 
   it("gives each module its own rule rather than letting it inherit /app", () => {
-    for (const module of MODULES) {
-      if (module.href === "/app") continue;
-      expect(resolveRouteAccess(module.href)?.prefix, module.href).toBe(module.href);
+    for (const entry of MODULES) {
+      if (entry.href === "/app") continue;
+      expect(resolveRouteAccess(entry.href)?.prefix, entry.href).toBe(entry.href);
     }
   });
 
   it("sends a CLIENT to the portal, never the staff dashboard", () => {
-    const dashboard = MODULES.find((module) => module.key === "dashboard");
+    const [dashboard] = MODULES.filter((entry) => entry.key === "dashboard");
     expect(dashboard).toBeDefined();
     expect(moduleHref(dashboard!, "CLIENT")).toBe("/app/portal");
     expect(moduleHref(dashboard!, "ADMIN")).toBe("/app");
@@ -78,8 +78,8 @@ describe("modulesForRole", () => {
       ROLES.map((role) => [role, modulesForRole(role).length]),
     ) as Record<Role, number>;
 
-    expect(counts.ADMIN).toBe(11);
-    expect(counts.FM_MANAGER).toBe(11);
+    expect(counts.ADMIN).toBe(13);
+    expect(counts.FM_MANAGER).toBe(13);
     expect(counts.SUPERVISOR).toBeLessThan(counts.FM_MANAGER);
     expect(counts.TECHNICIAN).toBeLessThan(counts.SUPERVISOR);
   });
@@ -92,8 +92,8 @@ describe("modulesForRole", () => {
    * the two; what matters is which ones.
    */
   it("gives a client the commercial modules and none of the internal ones", () => {
-    const clientKeys = modulesForRole("CLIENT").map((module) => module.key);
-    const technicianKeys = modulesForRole("TECHNICIAN").map((module) => module.key);
+    const clientKeys = modulesForRole("CLIENT").map((entry) => entry.key);
+    const technicianKeys = modulesForRole("TECHNICIAN").map((entry) => entry.key);
 
     expect(clientKeys).toEqual(
       expect.arrayContaining(["amc", "invoicing", "reports"]),
@@ -103,11 +103,33 @@ describe("modulesForRole", () => {
   });
 
   it("never offers a client the internal modules", () => {
-    const clientKeys = modulesForRole("CLIENT").map((module) => module.key);
+    const clientKeys = modulesForRole("CLIENT").map((entry) => entry.key);
     expect(clientKeys).not.toContain("technicians");
     expect(clientKeys).not.toContain("approvals");
     expect(clientKeys).not.toContain("aiInsights");
     expect(clientKeys).not.toContain("checklists");
+  });
+
+  /**
+   * The master-data split, from the navigation side.
+   *
+   * A client gets Locations because that collection carries a `clientId` and
+   * the data-access layer narrows it to their own sites. It never gets Clients,
+   * because that collection has nothing to narrow by — offering it would mean
+   * offering one customer the organization's entire customer list. The route
+   * table is derived from this one, so the sidebar and the middleware agree.
+   */
+  it("gives a client its locations but never the client list", () => {
+    const clientKeys = modulesForRole("CLIENT").map((entry) => entry.key);
+
+    expect(clientKeys).toContain("locations");
+    expect(clientKeys).not.toContain("clients");
+
+    expect(canAccessPath("CLIENT", "/app/locations")).toBe(true);
+    expect(canAccessPath("CLIENT", "/app/clients")).toBe(false);
+    // Staff read both; who may WRITE is checked in the actions, not here.
+    expect(canAccessPath("TECHNICIAN", "/app/clients")).toBe(true);
+    expect(canAccessPath("TECHNICIAN", "/app/locations")).toBe(true);
   });
 });
 
@@ -133,7 +155,7 @@ describe("activeModuleKey", () => {
 
   it("highlights nothing for a path outside every module", () => {
     expect(activeModuleKey("/login", "ADMIN")).toBeNull();
-    // Reachable, but it is not a module — the account page has no nav entry.
+    // Reachable, but it is not a entry — the account page has no nav entry.
     expect(activeModuleKey("/style-guide", "ADMIN")).toBeNull();
   });
 

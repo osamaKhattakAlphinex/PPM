@@ -98,11 +98,55 @@ export {
 } from "./repositories/users";
 
 export {
+  clientExistsInScope,
   clientsRepository,
+  findOwnClientForScope,
   type ClientCreateInput,
   type ClientUpdateInput,
 } from "./repositories/clients";
 
+export {
+  locationsRepository,
+  type LocationCreateInput,
+  type LocationUpdateInput,
+} from "./repositories/locations";
+
+export {
+  getOrganizationForScope,
+  updateOrganizationForScope,
+  type OrganizationPatch,
+  type OrganizationProfile,
+} from "./repositories/organizations";
+
+// --- Entity shapes and their zod schemas ------------------------------------
+// The MODELS stay unexported (see above); their zod schemas do not, because
+// they are the source of truth every action payload schema is derived from.
+
 export { USER_STATUSES, userStatusSchema, type UserDocument, type UserStatus } from "./models/user";
-export { type ClientDocument } from "./models/client";
-export { type OrganizationInput, type OrganizationDocument } from "./models/organization";
+
+export {
+  CLIENT_STATUSES,
+  clientContactInfoSchema,
+  clientInputSchema,
+  clientStatusSchema,
+  type ClientContactInfo,
+  type ClientDocument,
+  type ClientStatus,
+} from "./models/client";
+
+export {
+  LOCATION_STATUSES,
+  addressSchema,
+  locationInputSchema,
+  locationStatusSchema,
+  type Address,
+  type LocationDocument,
+  type LocationStatus,
+} from "./models/location";
+
+export {
+  organizationInputSchema,
+  organizationSettingsSchema,
+  type OrganizationDocument,
+  type OrganizationInput,
+} from "./models/organization";

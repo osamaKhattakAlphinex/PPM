@@ -1,7 +1,7 @@
 import type { Role } from "../auth/roles";
 
 /**
- * The eleven modules, and who may see each one.
+ * The thirteen modules, and who may see each one.
  *
  * This table is the single source of truth for two things that must never
  * disagree: what the sidebar renders, and what the middleware lets through. A
@@ -59,6 +59,8 @@ export const MODULE_KEYS = [
   "approvals",
   "invoicing",
   "technicians",
+  "clients",
+  "locations",
   "aiInsights",
 ] as const;
 
@@ -86,17 +88,40 @@ export const MODULES: readonly ModuleDefinition[] = [
   { key: "approvals", href: "/app/approvals", roles: [...MANAGEMENT, "SUPERVISOR"] },
   { key: "invoicing", href: "/app/invoicing", roles: [...MANAGEMENT, "CLIENT"] },
   { key: "technicians", href: "/app/technicians", roles: [...MANAGEMENT, "SUPERVISOR"] },
+  /**
+   * Master data. Both are readable by every staff role — a technician needs to
+   * know which site a work order is at — while creating and editing is
+   * ADMIN/FM_MANAGER, checked in the actions rather than here.
+   *
+   * The two differ on CLIENT, and the difference is the whole shape of the
+   * tenancy model:
+   *
+   *  - `clients` is STAFF only. The collection has no `clientId` to narrow by,
+   *    so serving a CLIENT session would mean serving it the organization's
+   *    entire customer list. A client reaches its own record at `/app/portal`.
+   *  - `locations` includes CLIENT, and needs no special case anywhere: the
+   *    collection carries a `clientId`, so the data-access layer narrows a
+   *    client-scoped session to its own sites before the query runs.
+   */
+  { key: "clients", href: "/app/clients", roles: STAFF },
+  { key: "locations", href: "/app/locations", roles: EVERYONE },
   { key: "aiInsights", href: "/app/ai-insights", roles: MANAGEMENT },
 ] as const;
 
-/** The href this role should use for this module. */
-export function moduleHref(module: ModuleDefinition, role: Role): string {
-  return role === "CLIENT" && module.clientHref ? module.clientHref : module.href;
+/**
+ * The href this role should use for this module.
+ *
+ * The parameter is `entry` rather than the obvious `module`: `module` is a
+ * reserved binding in a CommonJS scope, and `@next/next/no-assign-module-variable`
+ * rejects it — an ESLint *error*, which fails `next build`.
+ */
+export function moduleHref(entry: ModuleDefinition, role: Role): string {
+  return role === "CLIENT" && entry.clientHref ? entry.clientHref : entry.href;
 }
 
 /** Every module this role may open, in table order. */
 export function modulesForRole(role: Role): ModuleDefinition[] {
-  return MODULES.filter((module) => module.roles.includes(role));
+  return MODULES.filter((entry) => entry.roles.includes(role));
 }
 
 /**
@@ -115,12 +140,11 @@ export function modulesForRole(role: Role): ModuleDefinition[] {
 export function activeModuleKey(pathname: string, role: Role): ModuleKey | null {
   let best: { key: ModuleKey; length: number } | null = null;
 
-  for (const module of modulesForRole(role)) {
-    const href = moduleHref(module, role);
-    const matches =
-      pathname === href || (!module.exact && pathname.startsWith(`${href}/`));
+  for (const entry of modulesForRole(role)) {
+    const href = moduleHref(entry, role);
+    const matches = pathname === href || (!entry.exact && pathname.startsWith(`${href}/`));
     if (!matches) continue;
-    if (!best || href.length > best.length) best = { key: module.key, length: href.length };
+    if (!best || href.length > best.length) best = { key: entry.key, length: href.length };
   }
 
   return best?.key ?? null;

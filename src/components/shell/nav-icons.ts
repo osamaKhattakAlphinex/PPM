@@ -1,10 +1,12 @@
 import {
   Boxes,
+  Building2,
   CalendarCheck,
   ChartColumn,
   HardHat,
   LayoutDashboard,
   ListChecks,
+  MapPin,
   Receipt,
   ScrollText,
   Sparkles,
@@ -35,5 +37,7 @@ export const MODULE_ICONS: Readonly<Record<ModuleKey, LucideIcon>> = {
   approvals: Stamp,
   invoicing: Receipt,
   technicians: HardHat,
+  clients: Building2,
+  locations: MapPin,
   aiInsights: Sparkles,
 };

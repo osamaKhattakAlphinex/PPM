@@ -16,6 +16,7 @@ import {
   connectToDatabase,
   disconnectFromDatabase,
   ensureOrganization,
+  locationsRepository,
   requireObjectId,
   usersRepository,
 } from "../src/lib/db";
@@ -47,8 +48,51 @@ const ORGANIZATION = {
 const CLIENT = {
   name: "Al Faisaliah Tower",
   code: "faisaliah",
-  contactEmail: "facilities@faisaliah.example",
+  contactInfo: {
+    name: "Nada Al-Sabah",
+    email: "facilities@faisaliah.example",
+    phone: "+966 11 273 2000",
+  },
 };
+
+/**
+ * Two sites, and the difference between them is the point.
+ *
+ * The first belongs to the seeded client; the second is the organization's own
+ * depot and belongs to nobody. Sign in as `client@ppm.local` and only the first
+ * one is there — not because a page filtered it out, but because the data-access
+ * layer appends `clientId` to the query and null matches no client id. That
+ * split is asserted in `src/lib/db/__tests__/master-data.test.ts`; seeding both
+ * makes it visible in a browser on the first run too.
+ */
+const LOCATIONS = [
+  {
+    name: "Al Faisaliah Tower",
+    building: "Main Tower",
+    forClient: true,
+    address: {
+      line1: "King Fahd Road",
+      district: "Al Olaya",
+      city: "Riyadh",
+      region: "Riyadh Province",
+      postalCode: "11564",
+      country: "SA",
+    },
+  },
+  {
+    name: "Central Stores & Workshop",
+    building: null,
+    forClient: false,
+    address: {
+      line1: "Exit 18, Eastern Ring Road",
+      district: "Al Nasiriyah",
+      city: "Riyadh",
+      region: "Riyadh Province",
+      postalCode: "12811",
+      country: "SA",
+    },
+  },
+] as const;
 
 const USERS: ReadonlyArray<{ name: string; email: string; role: Role }> = [
   { name: "Layla Al-Harbi", email: "admin@ppm.local", role: "ADMIN" },
@@ -107,10 +151,32 @@ async function main(): Promise<void> {
     (await clients.create({
       name: CLIENT.name,
       code: CLIENT.code,
-      contactEmail: CLIENT.contactEmail,
+      contactInfo: { ...CLIENT.contactInfo },
       status: "ACTIVE",
     }));
   console.log(`client        ${client.name}  ${client._id.toHexString()}`);
+
+  // 3b. The sites. One belongs to the client above, one to the organization.
+  const locations = locationsRepository.forScope(bootstrapScope);
+
+  for (const seed of LOCATIONS) {
+    const existing = await locations.findOne({ name: seed.name });
+    if (existing) {
+      console.log(`location      ${seed.name.padEnd(28)} exists   ${existing._id.toHexString()}`);
+      continue;
+    }
+
+    const created = await locations.create({
+      name: seed.name,
+      building: seed.building,
+      // Null means org-wide. `clientId` is not patchable afterwards — a site's
+      // customer is fixed at creation, so the seed is the only place it is set.
+      clientId: seed.forClient ? client._id : null,
+      address: { ...seed.address },
+      status: "ACTIVE",
+    });
+    console.log(`location      ${seed.name.padEnd(28)} created  ${created._id.toHexString()}`);
+  }
 
   // 4. The users. One hash for all four: argon2 is deliberately slow, and four
   //    separate hashes would cost seconds for nothing.

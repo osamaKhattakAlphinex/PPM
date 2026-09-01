@@ -48,6 +48,15 @@ export function MobileDrawer({
     if (!isOpen) return;
 
     const previouslyFocused = document.activeElement as HTMLElement | null;
+    /**
+     * Captured now, not read in the cleanup. Reading `triggerRef.current` at
+     * cleanup time is what `react-hooks/exhaustive-deps` warns about — by then
+     * the node it points at may have been replaced or unmounted. Capturing here
+     * is not just a way to quiet the rule, it is correct: the caller sets the
+     * ref BEFORE opening the drawer, so it already holds the button that opened
+     * it, and that is the button focus should return to.
+     */
+    const openedBy = triggerRef.current;
 
     // The panel itself takes focus first (it is tabindex={-1}) so a screen
     // reader announces the dialog before its first link.
@@ -88,7 +97,7 @@ export function MobileDrawer({
     return () => {
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = previousOverflow;
-      (triggerRef.current ?? previouslyFocused)?.focus();
+      (openedBy ?? previouslyFocused)?.focus();
     };
   }, [isOpen, onClose, triggerRef]);
 
