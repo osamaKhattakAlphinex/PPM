@@ -1,4 +1,9 @@
+import createNextIntlPlugin from "next-intl/plugin";
 import type { NextConfig } from "next";
+
+import { staticSecurityHeaders } from "./src/lib/security/headers";
+
+const withNextIntl = createNextIntlPlugin("./src/lib/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   /**
@@ -9,39 +14,24 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["@node-rs/argon2", "mongoose"],
 
   /**
-   * Baseline security headers.
+   * The half of the security headers that never varies by request.
    *
-   * CSP and HSTS are deliberately NOT here yet: a useful CSP for an App Router
-   * app needs per-request nonces threaded through the middleware, and HSTS
-   * should only be switched on once the production domain is settled and
-   * serving HTTPS — turning it on early can lock a domain out of plain HTTP for
-   * as long as `max-age`. Both belong in their own pass. What is below is the
-   * part that is correct in every environment and costs nothing.
+   * The Content-Security-Policy is NOT here: it carries a per-request nonce,
+   * so it is built in `src/middleware.ts`. Everything below is constant, and
+   * living here means it is attached even to responses the middleware's
+   * matcher skips — static assets, `/api/auth/*`.
+   *
+   * See `src/lib/security/headers.ts` for what each one is for, and why HSTS
+   * only appears in a production build.
    */
   async headers() {
     return [
       {
         source: "/:path*",
-        headers: [
-          // Never let a browser sniff a JSON or text response into script.
-          { key: "X-Content-Type-Options", value: "nosniff" },
-          // No framing at all: this app has no embeddable surface, and it is
-          // the clickjacking defence that works without a CSP.
-          { key: "X-Frame-Options", value: "DENY" },
-          // Send the origin cross-site, the full path same-origin. A work-order
-          // URL carries ids that have no business in a third party's logs.
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          // Nothing here uses these; deny them rather than inherit a default.
-          {
-            key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
-          },
-          // Isolates the browsing context from cross-origin popup references.
-          { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
-        ],
+        headers: [...staticSecurityHeaders()],
       },
     ];
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

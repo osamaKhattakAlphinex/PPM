@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { DEFAULT_LOCALE, localeSchema } from "../i18n/config";
 import { roleSchema } from "./roles";
 
 /**
@@ -51,6 +52,14 @@ export const loginFormSchema = z.strictObject({
   password: z.string().min(1, "Enter your password").max(128),
   /** Validated again by `safeRedirectPath()` before it is ever followed. */
   callbackUrl: z.string().max(2_048).optional(),
+  /**
+   * The locale the form was rendered in, so the post-login landing page is in
+   * the same language. Parsed against the enum rather than trusted: it comes
+   * from a hidden field, and it is about to be interpolated into a redirect
+   * path. `catch` rather than `optional` so a tampered value degrades to the
+   * default instead of failing the whole sign-in.
+   */
+  locale: localeSchema.catch(DEFAULT_LOCALE).default(DEFAULT_LOCALE),
 });
 
 export type LoginFormInput = z.input<typeof loginFormSchema>;

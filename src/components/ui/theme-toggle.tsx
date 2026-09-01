@@ -2,19 +2,26 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { Moon, Sun } from "lucide-react";
-import { useThemeLocale } from "@/components/providers/theme-provider";
+import { useTranslations } from "next-intl";
 
-export function ThemeToggle() {
-  const { resolvedTheme, toggleTheme } = useThemeLocale();
+import { useTheme } from "@/components/providers/theme-provider";
+import { cn } from "@/lib/cn";
+
+export function ThemeToggle({ className }: { className?: string }) {
+  const { resolvedTheme, toggleTheme } = useTheme();
+  const t = useTranslations("theme");
   const isDark = resolvedTheme === "dark";
 
   return (
     <button
       type="button"
       onClick={toggleTheme}
-      aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
+      aria-label={isDark ? t("toLight") : t("toDark")}
       aria-pressed={isDark}
-      className="relative inline-flex h-11 w-11 items-center justify-center overflow-hidden rounded-sm border border-border-strong bg-surface text-foreground transition-colors hover:bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className={cn(
+        "relative inline-flex size-11 items-center justify-center overflow-hidden rounded-sm border border-border-strong bg-surface text-foreground transition-colors hover:bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        className,
+      )}
     >
       <AnimatePresence mode="wait" initial={false}>
         <motion.span

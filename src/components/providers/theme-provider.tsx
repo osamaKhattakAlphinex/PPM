@@ -11,120 +11,102 @@ import {
 } from "react";
 import { MotionConfig } from "framer-motion";
 
-export type Theme = "light" | "dark";
-export type Locale = "en" | "ar";
-
-const THEME_KEY = "ppm-theme";
-const LOCALE_KEY = "ppm-locale";
+import { THEME_COOKIE, THEME_COOKIE_MAX_AGE, type Theme, type ThemePreference } from "@/lib/theme";
 
 /**
- * Runs before hydration (see layout.tsx <head> script) so the very first
- * paint already has the right data-theme/dir/lang — no light-flash on load.
+ * Theme state, and the app-wide motion policy.
+ *
+ * Locale used to live here too. It does not any more: the locale is a path
+ * segment now, resolved on the server, so a component that needs it reads
+ * `useLocale()` from next-intl and a component that changes it navigates. See
+ * `src/lib/i18n/config.ts` for why the URL is the right home for it.
+ *
+ * The initial theme arrives as a prop from the server, which already read the
+ * cookie and stamped `data-theme` on `<html>`. That is what removes the
+ * pre-hydration flash script — and with it the last inline `<script>` the CSP
+ * would have had to make an exception for.
  */
-export const noFlashScript = `
-(function () {
-  try {
-    var theme = localStorage.getItem("${THEME_KEY}");
-    var locale = localStorage.getItem("${LOCALE_KEY}") || "en";
-    var dir = locale === "ar" ? "rtl" : "ltr";
-    if (theme === "light" || theme === "dark") {
-      document.documentElement.setAttribute("data-theme", theme);
-    }
-    document.documentElement.setAttribute("lang", locale);
-    document.documentElement.setAttribute("dir", dir);
-  } catch (e) {}
-})();
-`;
 
-type ThemeLocaleContextValue = {
-  theme: Theme | undefined;
-  resolvedTheme: Theme;
-  setTheme: (theme: Theme) => void;
-  toggleTheme: () => void;
-  locale: Locale;
-  dir: "ltr" | "rtl";
-  setLocale: (locale: Locale) => void;
-  toggleLocale: () => void;
-};
+const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-const ThemeLocaleContext = createContext<ThemeLocaleContextValue | null>(null);
+interface ThemeContextValue {
+  /** The explicit choice, or undefined when following the OS. */
+  readonly theme: ThemePreference;
+  /** What is actually on screen right now. Never undefined. */
+  readonly resolvedTheme: Theme;
+  readonly setTheme: (theme: Theme) => void;
+  readonly toggleTheme: () => void;
+}
 
-export function ThemeLocaleProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme | undefined>(undefined);
-  const [locale, setLocaleState] = useState<Locale>("en");
+export function ThemeProvider({
+  children,
+  initialTheme,
+}: {
+  children: ReactNode;
+  /** From the `ppm-theme` cookie, read in the server layout. */
+  initialTheme: ThemePreference;
+}) {
+  const [theme, setThemeState] = useState<ThemePreference>(initialTheme);
 
-  useEffect(() => {
-    const storedTheme = window.localStorage.getItem(THEME_KEY) as Theme | null;
-    const storedLocale = window.localStorage.getItem(LOCALE_KEY) as Locale | null;
-    if (storedTheme === "light" || storedTheme === "dark") setThemeState(storedTheme);
-    if (storedLocale === "en" || storedLocale === "ar") setLocaleState(storedLocale);
-  }, []);
-
+  /**
+   * The OS preference, tracked so `resolvedTheme` is correct for the users who
+   * have made no explicit choice — the toggle has to show a moon on a machine
+   * that is already dark. Starts at the light default and corrects on mount;
+   * the CSS has already painted the right colours either way, because
+   * `prefers-color-scheme` needs no JavaScript.
+   */
   const [systemTheme, setSystemTheme] = useState<Theme>("light");
+
   useEffect(() => {
-    const mql = window.matchMedia("(prefers-color-scheme: dark)");
-    setSystemTheme(mql.matches ? "dark" : "light");
-    const handler = (e: MediaQueryListEvent) => setSystemTheme(e.matches ? "dark" : "light");
-    mql.addEventListener("change", handler);
-    return () => mql.removeEventListener("change", handler);
+    const query = window.matchMedia("(prefers-color-scheme: dark)");
+    setSystemTheme(query.matches ? "dark" : "light");
+    const onChange = (event: MediaQueryListEvent) => setSystemTheme(event.matches ? "dark" : "light");
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
   }, []);
 
   const resolvedTheme = theme ?? systemTheme;
 
-  useEffect(() => {
-    if (theme) {
-      document.documentElement.setAttribute("data-theme", theme);
-    } else {
-      document.documentElement.removeAttribute("data-theme");
-    }
-  }, [theme]);
-
-  useEffect(() => {
-    document.documentElement.setAttribute("lang", locale);
-    document.documentElement.setAttribute("dir", locale === "ar" ? "rtl" : "ltr");
-  }, [locale]);
-
   const setTheme = useCallback((next: Theme) => {
     setThemeState(next);
-    window.localStorage.setItem(THEME_KEY, next);
+    // Written directly rather than through a server action: the switch has to
+    // be instant, and the cookie carries no authority — it only decides which
+    // colours this browser renders.
+    document.documentElement.setAttribute("data-theme", next);
+    document.cookie = [
+      `${THEME_COOKIE}=${next}`,
+      "path=/",
+      `max-age=${THEME_COOKIE_MAX_AGE}`,
+      "samesite=lax",
+      window.location.protocol === "https:" ? "secure" : "",
+    ]
+      .filter(Boolean)
+      .join("; ");
   }, []);
 
   const toggleTheme = useCallback(() => {
     setTheme(resolvedTheme === "dark" ? "light" : "dark");
   }, [resolvedTheme, setTheme]);
 
-  const setLocale = useCallback((next: Locale) => {
-    setLocaleState(next);
-    window.localStorage.setItem(LOCALE_KEY, next);
-  }, []);
-
-  const toggleLocale = useCallback(() => {
-    setLocale(locale === "en" ? "ar" : "en");
-  }, [locale, setLocale]);
-
-  const value = useMemo<ThemeLocaleContextValue>(
-    () => ({
-      theme,
-      resolvedTheme,
-      setTheme,
-      toggleTheme,
-      locale,
-      dir: locale === "ar" ? "rtl" : "ltr",
-      setLocale,
-      toggleLocale,
-    }),
-    [theme, resolvedTheme, setTheme, toggleTheme, locale, setLocale, toggleLocale]
+  const value = useMemo<ThemeContextValue>(
+    () => ({ theme, resolvedTheme, setTheme, toggleTheme }),
+    [theme, resolvedTheme, setTheme, toggleTheme],
   );
 
   return (
-    <ThemeLocaleContext.Provider value={value}>
+    <ThemeContext.Provider value={value}>
+      {/*
+        One place, once: every `motion.*` component in the kit drops its
+        transform animation to an instant opacity crossfade when the OS asks
+        for reduced motion. No component opts in. DESIGN.md §3.
+      */}
       <MotionConfig reducedMotion="user">{children}</MotionConfig>
-    </ThemeLocaleContext.Provider>
+    </ThemeContext.Provider>
   );
 }
 
-export function useThemeLocale() {
-  const ctx = useContext(ThemeLocaleContext);
-  if (!ctx) throw new Error("useThemeLocale must be used within ThemeLocaleProvider");
-  return ctx;
+export function useTheme(): ThemeContextValue {
+  const context = useContext(ThemeContext);
+  if (!context) throw new Error("useTheme must be used within ThemeProvider");
+  return context;
 }

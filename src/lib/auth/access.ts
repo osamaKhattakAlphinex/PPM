@@ -1,3 +1,4 @@
+import { MODULES } from "../nav/modules";
 import { ROLES, type Role } from "./roles";
 
 /**
@@ -48,6 +49,20 @@ export const ROUTE_ACCESS: readonly RouteAccessRule[] = [
   { prefix: "/app/settings", roles: ["ADMIN", "FM_MANAGER"] },
   { prefix: "/app/portal", roles: ["CLIENT"] },
   { prefix: "/app/account", roles: ROLES },
+  /**
+   * One rule per module, generated from the nav table rather than restated
+   * here. Restating it is how a sidebar ends up offering a link that answers
+   * 403 — or, far worse, how a module quietly inherits the permissive `/app`
+   * catch-all after someone adds it to the nav and forgets this file.
+   *
+   * The dashboard entry (`/app`) is filtered out because it is the catch-all
+   * above and must stay staff-only; a CLIENT reaches its own home at
+   * `/app/portal`, which has its own rule.
+   */
+  ...MODULES.filter((module) => module.href !== "/app").map((module) => ({
+    prefix: module.href,
+    roles: module.roles,
+  })),
 ];
 
 /** True when `pathname` is `prefix` itself or a segment below it. */

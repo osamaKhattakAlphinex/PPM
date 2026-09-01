@@ -1,0 +1,66 @@
+{
+  "brand": {
+    "name": "PPM Platform",
+    "tagline": "Facility maintenance operations"
+  },
+  "nav": {
+    "sectionLabel": "Modules",
+    "dashboard": "Dashboard",
+    "assets": "Assets",
+    "preventive": "Preventive",
+    "corrective": "Corrective",
+    "checklists": "Checklists",
+    "amc": "AMC",
+    "reports": "Reports",
+    "approvals": "Approvals",
+    "invoicing": "Invoicing",
+    "technicians": "Technicians",
+    "aiInsights": "AI Insights"
+  },
+  "shell": {
+    "primaryNavigation": "Primary navigation",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "menu": "Menu",
+    "more": "More",
+    "skipToContent": "Skip to content",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar",
+    "search": "Search"
+  },
+  "theme": {
+    "toLight": "Switch to light theme",
+    "toDark": "Switch to dark theme",
+    "label": "Theme"
+  },
+  "locale": {
+    "label": "Language",
+    "en": "English",
+    "ar": "Arabic"
+  },
+  "userMenu": {
+    "label": "Account",
+    "openLabel": "Open account menu",
+    "account": "Account settings",
+    "administration": "Administration",
+    "signOut": "Sign out",
+    "signedInAs": "Signed in as"
+  },
+  "roles": {
+    "ADMIN": "Administrator",
+    "FM_MANAGER": "FM manager",
+    "SUPERVISOR": "Supervisor",
+    "TECHNICIAN": "Technician",
+    "CLIENT": "Client"
+  },
+  "modulePlaceholder": {
+    "badge": "Not built yet",
+    "heading": "{module}",
+    "body": "This module is scheduled for a later prompt. The shell around it — navigation, locale, theme, session — is what is live today.",
+    "scopeNote": "Every query this module will make is scoped to your organization before it reaches the database."
+  },
+  "dashboard": {
+    "title": "Workspace",
+    "subtitle": "Signed in. Modules arrive in later prompts; the session below is what every scoped query will carry."
+  }
+}

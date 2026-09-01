@@ -1,30 +1,16 @@
-import type { Metadata } from "next";
-import { fontVariables } from "@/lib/fonts";
-import { ThemeLocaleProvider, noFlashScript } from "@/components/providers/theme-provider";
-import { ToastProvider } from "@/components/ui/toast";
-import "./globals.css";
+import type { ReactNode } from "react";
 
-export const metadata: Metadata = {
-  title: "PPM Platform",
-  description: "Facility maintenance management for the Gulf market.",
-  robots: { index: false, follow: false },
-};
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <html lang="en" dir="ltr" suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: noFlashScript }} />
-      </head>
-      <body className={`${fontVariables} font-body antialiased`} suppressHydrationWarning>
-        <ThemeLocaleProvider>
-          <ToastProvider>{children}</ToastProvider>
-        </ThemeLocaleProvider>
-      </body>
-    </html>
-  );
+/**
+ * A pass-through.
+ *
+ * `<html>` carries `lang` and `dir`, and both are decided by the locale in the
+ * URL — so the element itself has to live inside the `[locale]` segment, where
+ * that param is available. Next still requires a root layout, and this is it:
+ * it renders nothing and exists only to satisfy that requirement.
+ *
+ * Every path is given a locale prefix by `src/middleware.ts`, so nothing is
+ * ever rendered by this layout alone.
+ */
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return children;
 }

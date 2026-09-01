@@ -1,24 +1,30 @@
 "use server";
 
 import { AuthError } from "next-auth";
-import { headers } from "next/headers";
 
 import { clientBelongsToOrganization, usersRepository } from "../db";
+import { localeHref } from "../i18n/config";
+import { defineFormAction, type ActionResult } from "../security/action";
+import { AppError, ValidationError } from "../security/errors";
 import { canAssignRole } from "./access";
 import { signIn, signOut } from "./auth";
-import { requireRole } from "./guard";
 import { hashPassword } from "./password";
-import { clientIpFrom, registerRateLimiter } from "./rate-limit";
+import { registerRateLimiter } from "./rate-limit";
 import { loginFormSchema, registerUserSchema, safeRedirectPath } from "./schemas";
 
 /**
  * The write side of authentication.
  *
  * Server Actions rather than Route Handlers, per CLAUDE.md: route handlers are
- * reserved for webhooks, files and AI endpoints. Both actions return a plain
- * result object instead of throwing, because they are consumed by
- * `useActionState` in a form — and because the message a user sees must be a
- * deliberate choice, never an exception's own text.
+ * reserved for webhooks, files and AI endpoints.
+ *
+ * Note the split. `registerAction` runs behind a session, so it goes through
+ * `defineFormAction` — the wrapper that authenticates, resolves scope, rate
+ * limits, and parses with zod before the handler is entered. `loginAction`
+ * cannot: it is the thing that CREATES the session, so there is nobody to
+ * authenticate and nothing to scope. It keeps its own hand-written shape, and
+ * that asymmetry is the point of the wrapper — everything downstream of
+ * sign-in gets the same four checks for free.
  */
 
 const GENERIC_SIGN_IN_ERROR = "That email and password combination is not valid.";
@@ -43,6 +49,7 @@ export async function loginAction(_previous: LoginState, formData: FormData): Pr
     email: formData.get("email"),
     password: formData.get("password"),
     callbackUrl: formData.get("callbackUrl") ?? undefined,
+    locale: formData.get("locale") ?? undefined,
   });
 
   if (!parsed.success) {
@@ -54,12 +61,14 @@ export async function loginAction(_previous: LoginState, formData: FormData): Pr
     return { error: GENERIC_SIGN_IN_ERROR, fieldErrors };
   }
 
-  const { email, password, callbackUrl } = parsed.data;
+  const { email, password, callbackUrl, locale } = parsed.data;
 
   // `/app/start` reads the freshly-issued session and forwards each role to its
   // own landing page. Anything arriving in `callbackUrl` is checked first: it
-  // comes from a query string, so it is attacker-controlled.
-  const redirectTo = safeRedirectPath(callbackUrl, "/app/start");
+  // comes from a query string, so it is attacker-controlled. The fallback is
+  // built with `localeHref` so a sign-in from the Arabic page does not bounce
+  // through the middleware and land in English.
+  const redirectTo = safeRedirectPath(callbackUrl, localeHref("/app/start", locale));
 
   try {
     await signIn("credentials", { email, password, redirectTo });
@@ -68,7 +77,9 @@ export async function loginAction(_previous: LoginState, formData: FormData): Pr
     // MUST bubble — catching it would swallow the redirect and leave the user
     // signed in but still looking at the form.
     if (error instanceof AuthError) {
-      return { error: signInErrorCode(error) === "rate_limited" ? RATE_LIMITED_ERROR : GENERIC_SIGN_IN_ERROR };
+      return {
+        error: signInErrorCode(error) === "rate_limited" ? RATE_LIMITED_ERROR : GENERIC_SIGN_IN_ERROR,
+      };
     }
     throw error;
   }
@@ -91,88 +102,54 @@ export async function logoutAction(): Promise<void> {
   await signOut({ redirectTo: "/login" });
 }
 
-export interface RegisterState {
-  ok?: true;
-  userId?: string;
-  error?: string;
-  fieldErrors?: Partial<Record<"name" | "email" | "password" | "role" | "clientId", string>>;
+export interface RegisteredUser {
+  readonly userId: string;
 }
 
 /**
  * Create a user inside the caller's organization.
  *
- * There is no public sign-up. An account is only meaningful relative to a
- * tenant, and CLAUDE.md rules out public write endpoints — so provisioning is
- * an authenticated staff action, and the new user's `organizationId` comes from
- * the actor's scope rather than from the payload.
+ * The wrapper supplies everything above the business rule:
+ *
+ *   roles      -> the session must be ADMIN or FM_MANAGER, re-checked here and
+ *                 not inherited from whatever page called it
+ *   rateLimit  -> not a brute-force defence (the caller is signed in) but a cap
+ *                 on what a stolen staff session can create in one burst
+ *   input      -> parsed by zod, unknown fields rejected, before the handler runs
+ *   scope      -> the actor's organizationId, which is where the new user's
+ *                 tenant comes from. It is deliberately NOT a field in the
+ *                 schema: a payload must never be able to choose a tenant.
+ *
+ * What is left is the part that is actually about creating a user.
  */
-export async function registerAction(
-  _previous: RegisterState,
-  formData: FormData,
-): Promise<RegisterState> {
-  let context;
-  try {
-    context = await requireRole("ADMIN", "FM_MANAGER");
-  } catch {
-    // Same answer for "not signed in" and "not allowed": an unauthorised caller
-    // learns nothing about what this action does.
-    return { error: "You do not have access to this." };
-  }
+const runRegister = defineFormAction({
+  name: "registerUser",
+  roles: ["ADMIN", "FM_MANAGER"],
+  input: registerUserSchema,
+  rateLimit: registerRateLimiter,
+  async handler({ input, user, scope }): Promise<RegisteredUser> {
+    // Nobody may mint a role above their own: an FM_MANAGER creating an ADMIN
+    // would be a one-step takeover of the tenant.
+    if (!canAssignRole(user.role, input.role)) {
+      throw new AppError(
+        "FORBIDDEN",
+        403,
+        "You cannot create a user with that role.",
+        `${user.role} attempted to create a ${input.role}`,
+        { fields: { role: "Not allowed." } },
+      );
+    }
 
-  const { user, scope } = context;
-
-  // Not a brute-force defence — the caller is already authenticated. It caps
-  // what a stolen staff session, or a runaway script, can create in one burst.
-  const requestHeaders = await headers();
-  const decision = registerRateLimiter.consume(`${user.id}:${clientIpFrom(requestHeaders)}`);
-  if (!decision.allowed) {
-    console.warn(`[auth] register rate limit hit for user ${user.id}`);
-    return { error: RATE_LIMITED_ERROR };
-  }
-
-  const parsed = registerUserSchema.safeParse({
-    name: formData.get("name"),
-    email: formData.get("email"),
-    password: formData.get("password"),
-    role: formData.get("role"),
-    clientId: formData.get("clientId") ?? undefined,
-  });
-
-  if (!parsed.success) {
-    const fieldErrors: RegisterState["fieldErrors"] = {};
-    for (const issue of parsed.error.issues) {
-      const field = issue.path[0];
-      if (
-        field === "name" ||
-        field === "email" ||
-        field === "password" ||
-        field === "role" ||
-        field === "clientId"
-      ) {
-        fieldErrors[field] = issue.message;
+    // A clientId from a form is never trusted to belong to the actor's tenant.
+    if (input.role === "CLIENT") {
+      const belongs = await clientBelongsToOrganization(input.clientId, scope.organizationId);
+      if (!belongs) {
+        throw new ValidationError(`clientId ${input.clientId} is outside the actor's organization`, {
+          clientId: "Unknown client.",
+        });
       }
     }
-    return { error: "Check the details and try again.", fieldErrors };
-  }
 
-  const input = parsed.data;
-
-  // Nobody may mint a role above their own: an FM_MANAGER creating an ADMIN
-  // would be a one-step privilege escalation.
-  if (!canAssignRole(user.role, input.role)) {
-    console.warn(`[auth] ${user.role} attempted to create a ${input.role}`);
-    return { error: "You cannot create a user with that role.", fieldErrors: { role: "Not allowed." } };
-  }
-
-  // A clientId from a form is never trusted to belong to the actor's tenant.
-  if (input.role === "CLIENT") {
-    const belongs = await clientBelongsToOrganization(input.clientId, scope.organizationId);
-    if (!belongs) {
-      return { error: "That client is not available.", fieldErrors: { clientId: "Unknown client." } };
-    }
-  }
-
-  try {
     const created = await usersRepository.forScope(scope).create({
       name: input.name,
       email: input.email,
@@ -184,25 +161,22 @@ export async function registerAction(
       status: "INVITED",
     });
 
-    return { ok: true, userId: created._id.toHexString() };
-  } catch (error) {
-    // Email is unique system-wide, so a plain "already taken" would let staff
-    // in one tenant probe for addresses in another. The message stays neutral.
-    if (isDuplicateKeyError(error)) {
-      return { error: "That email address is not available.", fieldErrors: { email: "Not available." } };
-    }
+    // A duplicate email throws 11000 here and is normalised into a neutral
+    // 409 by the error handler. It is neutral on purpose — email is unique
+    // system-wide, so "already taken" would let staff in one tenant probe for
+    // addresses in another.
+    return { userId: created._id.toHexString() };
+  },
+});
 
-    console.error("[auth] failed to create user", error);
-    return { error: "Something went wrong. Try again." };
-  }
-}
-
-/** MongoDB's duplicate-key error, without letting the driver's type leak out. */
-function isDuplicateKeyError(error: unknown): boolean {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "code" in error &&
-    (error as { code: unknown }).code === 11000
-  );
+/**
+ * Re-exported as a plain async function because every export of a `"use server"`
+ * module has to be one — the wrapper's return value is assigned to a module
+ * constant instead.
+ */
+export async function registerAction(
+  previous: ActionResult<RegisteredUser> | undefined,
+  formData: FormData,
+): Promise<ActionResult<RegisteredUser>> {
+  return runRegister(previous, formData);
 }
