@@ -19,7 +19,7 @@ export function ThemeToggle({ className }: { className?: string }) {
       aria-label={isDark ? t("toLight") : t("toDark")}
       aria-pressed={isDark}
       className={cn(
-        "relative inline-flex size-11 items-center justify-center overflow-hidden rounded-sm border border-border-strong bg-surface text-foreground transition-colors hover:bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "relative inline-flex size-9 touch-target-square items-center justify-center overflow-hidden rounded-md border border-border-strong bg-surface text-foreground transition-colors hover:border-primary hover:bg-surface-sunken hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         className,
       )}
     >
@@ -32,7 +32,7 @@ export function ThemeToggle({ className }: { className?: string }) {
           transition={{ duration: 0.16, ease: "easeOut" }}
           className="flex"
         >
-          {isDark ? <Moon className="size-5" aria-hidden /> : <Sun className="size-5" aria-hidden />}
+          {isDark ? <Moon className="size-4" aria-hidden /> : <Sun className="size-4" aria-hidden />}
         </motion.span>
       </AnimatePresence>
     </button>

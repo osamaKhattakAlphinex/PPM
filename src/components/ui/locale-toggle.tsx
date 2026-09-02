@@ -66,7 +66,7 @@ export function LocaleToggle({ className }: { className?: string }) {
       aria-label={t("label")}
       aria-busy={isPending || undefined}
       className={cn(
-        "relative inline-flex h-11 items-center gap-0.5 rounded-sm border border-border-strong bg-surface p-1 text-sm font-medium",
+        "relative inline-flex h-9 touch-target items-center gap-0.5 rounded-md border border-border-strong bg-surface p-1 text-xs font-medium",
         className,
       )}
     >
@@ -83,7 +83,7 @@ export function LocaleToggle({ className }: { className?: string }) {
             aria-label={LOCALE_LABELS[locale].full}
             lang={locale}
             className={cn(
-              "relative min-w-9 rounded-[4px] px-2.5 py-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              "relative min-w-8 rounded-[7px] px-2 py-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
               isActive ? "text-on-primary" : "text-muted-foreground hover:text-foreground",
             )}
           >
@@ -95,7 +95,7 @@ export function LocaleToggle({ className }: { className?: string }) {
             {isActive && (
               <motion.span
                 layoutId="locale-toggle-pill"
-                className="absolute inset-0 z-0 rounded-[4px] bg-primary"
+                className="absolute inset-0 z-0 rounded-[7px] bg-primary"
                 transition={{ type: "spring", stiffness: 400, damping: 32 }}
               />
             )}

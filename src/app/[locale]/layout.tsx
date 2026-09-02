@@ -52,13 +52,28 @@ export default async function LocaleLayout({
 
   return (
     <html
+      /*
+        The font variables MUST be declared on <html>, not <body>.
+
+        `next/font`'s `.variable` class is what defines `--font-inter` and
+        `--font-plex-sans-arabic`, and globals.css reads them from `:root` —
+        which IS this element. A custom property is substituted against the
+        element the DECLARATION sits on, so with the class one level down on
+        <body>, `--font-display-family: var(--font-inter)` on `:root` resolved
+        against an <html> where `--font-inter` did not exist. That makes the
+        declaration invalid at computed-value time, <body> inherits the
+        guaranteed-invalid value, and `font-family: var(--font-body)` silently
+        falls back to the preflight system stack — no error, no warning, just
+        the wrong typeface everywhere. Keep these two on the same element.
+      */
+      className={fontVariables}
       lang={locale}
       dir={directionOf(locale)}
       // `data-theme` absent means "follow the OS", which the CSS already does.
       {...(theme ? { "data-theme": theme } : {})}
       suppressHydrationWarning
     >
-      <body className={`${fontVariables} font-body antialiased`}>
+      <body className="font-body antialiased">
         <ThemeProvider initialTheme={theme}>
           <NextIntlClientProvider messages={messages}>
             <ToastProvider>{children}</ToastProvider>

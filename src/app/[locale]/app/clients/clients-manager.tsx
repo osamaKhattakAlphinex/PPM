@@ -2,7 +2,7 @@
 
 import { useActionState, useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { Building2, Plus } from "lucide-react";
+import { Building2, Plus, Trash2 } from "lucide-react";
 
 import type { ClientSummary } from "@/lib/master-data/dto";
 import {
@@ -310,9 +310,30 @@ export function ClientsManager({
         open={formOpen}
         onOpenChange={setFormOpen}
         title={editing ? tc("editTitle") : tc("newTitle")}
+        size="md"
+        icon={<Building2 />}
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setFormOpen(false)} disabled={isSubmitting}>
+              {t("cancel")}
+            </Button>
+            <Button type="submit" form="client-form" isLoading={isSubmitting}>
+              {editing ? t("save") : t("create")}
+            </Button>
+          </>
+        }
       >
-        <form id="client-form" className="grid gap-4" onSubmit={handleSubmit}>
-          <Field label={tc("name")} error={fieldErrors.name} required>
+        {/*
+          Two columns against the DIALOG's width (`@lg` = 32rem container), not
+          the viewport's — the modal body is the `@container`. `items-start`
+          keeps a field with a hint from dragging its neighbour's control down.
+        */}
+        <form
+          id="client-form"
+          className="grid items-start gap-x-5 gap-y-4 @lg:grid-cols-2"
+          onSubmit={handleSubmit}
+        >
+          <Field label={tc("name")} error={fieldErrors.name} required className="@lg:col-span-2">
             <Input name="name" defaultValue={editing?.name ?? ""} maxLength={160} required />
           </Field>
 
@@ -331,7 +352,7 @@ export function ClientsManager({
             </Select>
           </Field>
 
-          <fieldset className="grid gap-4 border-t border-border pt-4">
+          <fieldset className="grid items-start gap-x-5 gap-y-4 border-t border-border pt-4 @lg:col-span-2 @lg:grid-cols-2">
             <legend className="sr-only">{tc("contact")}</legend>
             <Field label={tc("contactName")} error={fieldErrors["contactInfo.name"]}>
               <Input name="contactName" defaultValue={editing?.contactName ?? ""} maxLength={120} />
@@ -354,15 +375,6 @@ export function ClientsManager({
             </Field>
           </fieldset>
         </form>
-
-        <div className="mt-6 flex items-center justify-end gap-3 border-t border-border pt-4">
-          <Button variant="ghost" onClick={() => setFormOpen(false)} disabled={isSubmitting}>
-            {t("cancel")}
-          </Button>
-          <Button type="submit" form="client-form" isLoading={isSubmitting}>
-            {editing ? t("save") : t("create")}
-          </Button>
-        </div>
       </Modal>
 
       {/* --- Delete confirmation --- */}
@@ -371,6 +383,8 @@ export function ClientsManager({
         onOpenChange={(open) => !open && setDeleting(null)}
         title={t("deleteTitle", { name: deleting?.name ?? "" })}
         description={t("deleteBody")}
+        tone="danger"
+        icon={<Trash2 />}
         footer={
           <>
             <Button variant="ghost" onClick={() => setDeleting(null)} disabled={isDeleting}>

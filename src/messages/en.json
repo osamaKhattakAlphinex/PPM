@@ -40,6 +40,18 @@
     "en": "English",
     "ar": "Arabic"
   },
+  "password": {
+
+    "show": "Show password",
+
+    "hide": "Hide password",
+
+    "shown": "Password is visible",
+
+    "hidden": "Password is hidden"
+
+  },
+
   "userMenu": {
     "label": "Account",
     "openLabel": "Open account menu",
@@ -93,7 +105,9 @@
     "status": {
       "ACTIVE": "Active",
       "SUSPENDED": "Suspended",
-      "INACTIVE": "Inactive"
+      "INACTIVE": "Inactive",
+      "MAINTENANCE": "Under maintenance",
+      "ON_LEAVE": "On leave"
     },
     "clients": {
       "title": "Clients",
@@ -162,6 +176,76 @@
       "yourAccount": "Your account",
       "yourSites": "Your sites",
       "scopeNote": "You see this record and these sites only. Every query the app makes on your behalf is narrowed to your account before it reaches the database."
+    },
+    "assets": {
+      "title": "Assets",
+      "subtitle": "The plant and equipment you maintain. Work orders, PPM schedules and contracts all attach to these.",
+      "clientSubtitle": "The equipment maintained at your sites.",
+      "new": "New asset",
+      "newTitle": "New asset",
+      "editTitle": "Edit asset",
+      "empty": "No assets yet",
+      "emptyBody": "Add the first piece of equipment to start scheduling maintenance against it.",
+      "clientEmptyBody": "Equipment your provider registers at your sites will appear here.",
+      "name": "Name",
+      "filterCategory": "Category",
+      "allCategories": "All categories",
+      "type": "Type",
+      "typeHint": "The model or kind within the category — Chiller, AHU, Fire panel.",
+      "location": "Location",
+      "allLocations": "All locations",
+      "locationHint": "An asset can only move between sites belonging to the same client.",
+      "locationUnknown": "—",
+      "health": "Health",
+      "healthHint": "Condition from 0 to 100. Set by hand until work-order history can derive it.",
+      "searchPlaceholder": "Name",
+      "category": {
+        "HVAC": "HVAC",
+        "ELECTRICAL": "Electrical",
+        "ELV": "ELV",
+        "CIVIL": "Civil",
+        "PLUMBING": "Plumbing"
+      }
+    }
+  },
+  "technicians": {
+    "title": "Technicians",
+    "subtitle": "The people who do the work. Trades and skills here are what dispatch matches a work order against.",
+    "new": "New technician",
+    "newTitle": "New technician",
+    "editTitle": "Edit technician",
+    "empty": "No technicians yet",
+    "emptyBody": "Add the first technician to start assigning preventive and corrective work.",
+    "noMatches": "No technicians match",
+    "noMatchesBody": "Nobody in the directory matches these filters. Clear them to see everyone.",
+    "name": "Name",
+    "trade": "Trade",
+    "allTrades": "All trades",
+    "skills": "Skills",
+    "skillsPlaceholder": "Add a skill, then press Enter",
+    "skillsFull": "Skill limit reached",
+    "skillsCount": "{count} of {max} skills",
+    "noSkills": "No skills recorded",
+    "moreSkills": "+{count} more",
+    "removeSkill": "Remove {skill}",
+    "filterBySkill": "Show everyone with the skill {skill}",
+    "skillFilter": "Skill: {skill}",
+    "clearSkillFilter": "Clear the {skill} filter",
+    "viewProfile": "view profile",
+    "account": "Sign-in account",
+    "accountNone": "No account",
+    "accountNoneLong": "This technician has no sign-in account. They are dispatched through a supervisor.",
+    "accountLinked": "Account linked",
+    "accountTaken": "already linked",
+    "accountHint": "Only active technician accounts in your organization can be linked, and each account belongs to one technician.",
+    "addedOn": "Added {date}",
+    "deleteBody": "They stop appearing in the directory and in dispatch straight away. Nothing is erased — completed work orders keep naming them, and an administrator can restore the record.",
+    "trades": {
+      "HVAC": "HVAC",
+      "PLUMBING": "Plumbing",
+      "ELECTRICAL": "Electrical",
+      "ELV": "ELV",
+      "CIVIL": "Civil"
     }
   }
 }

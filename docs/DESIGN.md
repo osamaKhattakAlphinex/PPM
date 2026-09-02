@@ -86,13 +86,15 @@ Dark mode is not "invert the light theme" — surfaces are lifted (not black), a
 
 ## 2. Type pairing
 
-**Display — Space Grotesk.** A geometric grotesque with just enough personality in the `a`, `g`, and `S` to feel engineered and confident rather than corporate-neutral. Used for H1–H3, KPI numbers, and nav wordmark. It has real character at large sizes (dashboards live and die by their headline stat), and it does not read as "AI product" the way Inter/Söhne-alikes do everywhere right now.
+**Display — Inter (600/700).** Weight, not family, carries the display role. Inter is drawn for screens at UI sizes — tall x-height, open apertures, unambiguous `1`/`l`/`I` — and its variable axis means 600 and 700 cost nothing extra to load. Used for H1–H3, KPI numbers, and the nav wordmark, with the negative tracking in the scale below doing the work Inter's own display guidance asks for as size increases.
 
-**Body — IBM Plex Sans.** Chosen for legibility at small sizes in dense tables and forms — this app spends most of its life as a work-order list, not a hero section — and for its "engineered instrument" heritage (designed for IBM's own technical documentation), which matches a maintenance-ops tool. Practically: IBM Plex ships genuine weights (400/500/600/700) instead of relying on synthetic bold.
+> Chosen to match an existing product surface the team is standardising on (`prime-air-service-web`), which pairs Inter with IBM Plex Sans Arabic. The trade-off is worth stating plainly: Inter is the default face of a great many dashboards, so it buys familiarity and legibility at the cost of the distinctiveness §1 asks for. Differentiation therefore has to come from the palette, the motion and the layout rather than from the type.
 
-**Arabic — IBM Plex Sans Arabic** for *both* display and body (varying weight, not family). Rationale: Plex Sans Arabic is drawn as a sibling of the Latin Plex Sans, so EN/AR content sits at a matched x-height and stroke contrast when they appear side by side (bilingual labels, mixed-direction tables). Pairing two *unrelated* Arabic families for display vs. body is a common source of RTL layouts looking mismatched or, worse, hurting legibility at UI sizes — Arabic display faces with strong Latin-style "personality" are also far more likely to sacrifice legibility at 14–16px, which this app can't afford in a technician's table view. Weight carries the display/body distinction instead: 600–700 for headings, 400–500 for body.
+**Body — Inter (400/500).** One family covers both roles. This app spends most of its life as a work-order list, and Inter is at its best exactly there: at 13–14px in a dense table it stays legible, and its tabular figures line up cleanly under `numeric-isolate`. Loaded as a single variable file (100–900), so nothing is synthetically bolded and one Latin family replaces two.
 
-All three are loaded self-hosted via `next/font/google` (downloaded at build time, served from our own origin, zero runtime request to Google, no CLS from a late font swap) — see `src/lib/fonts.ts`.
+**Arabic — IBM Plex Sans Arabic** for *both* display and body (varying weight, not family). Inter has no Arabic cut, so the RTL side swaps family wholesale on `dir="rtl"` — the same pairing the reference surface uses. Plex Sans Arabic sits at a matched x-height and stroke contrast next to Inter, which is what keeps EN/AR from looking mismatched where they appear side by side (bilingual labels, mixed-direction tables). Pairing two *unrelated* Arabic families for display vs. body is a common source of RTL layouts looking mismatched or, worse, hurting legibility at UI sizes — Arabic display faces with strong Latin-style "personality" are also far more likely to sacrifice legibility at 14–16px, which this app can't afford in a technician's table view. Weight carries the display/body distinction instead: 600–700 for headings, 400–500 for body.
+
+Both are loaded self-hosted via `next/font/google` (downloaded at build time, served from our own origin, zero runtime request to Google, no CLS from a late font swap) — see `src/lib/fonts.ts`.
 
 ### Type scale
 
@@ -131,15 +133,15 @@ Framer Motion is used to add *legibility*, not decoration: it shows what changed
 
 ## 4. Spacing, radius, elevation, border
 
-**Spacing** uses Tailwind's default 4px grid as-is (no reinvented scale) — `1`=4px … `4`=16px … `8`=32px — with one rule: every tappable control has a minimum 44×44px hit area (`min-h-11` / explicit padding), enforced in the component kit, not left to page authors.
+**Spacing** uses Tailwind's default 4px grid as-is (no reinvented scale) — `1`=4px … `4`=16px … `8`=32px — with one rule: every tappable control has a minimum 44×44px hit area **wherever the pointer is coarse**. Controls are sized for a mouse (36px — `h-9`) and the `.touch-target` / `.touch-target-square` helpers in `globals.css` restore the 44px box under `@media (pointer: coarse)`. `min-height` outranks the utility+s `height`, so no `!important` is needed. Enforced in the component kit, not left to page authors.
 
-**Radius** is deliberately restrained — the generic-dashboard tell is 16–24px radii on *everything*. This kit tightens that on purpose so the product reads as an operations tool, not a consumer app:
+**Radius** is softened but still short of the generic-dashboard tell, which is 16–24px radii on *everything*. Controls sit at 12px — round enough to feel current, tight enough on a 36px-tall button that the ends do not go pill-shaped:
 
 | Token | Value | Usage |
 |---|---|---|
-| `--radius-sm` | 6px | Inputs, buttons, badges |
-| `--radius-md` | 10px | Cards, dropdowns, table container |
-| `--radius-lg` | 16px | Modal, bottom sheet (top corners only) |
+| `--radius-sm` | 8px | Badges, chips, small pills |
+| `--radius-md` | 12px | Inputs, buttons, cards, dropdowns, table container |
+| `--radius-lg` | 18px | Modal, bottom sheet (top corners only) |
 | `--radius-full` | 9999px | Avatars, status dots, pill badges |
 
 **Elevation** is used sparingly and only to indicate *layering* (something floats above the page: modal, popover, dropdown, sticky toolbar), never to decorate a card at rest. Cards at rest use a 1px `border`, not a shadow — another deliberate break from the "every card has a soft drop shadow" default. Shadows are tinted with `ink`, never pure black, so they don't look like generic CSS defaults.

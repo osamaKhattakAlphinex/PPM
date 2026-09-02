@@ -1,16 +1,21 @@
 import { cloneElement, isValidElement, useId, type ReactElement } from "react";
 
+import { cn } from "@/lib/cn";
+
 export function Field({
   label,
   hint,
   error,
   required,
+  className,
   children,
 }: {
   label: string;
   hint?: string;
   error?: string;
   required?: boolean;
+  /** Lets a caller span the field across a form grid, e.g. `@lg:col-span-2`. */
+  className?: string;
   /** A single form control (Input/Select) — id/aria wiring is injected automatically. */
   children: ReactElement<Record<string, unknown>>;
 }) {
@@ -31,7 +36,7 @@ export function Field({
     : children;
 
   return (
-    <div className="grid gap-1.5">
+    <div className={cn("grid gap-1.5", className)}>
       <label htmlFor={resolvedId} className="text-sm font-medium text-foreground">
         {label}
         {required && (

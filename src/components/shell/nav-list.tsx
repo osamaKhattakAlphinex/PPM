@@ -74,10 +74,11 @@ export function NavList({
               onClick={onNavigate}
               aria-current={isActive ? "page" : undefined}
               className={cn(
-                // min-h-11 is the 44px touch target from DESIGN.md §4. It
-                // applies on desktop too — a large pointer target is not a
-                // mobile concession.
-                "group relative flex min-h-11 items-center gap-3 rounded-sm px-3 py-2 text-sm font-medium transition-colors",
+                // 36px rows on a mouse; `.touch-target` (globals.css) puts the
+                // 44px box from DESIGN.md §4 back on a coarse pointer, which is
+                // where that rule was actually aimed — this same list is the
+                // mobile drawer.
+                "group relative flex min-h-9 touch-target items-center gap-2.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface-sunken",
                 isActive
                   ? "text-foreground"
@@ -94,7 +95,7 @@ export function NavList({
                 <>
                   <motion.span
                     layoutId={`${layoutIdPrefix}-active-bg`}
-                    className="absolute inset-0 z-0 rounded-sm bg-surface shadow-sm"
+                    className="absolute inset-0 z-0 rounded-md bg-surface shadow-sm"
                     transition={{ type: "spring", stiffness: 420, damping: 36 }}
                   />
                   {/*

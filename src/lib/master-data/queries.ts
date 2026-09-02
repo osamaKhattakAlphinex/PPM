@@ -8,6 +8,8 @@ import {
   findOwnClientForScope,
   getOrganizationForScope,
   locationsRepository,
+  mapPage,
+  prefixFilter,
   type ClientDocument,
   type LocationDocument,
   type Page,
@@ -58,30 +60,6 @@ export const MASTER_DATA_MANAGERS: readonly [Role, ...Role[]] = ["ADMIN", "FM_MA
 
 export function canManageMasterData(role: Role): boolean {
   return (MASTER_DATA_MANAGERS as readonly Role[]).includes(role);
-}
-
-/**
- * An anchored, case-insensitive prefix match on a user-supplied term.
- *
- * `$regex` is only ever reached through the repository's TRUSTED `where`
- * fragment, so three things have to be true before a search term may go near
- * it, and all three are enforced here rather than trusted to a caller:
- *
- *  - the term is escaped, so no metacharacter survives. An unescaped `(a+)+$`
- *    is a denial of service against our own database.
- *  - it is anchored with `^`, so the query can use the
- *    `{ organizationId, name }` index instead of scanning the collection.
- *  - it is length-capped upstream by `searchTerm` (64 characters).
- *
- * The scope keys are still applied after this fragment, and always win.
- */
-function prefixFilter(field: string, term: string): Record<string, unknown> {
-  const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return { [field]: { $regex: `^${escaped}`, $options: "i" } };
-}
-
-function mapPage<T, U>(page: Page<T>, map: (item: T) => U): Page<U> {
-  return { ...page, items: page.items.map(map) };
 }
 
 // --- Clients ----------------------------------------------------------------

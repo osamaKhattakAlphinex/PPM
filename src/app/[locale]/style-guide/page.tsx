@@ -66,7 +66,8 @@ const copy = {
     paletteBody:
       "Semantic tokens read live from the active theme below. Toggle theme/direction in the header.",
     type: "Typography",
-    typeBody: "Space Grotesk (display) + IBM Plex Sans (body). Arabic swaps both to IBM Plex Sans Arabic.",
+    typeBody:
+      "Inter throughout — 600/700 for display, 400/500 for body. Arabic swaps to IBM Plex Sans Arabic.",
     buttons: "Buttons",
     badges: "Badges",
     cards: "Cards",
@@ -96,7 +97,8 @@ const copy = {
     palette: "لوحة الألوان",
     paletteBody: "الرموز الدلالية تُقرأ مباشرة من السمة الحالية. بدّل السمة/الاتجاه من الأعلى.",
     type: "الطباعة",
-    typeBody: "Space Grotesk للعناوين و IBM Plex Sans للنصوص، وتتحول كلاهما إلى IBM Plex Sans Arabic بالعربية.",
+    typeBody:
+      "خط Inter للعناوين والنصوص معًا، ويتحول إلى IBM Plex Sans Arabic بالعربية.",
     buttons: "الأزرار",
     badges: "الشارات",
     cards: "البطاقات",

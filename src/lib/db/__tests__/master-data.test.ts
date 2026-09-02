@@ -242,10 +242,23 @@ describe("a CLIENT session sees only its own locations", () => {
   });
 
   it("cannot widen its own scope by passing another client's id as a filter", async () => {
-    // The scope keys are spread LAST, so this filter is overwritten, not honoured.
+    /**
+     * The scope keys are spread LAST, so this filter is overwritten, not
+     * honoured — which means the query that runs is the caller's own scope and
+     * returns the caller's own rows, NOT an empty set.
+     *
+     * This assertion used to expect zero results, contradicting the very
+     * sentence above it. It went unnoticed because the whole DB suite needs a
+     * local mongod, which could not start on the machine this was written on.
+     * "Returns nothing" is also the weaker claim: it would pass if the filter
+     * had been honoured and merely matched no rows. What actually keeps tenants
+     * apart is that the smuggled id has no effect whatsoever.
+     */
     const found = await locationsRepository.forScope(acmeScope).find({ clientId: rivalId });
 
-    expect(found).toHaveLength(0);
+    expect(found).toHaveLength(1);
+    expect(found[0].clientId?.toHexString()).toBe(acmeId.toHexString());
+    expect(found.some((l) => l.clientId?.toHexString() === rivalId.toHexString())).toBe(false);
   });
 
   it("has its own clientId stamped on create, whatever it asks for", async () => {

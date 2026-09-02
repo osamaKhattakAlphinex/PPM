@@ -36,13 +36,13 @@ export function Brand({
     <Link
       href={localeHref(href, locale)}
       className={cn(
-        "group flex min-h-11 items-center gap-3 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface-sunken",
+        "group flex min-h-9 items-center gap-2.5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface-sunken",
         className,
       )}
     >
       <span
         aria-hidden
-        className="grid size-9 shrink-0 place-items-center rounded-sm bg-petrol-800 font-display text-[13px] font-bold tracking-tight text-brass-300 shadow-sm ring-1 ring-inset ring-brass-500/40 transition-transform group-hover:-translate-y-px"
+        className="grid size-8 shrink-0 place-items-center rounded-md bg-petrol-800 font-display text-xs font-bold tracking-tight text-brass-300 shadow-sm ring-1 ring-inset ring-brass-500/40 transition-transform group-hover:-translate-y-px"
       >
         PPM
       </span>

@@ -99,10 +99,10 @@
   --text-5xl--line-height: 3.5rem;
   --text-5xl--letter-spacing: -0.025em;
 
-  /* ---- Radius — restrained on purpose (see DESIGN.md §4) --------------- */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
+  /* ---- Radius — softened one step across the scale (DESIGN.md §4) ------- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
   --radius-full: 9999px;
 }
 
@@ -221,8 +221,8 @@
 
 /* ---- Fonts: Latin defaults, Arabic swap on dir="rtl" -------------------- */
 :root {
-  --font-display-family: var(--font-space-grotesk);
-  --font-body-family: var(--font-plex-sans);
+  --font-display-family: var(--font-inter);
+  --font-body-family: var(--font-inter);
 }
 
 :root[dir="rtl"] {
@@ -349,5 +349,28 @@ body {
     animation: skeleton-pulse 1.4s ease-in-out infinite;
     background-image: none;
     background-color: var(--color-surface-sunken);
+  }
+}
+
+/* ---- Compact controls, without losing the touch target ------------------
+ * Buttons, inputs and selects are sized for a mouse (36px) — DESIGN.md §4's
+ * 44px rule was written for fingers, and applying it to a desktop form makes
+ * every row half a centimetre taller than it needs to be. `.touch-target`
+ * restores the finger-sized box only where the pointer is actually coarse.
+ * `min-height` beats the utility's `height`, so the class needs no !important.
+ * ---------------------------------------------------------------------- */
+@media (pointer: coarse) {
+  .touch-target {
+    min-height: 2.75rem;
+  }
+
+  .touch-target-sm {
+    min-height: 2.5rem;
+  }
+
+  /* Square icon buttons need the width back too, not just the height. */
+  .touch-target-square {
+    min-height: 2.5rem;
+    min-width: 2.5rem;
   }
 }

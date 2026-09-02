@@ -12,6 +12,7 @@ loadEnvConfig(process.cwd());
 import type { Role } from "../src/lib/auth/roles";
 import { hashPassword } from "../src/lib/auth/password";
 import {
+  assetsRepository,
   clientsRepository,
   connectToDatabase,
   disconnectFromDatabase,
@@ -93,6 +94,49 @@ const LOCATIONS = [
     },
   },
 ] as const;
+
+/**
+ * Equipment, spread deliberately rather than randomly.
+ *
+ * Two things are being made visible on a first run:
+ *
+ *  - every category, every status, and all three health bands (green ≥70,
+ *    amber 40–69, red <40), so the list, the filters and the bar's tones can
+ *    all be seen without inventing data by hand;
+ *  - assets at BOTH sites. Those at the tower inherit its client; those at the
+ *    depot inherit null. Sign in as `client@ppm.local` and only the tower's
+ *    appear — the same isolation the locations above demonstrate, one level
+ *    further down.
+ */
+const ASSETS: ReadonlyArray<{
+  name: string;
+  category: "HVAC" | "ELECTRICAL" | "ELV" | "CIVIL" | "PLUMBING";
+  type: string;
+  status: "ACTIVE" | "INACTIVE" | "MAINTENANCE";
+  health: number;
+  /** Which of the two seeded sites this stands at. */
+  site: "Al Faisaliah Tower" | "Central Stores & Workshop";
+}> = [
+  // --- The client's tower ---------------------------------------------------
+  { name: "Chiller Plant A", category: "HVAC", type: "Centrifugal Chiller", status: "ACTIVE", health: 92, site: "Al Faisaliah Tower" },
+  { name: "Chiller Plant B", category: "HVAC", type: "Centrifugal Chiller", status: "MAINTENANCE", health: 48, site: "Al Faisaliah Tower" },
+  { name: "AHU-02 Rooftop", category: "HVAC", type: "Air Handling Unit", status: "ACTIVE", health: 76, site: "Al Faisaliah Tower" },
+  { name: "Cooling Tower 1", category: "HVAC", type: "Cooling Tower", status: "ACTIVE", health: 64, site: "Al Faisaliah Tower" },
+  { name: "Main Switchgear", category: "ELECTRICAL", type: "LV Switchboard", status: "ACTIVE", health: 88, site: "Al Faisaliah Tower" },
+  { name: "Standby Generator", category: "ELECTRICAL", type: "Diesel Generator", status: "ACTIVE", health: 71, site: "Al Faisaliah Tower" },
+  { name: "Distribution Board 4F", category: "ELECTRICAL", type: "Distribution Board", status: "INACTIVE", health: 31, site: "Al Faisaliah Tower" },
+  { name: "Fire Alarm Panel", category: "ELV", type: "Addressable Panel", status: "ACTIVE", health: 95, site: "Al Faisaliah Tower" },
+  { name: "CCTV Head End", category: "ELV", type: "NVR Rack", status: "ACTIVE", health: 57, site: "Al Faisaliah Tower" },
+  { name: "Passenger Lift 3", category: "CIVIL", type: "Traction Lift", status: "MAINTENANCE", health: 23, site: "Al Faisaliah Tower" },
+  { name: "Domestic Water Pump", category: "PLUMBING", type: "Booster Set", status: "ACTIVE", health: 82, site: "Al Faisaliah Tower" },
+  { name: "Sump Pump B1", category: "PLUMBING", type: "Submersible Pump", status: "ACTIVE", health: 39, site: "Al Faisaliah Tower" },
+
+  // --- The organization's own depot (clientId null, invisible to CLIENT) ----
+  { name: "Workshop Compressor", category: "HVAC", type: "Air Compressor", status: "ACTIVE", health: 68, site: "Central Stores & Workshop" },
+  { name: "Depot Distribution Board", category: "ELECTRICAL", type: "Distribution Board", status: "ACTIVE", health: 90, site: "Central Stores & Workshop" },
+  { name: "Access Control Server", category: "ELV", type: "Controller", status: "ACTIVE", health: 45, site: "Central Stores & Workshop" },
+  { name: "Loading Bay Door", category: "CIVIL", type: "Roller Shutter", status: "INACTIVE", health: 18, site: "Central Stores & Workshop" },
+];
 
 const USERS: ReadonlyArray<{ name: string; email: string; role: Role }> = [
   { name: "Layla Al-Harbi", email: "admin@ppm.local", role: "ADMIN" },
@@ -176,6 +220,40 @@ async function main(): Promise<void> {
       status: "ACTIVE",
     });
     console.log(`location      ${seed.name.padEnd(28)} created  ${created._id.toHexString()}`);
+  }
+
+  // 3c. The assets. Written through the scoped repository like everything else,
+  //     with `clientId` DERIVED from the site — exactly as `createAsset` does,
+  //     so the seed cannot produce a row the application could not have.
+  const assets = assetsRepository.forScope(bootstrapScope);
+
+  for (const seed of ASSETS) {
+    const existing = await assets.findOne({ name: seed.name });
+    if (existing) {
+      console.log(`asset         ${seed.name.padEnd(28)} exists   ${existing._id.toHexString()}`);
+      continue;
+    }
+
+    // The site was created above; re-read rather than remembered, so this stays
+    // idempotent on a re-run where the locations already existed.
+    const site = await locations.findOne({ name: seed.site });
+    if (!site) {
+      console.warn(`asset         ${seed.name.padEnd(28)} SKIPPED  no site "${seed.site}"`);
+      continue;
+    }
+
+    const created = await assets.create({
+      name: seed.name,
+      category: seed.category,
+      type: seed.type,
+      locationId: site._id,
+      // Derived, never chosen: an asset belongs to whoever owns the site it
+      // stands at. Null for the depot, which is why a CLIENT never sees those.
+      clientId: site.clientId ?? null,
+      status: seed.status,
+      health: seed.health,
+    });
+    console.log(`asset         ${seed.name.padEnd(28)} created  ${created._id.toHexString()}`);
   }
 
   // 4. The users. One hash for all four: argon2 is deliberately slow, and four

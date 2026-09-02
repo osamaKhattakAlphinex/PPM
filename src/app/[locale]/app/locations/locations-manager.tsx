@@ -2,7 +2,7 @@
 
 import { useActionState, useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { MapPin, Plus } from "lucide-react";
+import { MapPin, Plus, Trash2 } from "lucide-react";
 
 import type { LocationSummary } from "@/lib/master-data/dto";
 import {
@@ -364,9 +364,30 @@ export function LocationsManager({
         open={formOpen}
         onOpenChange={setFormOpen}
         title={editing ? tl("editTitle") : tl("newTitle")}
+        size="lg"
+        icon={<MapPin />}
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setFormOpen(false)} disabled={isSubmitting}>
+              {t("cancel")}
+            </Button>
+            <Button type="submit" form="location-form" isLoading={isSubmitting}>
+              {editing ? t("save") : t("create")}
+            </Button>
+          </>
+        }
       >
-        <form id="location-form" className="grid gap-4" onSubmit={handleSubmit}>
-          <Field label={tl("name")} error={fieldErrors.name} required>
+        {/*
+          Two columns against the DIALOG's width (`@lg` = 32rem container), not
+          the viewport's — the modal body is the `@container`. `items-start`
+          keeps a field with a hint from dragging its neighbour's control down.
+        */}
+        <form
+          id="location-form"
+          className="grid items-start gap-x-5 gap-y-4 @lg:grid-cols-2"
+          onSubmit={handleSubmit}
+        >
+          <Field label={tl("name")} error={fieldErrors.name} required className="@lg:col-span-2">
             <Input name="name" defaultValue={editing?.name ?? ""} maxLength={160} required />
           </Field>
 
@@ -400,10 +421,17 @@ export function LocationsManager({
             </Select>
           </Field>
 
-          <fieldset className="grid gap-4 border-t border-border pt-4">
-            <legend className="mb-1 text-sm font-medium text-foreground">{tl("address")}</legend>
+          <fieldset className="grid items-start gap-x-5 gap-y-4 border-t border-border pt-4 @lg:col-span-2 @lg:grid-cols-2">
+            <legend className="mb-1 text-sm font-medium text-foreground @lg:col-span-2">
+              {tl("address")}
+            </legend>
 
-            <Field label={tl("line1")} error={fieldErrors["address.line1"]} required>
+            <Field
+              label={tl("line1")}
+              error={fieldErrors["address.line1"]}
+              required
+              className="@lg:col-span-2"
+            >
               <Input
                 name="line1"
                 defaultValue={editing?.address.line1 ?? ""}
@@ -411,38 +439,40 @@ export function LocationsManager({
                 required
               />
             </Field>
-            <Field label={tl("line2")} error={fieldErrors["address.line2"]}>
+            <Field
+              label={tl("line2")}
+              error={fieldErrors["address.line2"]}
+              className="@lg:col-span-2"
+            >
               <Input name="line2" defaultValue={editing?.address.line2 ?? ""} maxLength={160} />
             </Field>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label={tl("district")} error={fieldErrors["address.district"]}>
-                <Input
-                  name="district"
-                  defaultValue={editing?.address.district ?? ""}
-                  maxLength={120}
-                />
-              </Field>
-              <Field label={tl("city")} error={fieldErrors["address.city"]} required>
-                <Input
-                  name="city"
-                  defaultValue={editing?.address.city ?? ""}
-                  maxLength={120}
-                  required
-                />
-              </Field>
-              <Field label={tl("region")} error={fieldErrors["address.region"]}>
-                <Input name="region" defaultValue={editing?.address.region ?? ""} maxLength={120} />
-              </Field>
-              <Field label={tl("postalCode")} error={fieldErrors["address.postalCode"]}>
-                <Input
-                  name="postalCode"
-                  defaultValue={editing?.address.postalCode ?? ""}
-                  maxLength={16}
-                  inputMode="numeric"
-                />
-              </Field>
-            </div>
+            <Field label={tl("district")} error={fieldErrors["address.district"]}>
+              <Input
+                name="district"
+                defaultValue={editing?.address.district ?? ""}
+                maxLength={120}
+              />
+            </Field>
+            <Field label={tl("city")} error={fieldErrors["address.city"]} required>
+              <Input
+                name="city"
+                defaultValue={editing?.address.city ?? ""}
+                maxLength={120}
+                required
+              />
+            </Field>
+            <Field label={tl("region")} error={fieldErrors["address.region"]}>
+              <Input name="region" defaultValue={editing?.address.region ?? ""} maxLength={120} />
+            </Field>
+            <Field label={tl("postalCode")} error={fieldErrors["address.postalCode"]}>
+              <Input
+                name="postalCode"
+                defaultValue={editing?.address.postalCode ?? ""}
+                maxLength={16}
+                inputMode="numeric"
+              />
+            </Field>
 
             <Field label={tl("country")} error={fieldErrors["address.country"]} required>
               <Input
@@ -456,15 +486,6 @@ export function LocationsManager({
             </Field>
           </fieldset>
         </form>
-
-        <div className="mt-6 flex items-center justify-end gap-3 border-t border-border pt-4">
-          <Button variant="ghost" onClick={() => setFormOpen(false)} disabled={isSubmitting}>
-            {t("cancel")}
-          </Button>
-          <Button type="submit" form="location-form" isLoading={isSubmitting}>
-            {editing ? t("save") : t("create")}
-          </Button>
-        </div>
       </Modal>
 
       {/* --- Delete confirmation --- */}
@@ -473,6 +494,8 @@ export function LocationsManager({
         onOpenChange={(open) => !open && setDeleting(null)}
         title={t("deleteTitle", { name: deleting?.name ?? "" })}
         description={t("deleteBody")}
+        tone="danger"
+        icon={<Trash2 />}
         footer={
           <>
             <Button variant="ghost" onClick={() => setDeleting(null)} disabled={isDeleting}>

@@ -124,7 +124,7 @@ export default async function PortalPage({
                   open-in-new-tab and the browser's own affordances. */}
               <Link
                 href={localeHref("/app/locations", locale)}
-                className="inline-flex min-h-11 items-center gap-2 rounded-sm border border-border-strong px-4 text-sm font-medium text-foreground transition-colors hover:bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="inline-flex h-9 touch-target items-center gap-2 rounded-md border border-border-strong px-4 text-sm font-medium text-foreground transition-colors hover:border-primary hover:bg-surface-sunken hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {tl("title")}
               </Link>

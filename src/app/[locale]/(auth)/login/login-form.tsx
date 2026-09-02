@@ -9,6 +9,7 @@ import { loginAction, type LoginState } from "@/lib/auth/actions";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 
 /**
  * The sign-in form.
@@ -72,9 +73,8 @@ export function LoginForm({
       </Field>
 
       <Field label="Password" error={state.fieldErrors?.password} required>
-        <Input
+        <PasswordInput
           name="password"
-          type="password"
           autoComplete="current-password"
           required
           dir="ltr"

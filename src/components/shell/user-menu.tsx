@@ -58,7 +58,7 @@ export function UserMenu({ user }: { user: ShellUser }) {
   const initials = initialsOf(user.name);
 
   const itemClass =
-    "flex min-h-11 w-full items-center gap-2.5 px-3 text-sm text-foreground transition-colors hover:bg-surface-sunken focus-visible:outline-none focus-visible:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring";
+    "flex min-h-9 touch-target w-full items-center gap-2.5 px-3 py-1.5 text-sm text-foreground transition-colors hover:bg-surface-sunken focus-visible:outline-none focus-visible:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring";
 
   return (
     <div ref={containerRef} className="relative">
@@ -70,19 +70,19 @@ export function UserMenu({ user }: { user: ShellUser }) {
         aria-haspopup="menu"
         aria-controls={isOpen ? menuId : undefined}
         aria-label={t("openLabel")}
-        className="flex min-h-11 items-center gap-2 rounded-sm border border-border-strong bg-surface ps-1.5 pe-2 transition-colors hover:bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="flex h-9 touch-target items-center gap-2 rounded-md border border-border-strong bg-surface ps-1 pe-2 transition-colors hover:border-primary hover:bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <span
           aria-hidden
-          className="grid size-8 shrink-0 place-items-center rounded-full bg-petrol-800 font-display text-xs font-semibold text-brass-300"
+          className="grid size-7 shrink-0 place-items-center rounded-full bg-petrol-800 font-display text-[11px] font-semibold text-brass-300"
         >
           {initials}
         </span>
         <span className="hidden min-w-0 flex-col items-start sm:flex">
-          <span className="max-w-32 truncate text-xs font-semibold text-foreground">
+          <span className="max-w-32 truncate text-xs font-semibold leading-tight text-foreground">
             {user.name}
           </span>
-          <span className="max-w-32 truncate text-[11px] text-muted-foreground">
+          <span className="max-w-32 truncate text-[10px] leading-tight text-muted-foreground">
             {roleLabel(user.role)}
           </span>
         </span>

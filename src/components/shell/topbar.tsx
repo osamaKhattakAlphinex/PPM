@@ -40,7 +40,7 @@ export function Topbar({
   const t = useTranslations("shell");
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b border-border bg-background/90 px-3 backdrop-blur-sm sm:px-5">
+    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background/90 px-3 backdrop-blur-sm sm:px-5">
       <button
         ref={menuButtonRef}
         type="button"
@@ -48,7 +48,7 @@ export function Topbar({
         aria-label={t("openMenu")}
         aria-expanded={isMenuOpen}
         aria-haspopup="dialog"
-        className="grid size-11 shrink-0 place-items-center rounded-sm border border-border-strong bg-surface text-foreground transition-colors hover:bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
+        className="grid size-9 touch-target-square shrink-0 place-items-center rounded-md border border-border-strong bg-surface text-foreground transition-colors hover:border-primary hover:bg-surface-sunken hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
       >
         <Menu className="size-5" aria-hidden />
       </button>

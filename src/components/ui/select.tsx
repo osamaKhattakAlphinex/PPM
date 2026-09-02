@@ -1,25 +1,25 @@
 import { forwardRef, type SelectHTMLAttributes } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { inputBaseClass } from "./input";
 
 export type SelectProps = SelectHTMLAttributes<HTMLSelectElement>;
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
   ({ className, children, ...props }, ref) => {
     return (
-      <div className="relative">
+      <div className="group relative">
         <select
           ref={ref}
-          className={cn(
-            "min-h-11 w-full appearance-none rounded-sm border border-border-strong bg-surface ps-3 pe-9 text-sm text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring aria-[invalid=true]:border-danger disabled:cursor-not-allowed disabled:bg-surface-sunken disabled:opacity-60",
-            className
-          )}
+          // Shares the input's box so the two line up in a mixed form; only the
+          // padding differs, to leave room for the chevron.
+          className={cn(inputBaseClass, "appearance-none ps-3 pe-9", className)}
           {...props}
         >
           {children}
         </select>
         <ChevronDown
-          className="pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+          className="pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground transition-colors group-hover:text-foreground"
           aria-hidden
         />
       </div>

@@ -138,7 +138,7 @@ export function MobileDrawer({
                 type="button"
                 onClick={onClose}
                 aria-label={t("closeMenu")}
-                className="grid size-11 shrink-0 place-items-center rounded-sm text-muted-foreground transition-colors hover:bg-surface hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="grid size-9 touch-target-square shrink-0 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-surface hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <X className="size-5" aria-hidden />
               </button>

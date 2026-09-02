@@ -48,6 +48,7 @@ export {
   DEFAULT_PAGE_SIZE,
   MAX_FIND_LIMIT,
   MAX_PAGE_SIZE,
+  mapPage,
   RESERVED_FIELDS,
   type CreateInput,
   type Page,
@@ -60,6 +61,8 @@ export {
   type SortSpec,
   type UpdateInput,
 } from "./repository";
+
+export { prefixFilter, textSearchFilter } from "./text-search";
 
 export {
   assertNoDangerousOperators,
@@ -112,6 +115,18 @@ export {
 } from "./repositories/locations";
 
 export {
+  assetsRepository,
+  type AssetCreateInput,
+  type AssetUpdateInput,
+} from "./repositories/assets";
+
+export {
+  techniciansRepository,
+  type TechnicianCreateInput,
+  type TechnicianUpdateInput,
+} from "./repositories/technicians";
+
+export {
   getOrganizationForScope,
   updateOrganizationForScope,
   type OrganizationPatch,
@@ -143,6 +158,16 @@ export {
   type LocationDocument,
   type LocationStatus,
 } from "./models/location";
+
+// The category and status vocabularies are NOT re-exported here: they are
+// domain constants (`src/lib/domain/assets.ts`) that Client Components import
+// as values, and anything reachable from this barrel drags Mongoose with it.
+export { assetInputSchema, type AssetDocument } from "./models/asset";
+
+// Same rule as assets above: the trade and status vocabularies, and the bounds
+// on a skills list, are domain constants (`src/lib/domain/technicians.ts`) that
+// the directory grid imports as values, so they are not re-exported here.
+export { technicianInputSchema, type TechnicianDocument } from "./models/technician";
 
 export {
   organizationInputSchema,

@@ -4,13 +4,12 @@ import {
   addressSchema,
   clientInputSchema,
   clientStatusSchema,
-  DEFAULT_PAGE_SIZE,
   locationInputSchema,
   locationStatusSchema,
-  MAX_PAGE_SIZE,
   organizationInputSchema,
   organizationSettingsSchema,
 } from "@/lib/db";
+import { objectIdString, pageParams, searchTerm } from "@/lib/validation/primitives";
 
 /**
  * Every payload that reaches a master-data action is parsed here first.
@@ -35,25 +34,14 @@ import {
  * that, so an unknown key is still rejected everywhere below.
  */
 
-/** The only id shape accepted anywhere, matching `src/lib/auth/session.ts`. */
-export const objectIdString = z
-  .string()
-  .regex(/^[0-9a-fA-F]{24}$/, "Expected a 24-character object id");
-
 /**
- * A free-text search term.
- *
- * Capped hard at 64 characters and used only as an ANCHORED, escaped prefix
- * match (see `prefixFilter()` in `queries.ts`). Neither the cap nor the escape
- * is optional: an unescaped user string in a `$regex` is a ReDoS, and an
- * unanchored one is a full collection scan on every keystroke.
+ * The id shape and the search-term cap moved to
+ * `src/lib/validation/primitives.ts` when the technicians module needed the
+ * same two rules — a regex that is 24 hex characters in one module and
+ * `z.string()` in another is a hole, not a style difference. Re-exported here
+ * so the existing import sites (and their tests) keep working.
  */
-export const searchTerm = z.string().trim().min(1).max(64);
-
-const pageParams = {
-  page: z.coerce.number().int().min(1).default(1),
-  pageSize: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).default(DEFAULT_PAGE_SIZE),
-};
+export { objectIdString, searchTerm };
 
 // --- Client -----------------------------------------------------------------
 

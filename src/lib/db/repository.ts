@@ -73,9 +73,22 @@ export type CreateInput<T> = Omit<T, (typeof RESERVED_FIELDS)[number]> &
 /** What a repository accepts on update. `clientId` is not patchable. */
 export type UpdateInput<T> = Partial<Omit<T, (typeof RESERVED_FIELDS)[number]>>;
 
-/** A plain equality filter. Operators belong in `where`, not here. */
+/**
+ * A plain equality filter. Operators belong in `where`, not here.
+ *
+ * The third branch is for ARRAY fields. MongoDB matches an array against a
+ * scalar by containment — `{ skills: "brazing" }` matches every document whose
+ * `skills` array holds that string — and that is the shape a "everyone with
+ * this skill" filter needs. Without it the only way to express containment
+ * would be an operator in the TRUSTED `where` fragment, which is precisely
+ * where untrusted values must not go; allowing the element type here keeps such
+ * a filter on the sanitized, path-checked path.
+ */
 export type ScopedFilter<T> = {
-  readonly [K in keyof T]?: T[K] | readonly T[K][];
+  readonly [K in keyof T]?:
+    | T[K]
+    | readonly T[K][]
+    | (T[K] extends readonly (infer Element)[] ? Element : never);
 };
 
 export type SortSpec = Readonly<Record<string, 1 | -1>>;
@@ -111,6 +124,18 @@ export interface Page<T> {
   totalPages: number;
   hasNextPage: boolean;
   hasPreviousPage: boolean;
+}
+
+/**
+ * Map one page's items, keeping the pagination envelope intact.
+ *
+ * Every list read ends by turning documents into the DTOs that cross to the
+ * client, and every one of them needs the same five counters carried through
+ * unchanged. Written once so a module cannot recompute `totalPages` slightly
+ * differently on its way out.
+ */
+export function mapPage<T, U>(page: Page<T>, map: (item: T) => U): Page<U> {
+  return { ...page, items: page.items.map(map) };
 }
 
 export interface RepositoryOptions {
