@@ -51,7 +51,6 @@
     "hidden": "Password is hidden"
 
   },
-
   "userMenu": {
     "label": "Account",
     "openLabel": "Open account menu",
@@ -246,6 +245,49 @@
       "ELECTRICAL": "Electrical",
       "ELV": "ELV",
       "CIVIL": "Civil"
+    }
+  },
+  "preventive": {
+    "title": "Preventive maintenance",
+    "subtitle": "The planned visits your team works from — what is due, who is doing it, and what has slipped.",
+    "new": "New schedule",
+    "newTitle": "Schedule a visit",
+    "editTitle": "Edit schedule",
+    "empty": "Nothing scheduled",
+    "emptyBody": "Planned maintenance visits appear here. Schedule one against an asset to start building the calendar.",
+    "actions": "Visit actions",
+    "asset": "Asset",
+    "assetHint": "The equipment this visit maintains.",
+    "assetUnknown": "Unknown asset",
+    "frequencyLabel": "Frequency",
+    "dueDate": "Due",
+    "dueDateHint": "The day the visit is due, not a time.",
+    "technician": "Technician",
+    "technicianUnknown": "Unassigned",
+    "allTechnicians": "All technicians",
+    "start": "Start",
+    "complete": "Complete",
+    "startedToast": "Visit started.",
+    "completedToast": "Visit completed.",
+    "deleteBody": "The visit is removed from the schedule. Its record is kept for audit.",
+    "tiles": {
+      "open": "open",
+      "overdue": "{count, plural, one {1 overdue} other {# overdue}}"
+    },
+    "frequency": {
+      "DAILY": "Daily",
+      "WEEKLY": "Weekly",
+      "MONTHLY": "Monthly",
+      "QUARTERLY": "Quarterly",
+      "HALF_YEARLY": "Half-yearly",
+      "ANNUAL": "Annual"
+    },
+    "status": {
+      "SCHEDULED": "Scheduled",
+      "UPCOMING": "Upcoming",
+      "OVERDUE": "Overdue",
+      "IN_PROGRESS": "In progress",
+      "COMPLETED": "Completed"
     }
   }
 }

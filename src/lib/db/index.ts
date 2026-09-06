@@ -127,6 +127,14 @@ export {
 } from "./repositories/technicians";
 
 export {
+  countPpmSchedulesByType,
+  ppmSchedulesRepository,
+  type PpmScheduleCreateInput,
+  type PpmScheduleUpdateInput,
+  type PpmTypeCount,
+} from "./repositories/ppm-schedules";
+
+export {
   getOrganizationForScope,
   updateOrganizationForScope,
   type OrganizationPatch,
@@ -168,6 +176,11 @@ export { assetInputSchema, type AssetDocument } from "./models/asset";
 // on a skills list, are domain constants (`src/lib/domain/technicians.ts`) that
 // the directory grid imports as values, so they are not re-exported here.
 export { technicianInputSchema, type TechnicianDocument } from "./models/technician";
+
+// Same rule again: the frequency and status vocabularies are domain constants
+// (`src/lib/domain/preventive.ts`) that the schedule list, its filters and its
+// tiles import as values, so they are not re-exported here.
+export { ppmScheduleInputSchema, type PpmScheduleDocument } from "./models/ppm-schedule";
 
 export {
   organizationInputSchema,
