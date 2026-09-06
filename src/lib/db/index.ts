@@ -135,6 +135,14 @@ export {
 } from "./repositories/ppm-schedules";
 
 export {
+  countWorkOrdersByPriority,
+  workOrdersRepository,
+  type WorkOrderCreateInput,
+  type WorkOrderPriorityCount,
+  type WorkOrderUpdateInput,
+} from "./repositories/work-orders";
+
+export {
   getOrganizationForScope,
   updateOrganizationForScope,
   type OrganizationPatch,
@@ -181,6 +189,12 @@ export { technicianInputSchema, type TechnicianDocument } from "./models/technic
 // (`src/lib/domain/preventive.ts`) that the schedule list, its filters and its
 // tiles import as values, so they are not re-exported here.
 export { ppmScheduleInputSchema, type PpmScheduleDocument } from "./models/ppm-schedule";
+
+// And again: the priority and status vocabularies are domain constants
+// (`src/lib/domain/corrective.ts`) that the ticket list, its filters, its tiles
+// and — uniquely — its per-row action buttons import as values, so they are not
+// re-exported here.
+export { workOrderInputSchema, type WorkOrderDocument } from "./models/work-order";
 
 export {
   organizationInputSchema,

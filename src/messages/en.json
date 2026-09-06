@@ -41,15 +41,10 @@
     "ar": "Arabic"
   },
   "password": {
-
     "show": "Show password",
-
     "hide": "Hide password",
-
     "shown": "Password is visible",
-
     "hidden": "Password is hidden"
-
   },
   "userMenu": {
     "label": "Account",
@@ -288,6 +283,61 @@
       "OVERDUE": "Overdue",
       "IN_PROGRESS": "In progress",
       "COMPLETED": "Completed"
+    }
+  },
+  "corrective": {
+    "title": "Corrective maintenance",
+    "subtitle": "The faults your team is reacting to — what is broken, how badly, and who has it.",
+    "clientSubtitle": "Faults raised at your sites — what you have reported, and where each one has got to.",
+    "new": "Raise ticket",
+    "newTitle": "Raise a work order",
+    "editTitle": "Edit work order",
+    "empty": "Nothing broken",
+    "emptyBody": "Reactive work orders appear here. Raise one against an asset when something fails.",
+    "clientEmptyBody": "You have not reported any faults. Raise one against your equipment and the team will pick it up.",
+    "actions": "Work order actions",
+    "issue": "Fault",
+    "issueHint": "What is wrong, in enough detail for whoever picks it up.",
+    "asset": "Asset",
+    "assetHint": "The equipment that has failed.",
+    "assetUnknown": "Unknown asset",
+    "priorityLabel": "Priority",
+    "priorityHint": "How soon this needs someone.",
+    "raised": "Raised",
+    "technician": "Technician",
+    "technicianHint": "Who is going to do it. Only active technicians are listed.",
+    "technicianUnknown": "Unassigned",
+    "allTechnicians": "All technicians",
+    "assign": "Assign",
+    "assignTitle": "Assign this work order",
+    "start": "Start",
+    "hold": "Hold",
+    "resume": "Resume",
+    "close": "Close",
+    "unassign": "Unassign",
+    "assignedToast": "Work order assigned.",
+    "startToast": "Work started.",
+    "holdToast": "Work order put on hold.",
+    "resumeToast": "Work resumed.",
+    "closeToast": "Work order closed.",
+    "unassignToast": "Work order returned to the queue.",
+    "deleteBody": "The work order is removed from the queue. Its record is kept for audit.",
+    "tiles": {
+      "open": "open",
+      "unassigned": "{count, plural, one {1 unassigned} other {# unassigned}}"
+    },
+    "priority": {
+      "CRITICAL": "Critical",
+      "HIGH": "High",
+      "MEDIUM": "Medium",
+      "LOW": "Low"
+    },
+    "status": {
+      "OPEN": "Open",
+      "ASSIGNED": "Assigned",
+      "IN_PROGRESS": "In progress",
+      "PENDING": "Pending",
+      "CLOSED": "Closed"
     }
   }
 }

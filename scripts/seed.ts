@@ -11,6 +11,7 @@ loadEnvConfig(process.cwd());
 
 import type { Role } from "../src/lib/auth/roles";
 import { hashPassword } from "../src/lib/auth/password";
+import type { TechnicianStatus, Trade } from "../src/lib/domain/technicians";
 import {
   assetsRepository,
   clientsRepository,
@@ -19,6 +20,7 @@ import {
   ensureOrganization,
   locationsRepository,
   requireObjectId,
+  techniciansRepository,
   usersRepository,
 } from "../src/lib/db";
 
@@ -136,6 +138,66 @@ const ASSETS: ReadonlyArray<{
   { name: "Depot Distribution Board", category: "ELECTRICAL", type: "Distribution Board", status: "ACTIVE", health: 90, site: "Central Stores & Workshop" },
   { name: "Access Control Server", category: "ELV", type: "Controller", status: "ACTIVE", health: 45, site: "Central Stores & Workshop" },
   { name: "Loading Bay Door", category: "CIVIL", type: "Roller Shutter", status: "INACTIVE", health: 18, site: "Central Stores & Workshop" },
+];
+
+/**
+ * The workforce, spread deliberately rather than randomly.
+ *
+ * Three things are being made visible on a first run:
+ *
+ *  - every trade and every status, so the directory's filters and the status
+ *    tones can be seen without inventing data by hand;
+ *  - the ACCOUNT LINK. A `Technician` is not a `User` — most technicians on a
+ *    Gulf FM contract never sign in — so `userId` is optional, and exactly one
+ *    person here has one. Yousef is the same human as `tech@ppm.local`, which
+ *    is what makes the linked/unlinked split visible instead of theoretical.
+ *  - enough ACTIVE people to schedule against. The preventive module's picker
+ *    lists ACTIVE only: assigning next Tuesday's service to someone who is away
+ *    until the 14th is the mistake the status field exists to prevent, so the
+ *    ON_LEAVE and INACTIVE two below are deliberately not selectable there.
+ */
+const TECHNICIANS: ReadonlyArray<{
+  name: string;
+  trade: Trade;
+  skills: readonly string[];
+  status: TechnicianStatus;
+  /** The seeded account this person signs in with, if any. */
+  email?: string;
+}> = [
+  {
+    name: "Yousef Karim",
+    trade: "HVAC",
+    skills: ["Chiller overhaul", "VRF commissioning", "Brazing"],
+    status: "ACTIVE",
+    email: "tech@ppm.local",
+  },
+  {
+    name: "Rashid Al-Otaibi",
+    trade: "ELECTRICAL",
+    skills: ["LV switchgear", "Generator load testing", "Thermography"],
+    status: "ACTIVE",
+  },
+  {
+    name: "Mahmoud Farouk",
+    trade: "ELV",
+    skills: ["Fire alarm panels", "CCTV and NVR", "Access control"],
+    status: "ACTIVE",
+  },
+  {
+    name: "Bilal Haddad",
+    trade: "PLUMBING",
+    skills: ["Booster sets", "Submersible pumps", "Drainage jetting"],
+    status: "ACTIVE",
+  },
+  // Away, not gone — on the payroll and back next week, so a scheduler must be
+  // able to tell them from the one below.
+  {
+    name: "Tariq Al-Amri",
+    trade: "CIVIL",
+    skills: ["Traction lifts", "Roller shutters", "Waterproofing"],
+    status: "ON_LEAVE",
+  },
+  { name: "Salim Baloch", trade: "HVAC", skills: ["AHU filters and belts"], status: "INACTIVE" },
 ];
 
 const USERS: ReadonlyArray<{ name: string; email: string; role: Role }> = [
@@ -289,6 +351,38 @@ async function main(): Promise<void> {
     });
     console.log(
       `user          ${seed.email.padEnd(17)} ${seed.role.padEnd(11)} created  ${created._id.toHexString()}`,
+    );
+  }
+
+  // 5. The workforce. AFTER the users, because one technician carries a link to
+  //    the account they sign in with and that account has to exist to be linked.
+  const technicians = techniciansRepository.forScope(bootstrapScope);
+
+  for (const seed of TECHNICIANS) {
+    const existing = await technicians.findOne({ name: seed.name });
+    if (existing) {
+      console.log(`technician    ${seed.name.padEnd(28)} exists   ${existing._id.toHexString()}`);
+      continue;
+    }
+
+    /**
+     * Re-read rather than remembered, so this stays idempotent on a re-run
+     * where the users already existed. A missing account is not fatal: `userId`
+     * is optional precisely because most technicians never sign in, so the
+     * record is still worth creating unlinked.
+     */
+    const account = seed.email ? await users.findOne({ email: seed.email }) : null;
+
+    const created = await technicians.create({
+      name: seed.name,
+      trade: seed.trade,
+      skills: [...seed.skills],
+      status: seed.status,
+      userId: account?._id ?? null,
+    });
+    console.log(
+      `technician    ${seed.name.padEnd(28)} created  ${created._id.toHexString()}` +
+        (account ? `  linked to ${seed.email}` : ""),
     );
   }
 
