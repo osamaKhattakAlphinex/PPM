@@ -143,6 +143,18 @@ export {
 } from "./repositories/work-orders";
 
 export {
+  checklistsRepository,
+  type ChecklistCreateInput,
+  type ChecklistUpdateInput,
+} from "./repositories/checklists";
+
+export {
+  checklistRunsRepository,
+  type ChecklistRunCreateInput,
+  type ChecklistRunUpdateInput,
+} from "./repositories/checklist-runs";
+
+export {
   getOrganizationForScope,
   updateOrganizationForScope,
   type OrganizationPatch,
@@ -195,6 +207,24 @@ export { ppmScheduleInputSchema, type PpmScheduleDocument } from "./models/ppm-s
 // and — uniquely — its per-row action buttons import as values, so they are not
 // re-exported here.
 export { workOrderInputSchema, type WorkOrderDocument } from "./models/work-order";
+
+// And again: the category vocabulary, the run statuses, the job-type
+// discriminator and the bounds on an item array are domain constants
+// (`src/lib/domain/checklists.ts`) that the library list, the item builder and
+// the run sheet all import as values, so they are not re-exported here.
+export {
+  checklistInputSchema,
+  checklistItemSchema,
+  type ChecklistDocument,
+  type ChecklistItem,
+} from "./models/checklist";
+
+export {
+  checklistRunInputSchema,
+  checklistRunItemSchema,
+  type ChecklistRunDocument,
+  type ChecklistRunItem,
+} from "./models/checklist-run";
 
 export {
   organizationInputSchema,
