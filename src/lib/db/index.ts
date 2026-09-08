@@ -143,6 +143,14 @@ export {
 } from "./repositories/work-orders";
 
 export {
+  contractsRepository,
+  summariseContracts,
+  type ContractCreateInput,
+  type ContractSummaryTotals,
+  type ContractUpdateInput,
+} from "./repositories/contracts";
+
+export {
   checklistsRepository,
   type ChecklistCreateInput,
   type ChecklistUpdateInput,
@@ -207,6 +215,13 @@ export { ppmScheduleInputSchema, type PpmScheduleDocument } from "./models/ppm-s
 // and — uniquely — its per-row action buttons import as values, so they are not
 // re-exported here.
 export { workOrderInputSchema, type WorkOrderDocument } from "./models/work-order";
+
+// And again: the contract type and status vocabularies, the display statuses
+// and the two derived-status functions are domain constants
+// (`src/lib/domain/amc.ts`) that the contract list, its filters, its KPI header,
+// its badge and its per-row action buttons import as values, so they are not
+// re-exported here.
+export { contractInputSchema, type ContractDocument } from "./models/contract";
 
 // And again: the category vocabulary, the run statuses, the job-type
 // discriminator and the bounds on an item array are domain constants

@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { addUtcDays, addUtcMonths, startOfUtcDay } from "./dates";
+
 /**
  * The preventive-maintenance vocabulary, and the two pure functions that turn a
  * due date into something a person can act on.
@@ -107,48 +109,17 @@ export const UPCOMING_WINDOW_DAYS = 7;
 // Dates
 // ---------------------------------------------------------------------------
 
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
-
 /**
- * Midnight UTC on the day the given instant falls in.
+ * The calendar arithmetic lives in `src/lib/domain/dates.ts`, because AMC needs
+ * the same primitives and a second copy of "add days" is how two screens end up
+ * disagreeing about what today is.
  *
- * A due date is a DAY, not a moment: "the chiller service is due on the 14th",
- * never "due at 14:32". Normalising both ends of every comparison to UTC
- * midnight is what stops a schedule created at 23:00 local from reading as
- * overdue an hour later, and what makes `dueDate` values comparable at all
- * across the timezones a Gulf FM tenant's staff actually sign in from.
- *
- * The write path normalises on the way in and this normalises the clock on the
- * way out, so the two sides of `<` are always the same kind of value.
+ * `startOfUtcDay` is RE-EXPORTED rather than merely imported: it is part of this
+ * module's published surface — `ppm-schedules.ts`, `preventive/actions.ts` and
+ * `recurrence.test.ts` all import it from here — and a due date normalised to
+ * UTC midnight is a preventive-maintenance concept as much as a calendar one.
  */
-export function startOfUtcDay(value: Date): Date {
-  return new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate()));
-}
-
-function addUtcDays(value: Date, days: number): Date {
-  return new Date(startOfUtcDay(value).getTime() + days * MS_PER_DAY);
-}
-
-/**
- * Add whole months, clamped to the end of the target month.
- *
- * The reason this is not `setUTCMonth(month + n)` is that the native setter
- * OVERFLOWS: 31 January plus one month becomes 3 March, because there is no 31
- * February. A monthly PPM that drifts forward three days every short month is a
- * schedule nobody trusts, so the day is clamped to the last of the target month
- * instead — 31 Jan + 1 month is 28 Feb, or 29 in a leap year.
- */
-function addUtcMonths(value: Date, months: number): Date {
-  const start = startOfUtcDay(value);
-  const year = start.getUTCFullYear();
-  const month = start.getUTCMonth();
-  const day = start.getUTCDate();
-
-  // Day 0 of the FOLLOWING month is the last day of the target month.
-  const lastDayOfTarget = new Date(Date.UTC(year, month + months + 1, 0)).getUTCDate();
-
-  return new Date(Date.UTC(year, month + months, Math.min(day, lastDayOfTarget)));
-}
+export { startOfUtcDay } from "./dates";
 
 // ---------------------------------------------------------------------------
 // Derived status
