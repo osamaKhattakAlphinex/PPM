@@ -1,6 +1,7 @@
 {
   "name": "ppm-platform",
   "version": "0.1.0",
+  "packageManager": "pnpm@10.33.0",
   "private": true,
   "engines": {
     "node": ">=22"
@@ -14,7 +15,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "lint:dal": "eslint \"src/**/*.{ts,tsx}\" --max-warnings 0",
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx scripts/seed.ts",
+    "indexes": "tsx scripts/build-indexes.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.124.0",

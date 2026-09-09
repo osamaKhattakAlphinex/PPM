@@ -7,6 +7,21 @@ const withNextIntl = createNextIntlPlugin("./src/lib/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   /**
+   * Next sends `X-Powered-By: Next.js` by default. It tells an attacker which
+   * framework to look up advisories for and tells a visitor nothing, so it is
+   * off. Free, and one fewer thing to notice in a scan report.
+   */
+  poweredByHeader: false,
+
+  /**
+   * A self-contained server bundle in `.next/standalone`, for the Node-host
+   * deployment described in `docs/DEPLOYMENT.md`. Vercel ignores it, so it
+   * costs nothing to leave on; a container that would otherwise ship the whole
+   * `node_modules` tree gets a fraction of it.
+   */
+  output: "standalone",
+
+  /**
    * `@node-rs/argon2` is a native addon (a `.node` binary). Bundling it breaks
    * the require path, so it stays external and is loaded from node_modules at
    * runtime.
