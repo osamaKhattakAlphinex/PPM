@@ -636,5 +636,68 @@
       "OVERDUE": "Overdue",
       "PAID": "Paid"
     }
+  },
+  "reports": {
+    "title": "Reports",
+    "subtitle": "Generated from your own data, on the server. Read on screen, print, or take the PDF.",
+    "downloadPdf": "PDF",
+    "print": "Print",
+    "vatNumber": "VAT {number}",
+    "noData": "Nothing to report yet",
+    "asset": "Asset",
+    "unknownAsset": "Unknown asset",
+    "category": "Category",
+    "status": "Status",
+    "health": "Health",
+    "frequency": "Frequency",
+    "scheduled": "Scheduled",
+    "completed": "Completed",
+    "missed": "Missed",
+    "overdue": "Overdue",
+    "upcoming": "Upcoming",
+    "dueDate": "Due",
+    "compliance": "Compliance",
+    "complianceNote": "{done} of {due} visits that fell due",
+    "byFrequency": "By frequency",
+    "overdueVisits": "Overdue visits",
+    "nothingOverdue": "Nothing is overdue",
+    "totalAssets": "Assets",
+    "inService": "In service",
+    "underMaintenance": "Under maintenance",
+    "averageHealth": "Average health",
+    "byCategory": "By category",
+    "worstCondition": "Worst condition",
+    "openWorkOrdersNote": "{count, plural, =0 {no open work orders} one {# open work order} other {# open work orders}}",
+    "invoiced": "Invoiced",
+    "collected": "Collected",
+    "outstanding": "Outstanding",
+    "overdueMoney": "Overdue",
+    "invoiceCountNote": "{count, plural, =0 {no invoices} one {# invoice} other {# invoices}}",
+    "overdueCountNote": "{count, plural, =0 {none late} one {# late} other {# late}}",
+    "contracts": "Contracts",
+    "measure": "Measure",
+    "value": "Value",
+    "contractValue": "Contract value",
+    "activeContracts": "Active contracts",
+    "expiringContracts": "Expiring within 60 days",
+    "averageContractCompliance": "Average contract compliance",
+    "workloadTrend": "Workload, last 6 months",
+    "month": "Month",
+    "preventive": "Preventive",
+    "corrective": "Corrective",
+    "kind": {
+      "PM": {
+        "title": "Preventive maintenance",
+        "body": "How much of the plan was kept, by frequency, and what is late."
+      },
+      "ASSET": {
+        "title": "Assets",
+        "body": "What you maintain, by category, and the equipment in the worst condition."
+      },
+      "FINANCIAL": {
+        "title": "Financial",
+        "body": "Invoiced, collected and outstanding, with contract value and workload."
+      }
+    }
   }
 }

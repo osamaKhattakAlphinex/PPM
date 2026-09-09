@@ -160,11 +160,15 @@ export {
 
 export {
   assetNamesFor,
+  assetsByCategory,
   countWorkOrdersByStatus,
   maintenanceTrend,
   summariseAssets,
+  ppmByFrequency,
   summarisePpmCompliance,
+  type AssetCategoryRow,
   type AssetHealthSummary,
+  type PpmFrequencyRow,
   type MaintenanceTrendPoint,
   type PpmComplianceSummary,
   type WorkOrderStatusCount,

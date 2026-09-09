@@ -636,5 +636,68 @@
       "OVERDUE": "متأخرة",
       "PAID": "مدفوعة"
     }
+  },
+  "reports": {
+    "title": "التقارير",
+    "subtitle": "تُنشأ من بياناتك على الخادم. اقرأها على الشاشة، أو اطبعها، أو نزّل ملف PDF.",
+    "downloadPdf": "PDF",
+    "print": "طباعة",
+    "vatNumber": "الرقم الضريبي {number}",
+    "noData": "لا توجد بيانات بعد",
+    "asset": "الأصل",
+    "unknownAsset": "أصل غير معروف",
+    "category": "الفئة",
+    "status": "الحالة",
+    "health": "الحالة الفنية",
+    "frequency": "التكرار",
+    "scheduled": "مجدولة",
+    "completed": "منجزة",
+    "missed": "فائتة",
+    "overdue": "متأخرة",
+    "upcoming": "قادمة",
+    "dueDate": "الاستحقاق",
+    "compliance": "الالتزام",
+    "complianceNote": "{done} من {due} زيارة مستحقة",
+    "byFrequency": "حسب التكرار",
+    "overdueVisits": "الزيارات المتأخرة",
+    "nothingOverdue": "لا توجد متأخرات",
+    "totalAssets": "الأصول",
+    "inService": "في الخدمة",
+    "underMaintenance": "تحت الصيانة",
+    "averageHealth": "متوسط الحالة",
+    "byCategory": "حسب الفئة",
+    "worstCondition": "الأسوأ حالة",
+    "openWorkOrdersNote": "{count, plural, =0 {لا أوامر عمل مفتوحة} one {أمر عمل مفتوح} two {أمرا عمل مفتوحان} few {# أوامر عمل مفتوحة} many {# أمر عمل مفتوح} other {# أمر عمل مفتوح}}",
+    "invoiced": "المفوتر",
+    "collected": "المحصّل",
+    "outstanding": "المستحق",
+    "overdueMoney": "المتأخر",
+    "invoiceCountNote": "{count, plural, =0 {لا فواتير} one {فاتورة واحدة} two {فاتورتان} few {# فواتير} many {# فاتورة} other {# فاتورة}}",
+    "overdueCountNote": "{count, plural, =0 {لا متأخرات} one {متأخرة واحدة} two {متأخرتان} few {# متأخرة} many {# متأخرة} other {# متأخرة}}",
+    "contracts": "العقود",
+    "measure": "المؤشر",
+    "value": "القيمة",
+    "contractValue": "قيمة العقود",
+    "activeContracts": "العقود السارية",
+    "expiringContracts": "تنتهي خلال ٦٠ يوماً",
+    "averageContractCompliance": "متوسط الالتزام بالعقود",
+    "workloadTrend": "حجم العمل، آخر ٦ أشهر",
+    "month": "الشهر",
+    "preventive": "وقائية",
+    "corrective": "علاجية",
+    "kind": {
+      "PM": {
+        "title": "الصيانة الوقائية",
+        "body": "مدى الالتزام بالخطة حسب التكرار، وما هو متأخر."
+      },
+      "ASSET": {
+        "title": "الأصول",
+        "body": "ما تتم صيانته حسب الفئة، والمعدات الأسوأ حالة."
+      },
+      "FINANCIAL": {
+        "title": "التقرير المالي",
+        "body": "المفوتر والمحصّل والمستحق، مع قيمة العقود وحجم العمل."
+      }
+    }
   }
 }

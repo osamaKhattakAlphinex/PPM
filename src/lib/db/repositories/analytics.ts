@@ -357,3 +357,121 @@ export async function assetNamesFor(
   for (const asset of assets) names.set(asset._id.toHexString(), asset.name);
   return names;
 }
+
+// ---------------------------------------------------------------------------
+// Report breakdowns
+// ---------------------------------------------------------------------------
+
+/** One row of "how many assets of this kind, and how healthy are they". */
+export interface AssetCategoryRow {
+  readonly category: string;
+  readonly total: number;
+  readonly active: number;
+  readonly maintenance: number;
+  /** 0–100, rounded. NULL when the category is empty. */
+  readonly averageHealth: number | null;
+}
+
+/**
+ * The asset report's body: a row per category the tenant actually owns.
+ *
+ * Unlike the dashboard's tiles, this does NOT pad out the enum with empty rows.
+ * A KPI strip pads so the grid does not reflow as work moves; a printed report
+ * that listed "ELV: 0 assets, — health" for a tenant with no ELV equipment would
+ * be padding a document somebody signs with rows that say nothing.
+ */
+export async function assetsByCategory(scope: TenantScope): Promise<AssetCategoryRow[]> {
+  const rows = await Asset.aggregate<{
+    _id: string;
+    total: number;
+    active: number;
+    maintenance: number;
+    averageHealth: number | null;
+  }>([
+    { $match: assetsRepository.forScope(scope).matchStage() },
+    {
+      $group: {
+        _id: "$category",
+        total: { $sum: 1 },
+        active: { $sum: { $cond: [{ $eq: ["$status", "ACTIVE"] }, 1, 0] } },
+        maintenance: { $sum: { $cond: [{ $eq: ["$status", "MAINTENANCE"] }, 1, 0] } },
+        averageHealth: { $avg: "$health" },
+      },
+    },
+    // Biggest category first: a report is read from the top, and the top should
+    // be the equipment the tenant actually has most of.
+    { $sort: { total: -1, _id: 1 } },
+  ]).exec();
+
+  return rows.map((row) => ({
+    category: row._id,
+    total: row.total,
+    active: row.active,
+    maintenance: row.maintenance,
+    averageHealth:
+      typeof row.averageHealth === "number" ? Math.round(row.averageHealth) : null,
+  }));
+}
+
+/** One row of "how the plan is being kept, at this frequency". */
+export interface PpmFrequencyRow {
+  readonly frequency: string;
+  readonly total: number;
+  readonly completed: number;
+  readonly overdue: number;
+  /** completed / fallen-due as a percentage. NULL when nothing has fallen due. */
+  readonly compliance: number | null;
+}
+
+/**
+ * The PM report's body: a row per frequency, with the same compliance
+ * definition the dashboard KPI uses — completed over FALLEN DUE, never over
+ * everything scheduled.
+ *
+ * Stating it twice would be two definitions; the arithmetic is done here from
+ * the same two counts the dashboard's pipeline produces, so the report and the
+ * tile cannot disagree about what compliance means.
+ *
+ * A CLIENT scope is refused by `ppmSchedulesRepository` outright, so this
+ * returns nothing for one rather than throwing three layers down.
+ */
+export async function ppmByFrequency(
+  scope: TenantScope,
+  now: Date = new Date(),
+): Promise<PpmFrequencyRow[]> {
+  if (isClientScope(scope)) return [];
+
+  const today = startOfUtcDay(now);
+  const isDue = { $lt: ["$dueDate", today] };
+  const isCompleted = { $eq: ["$status", "COMPLETED"] };
+
+  const rows = await PpmSchedule.aggregate<{
+    _id: string;
+    total: number;
+    completed: number;
+    due: number;
+    overdue: number;
+  }>([
+    { $match: ppmSchedulesRepository.forScope(scope).matchStage() },
+    {
+      $group: {
+        _id: "$type",
+        total: { $sum: 1 },
+        due: { $sum: { $cond: [isDue, 1, 0] } },
+        completed: { $sum: { $cond: [{ $and: [isDue, isCompleted] }, 1, 0] } },
+        overdue: {
+          $sum: { $cond: [{ $and: [isDue, { $not: isCompleted }] }, 1, 0] },
+        },
+      },
+    },
+    { $sort: { total: -1, _id: 1 } },
+  ]).exec();
+
+  return rows.map((row) => ({
+    frequency: row._id,
+    total: row.total,
+    completed: row.completed,
+    overdue: row.overdue,
+    compliance: row.due === 0 ? null : Math.round((row.completed / row.due) * 100),
+  }));
+}
