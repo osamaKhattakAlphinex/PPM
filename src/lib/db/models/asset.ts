@@ -77,6 +77,15 @@ export const Asset = defineModel("Asset", assetInputSchema, {
     // Every asset at one site: the drill-down from a location, and the query
     // the work-order module will run constantly.
     { fields: { organizationId: 1, locationId: 1, status: 1 } },
+
+    /**
+     * The asset report's "worst condition" list, and the AI module's weakest-
+     * equipment snapshot: both sort by `health` ascending across the whole
+     * tenant. Nothing else in the app sorts by it, and without this the sort is
+     * done in memory over every asset the tenant owns — which mongod aborts
+     * past 32MB. Added during the performance pass in `docs/PERFORMANCE.md`.
+     */
+    { fields: { organizationId: 1, health: 1 } },
     /**
      * Free-text search on the name.
      *

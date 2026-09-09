@@ -6,6 +6,7 @@
   "nav": {
     "sectionLabel": "Modules",
     "dashboard": "Dashboard",
+    "myJobs": "My jobs",
     "assets": "Assets",
     "preventive": "Preventive",
     "corrective": "Corrective",
@@ -67,9 +68,84 @@
     "body": "This module is scheduled for a later prompt. The shell around it — navigation, locale, theme, session — is what is live today.",
     "scopeNote": "Every query this module will make is scoped to your organization before it reaches the database."
   },
+  "admin": {
+    "title": "Users",
+    "subtitle": "Who may sign in, and what they may do. Creating an account does not let it in — activate it here when the person is ready to start.",
+    "new": "New user",
+    "created": "User created. Activate the account when they are ready to sign in.",
+    "activated": "Account activated",
+    "suspended": "Account suspended",
+    "activate": "Activate",
+    "suspend": "Suspend",
+    "you": "You",
+    "columns": {
+      "name": "Name",
+      "role": "Role",
+      "client": "Client",
+      "status": "Status",
+      "created": "Created",
+      "actions": "Actions"
+    },
+    "statuses": {
+      "ACTIVE": "Active",
+      "INVITED": "Invited",
+      "SUSPENDED": "Suspended"
+    },
+    "filters": {
+      "search": "Search",
+      "searchPlaceholder": "Search by name",
+      "role": "Role",
+      "allRoles": "All roles",
+      "status": "Status",
+      "allStatuses": "All statuses"
+    },
+    "empty": {
+      "title": "No users match",
+      "description": "Nobody matches these filters. Clear them to see everyone, or add the first colleague."
+    },
+    "form": {
+      "title": "New user",
+      "name": "Full name",
+      "email": "Work email",
+      "password": "Temporary password",
+      "passwordHint": "At least 12 characters. Give it to them directly and ask them to change it.",
+      "role": "Role",
+      "client": "Client",
+      "clientPlaceholder": "Choose a client",
+      "cancel": "Cancel",
+      "submit": "Create user"
+    }
+  },
   "dashboard": {
-    "title": "Workspace",
-    "subtitle": "Signed in. Modules arrive in later prompts; the session below is what every scoped query will carry."
+    "title": "Dashboard",
+    "subtitle": "Your organisation this morning — what you own, how much of the plan is being kept, and what is on fire.",
+    "totalAssets": "Assets",
+    "activeAssets": "{count, plural, =0 {none in service} one {# in service} other {# in service}}",
+    "ppmCompliance": "PM compliance",
+    "complianceNote": "{done} of {due} visits that fell due",
+    "nothingDue": "Nothing has fallen due yet",
+    "openWorkOrders": "Open work orders",
+    "criticalNote": "{count, plural, =0 {none critical} one {# critical} other {# critical}}",
+    "upcomingPpm": "Upcoming PM",
+    "nextSevenDays": "Due in the next 7 days",
+    "workStatus": "Work orders by status",
+    "workOrders": "work orders",
+    "noWorkOrders": "No work orders yet.",
+    "trendTitle": "Planned vs reactive, last 6 months",
+    "preventive": "Preventive",
+    "corrective": "Corrective",
+    "upcomingTitle": "Coming up",
+    "unknownAsset": "Unknown asset",
+    "nothingUpcoming": "Nothing due this week",
+    "nothingUpcomingBody": "Planned visits falling due in the next seven days appear here.",
+    "alertOverdue": "{count, plural, one {# planned visit is overdue} other {# planned visits are overdue}}",
+    "alertCritical": "{count, plural, one {# critical work order is open} other {# critical work orders are open}}",
+    "seeInsights": "See AI insights",
+    "portalTitle": "Your maintenance",
+    "portalSubtitle": "Your sites, your equipment, and the work being done on them.",
+    "yourAssets": "Your assets",
+    "averageHealth": "Average health",
+    "alertCriticalShort": "Critical"
   },
   "masterData": {
     "search": "Search by name",
@@ -338,7 +414,9 @@
       "IN_PROGRESS": "In progress",
       "PENDING": "Pending",
       "CLOSED": "Closed"
-    }
+    },
+    "sendForApproval": "Send for approval",
+    "sentForApproval": "Sent for approval."
   },
   "checklists": {
     "title": "Checklists",
@@ -480,6 +558,409 @@
       "EXPIRED": "Expired",
       "SUSPENDED": "Suspended",
       "CANCELLED": "Cancelled"
+    }
+  },
+  "approvals": {
+    "title": "Approvals",
+    "subtitle": "Completed work on its way to being billed — who has signed it off, and whose desk it is on now.",
+    "clientSubtitle": "Work your provider has completed and is asking you to accept, before it is invoiced.",
+    "clientNote": "You are asked to accept work at the client stage.",
+    "item": "Item",
+    "progress": "Progress",
+    "statusLabel": "Status",
+    "raised": "Raised",
+    "actions": "Approval actions",
+    "waiting": "waiting",
+    "approve": "Approve",
+    "reject": "Reject",
+    "cancel": "Cancel",
+    "approved": "Approved — moved to the next stage.",
+    "rejected": "Rejected. The chain has stopped here.",
+    "trail": "History",
+    "trailFor": "History — {item}",
+    "mine": "Waiting on me",
+    "filterStatus": "Status",
+    "filterStage": "Stage",
+    "filterType": "Item type",
+    "allStatuses": "All statuses",
+    "allStages": "All stages",
+    "allTypes": "All types",
+    "empty": "Nothing to approve",
+    "emptyBody": "Completed work sent for sign-off will appear here, at the stage it is waiting on.",
+    "rejectTitle": "Reject this item",
+    "rejectBody": "The chain stops here and the reason is recorded permanently. Redone work is submitted as a new request.",
+    "reason": "Reason",
+    "reasonHint": "What has to change before this can be approved. The requester sees this.",
+    "reasonRequired": "Say why this is being rejected.",
+    "stage": {
+      "TECHNICIAN": "Technician",
+      "SUPERVISOR": "Supervisor",
+      "FM_MANAGER": "FM manager",
+      "CLIENT": "Client",
+      "INVOICE_TRIGGER": "Ready to invoice"
+    },
+    "status": {
+      "PENDING": "Pending",
+      "APPROVED": "Ready to invoice",
+      "REJECTED": "Rejected",
+      "COMPLETED": "Invoiced"
+    },
+    "refType": {
+      "WORK_ORDER": "Work order",
+      "PM_REPORT": "Maintenance report",
+      "INVOICE": "Invoice"
+    },
+    "action": {
+      "SUBMITTED": "Submitted",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected"
+    },
+    "byRole": {
+      "ADMIN": "an administrator",
+      "FM_MANAGER": "the FM manager",
+      "SUPERVISOR": "the supervisor",
+      "TECHNICIAN": "the technician",
+      "CLIENT": "the client"
+    }
+  },
+  "invoicing": {
+    "title": "Invoicing",
+    "subtitle": "What has been billed, what has been paid, and what is late. Totals and VAT are calculated on the server.",
+    "clientSubtitle": "Your invoices — what is outstanding, what is settled, and the documents themselves.",
+    "new": "New invoice",
+    "newTitle": "Raise an invoice",
+    "editTitle": "Edit invoice",
+    "invoice": "Invoice",
+    "client": "Client",
+    "clientUnknown": "—",
+    "selectClient": "Choose a client",
+    "invoiceNumber": "Invoice number",
+    "invoiceNumberHint": "Lowercase letters, digits and hyphens. It goes on the bank transfer, and is fixed once saved.",
+    "workRef": "What it is for",
+    "workRefHint": "The words the client would recognise — the job, the site, the period.",
+    "amount": "Amount before VAT",
+    "amountHint": "In riyals, to two decimal places. VAT and the total are calculated on the server.",
+    "vatNotice": "VAT at the rate in force and the total are calculated on the server when this is saved. They cannot be entered here.",
+    "total": "Total",
+    "vatLine": "{net} + {vat} VAT",
+    "due": "Due",
+    "issueDate": "Issued",
+    "dueDate": "Due",
+    "dueDateHint": "Leave empty for the standard 30-day term.",
+    "notes": "Notes",
+    "notesHint": "Payment terms or a reference, printed on the document.",
+    "statusLabel": "Status",
+    "filterStatus": "Status",
+    "filterClient": "Client",
+    "allStatuses": "All statuses",
+    "allClients": "All clients",
+    "actions": "Invoice actions",
+    "markPaid": "Mark paid",
+    "markedPaid": "Marked as paid.",
+    "reversePayment": "Reverse payment",
+    "paymentReversed": "Payment reversed.",
+    "withdraw": "Withdraw",
+    "withdrawn": "Invoice withdrawn.",
+    "withdrawTitle": "Withdraw this invoice",
+    "withdrawBody": "Invoice {number} will be removed from the ledger. A paid invoice cannot be withdrawn.",
+    "pdf": "PDF",
+    "download": "Download the PDF",
+    "empty": "No invoices yet",
+    "emptyBody": "Raise one from an approved job, or directly for a fee or an instalment.",
+    "clientEmptyBody": "Invoices your provider raises will appear here.",
+    "invoiceCount": "{count, plural, =0 {no invoices} one {# invoice} other {# invoices}}",
+    "source": "Raise from",
+    "sourceHint": "An approved job carries its client and description across automatically.",
+    "fromApproval": "An approved job",
+    "direct": "Directly (a fee or an instalment)",
+    "noneApproved": "Nothing is approved yet",
+    "approval": "Approved job",
+    "approvalHint": "Only jobs that have cleared every approval stage and have not been billed appear here.",
+    "totalInvoiced": "Total invoiced",
+    "paid": "Paid",
+    "pending": "Pending",
+    "overdue": "Overdue",
+    "status": {
+      "PENDING": "Pending",
+      "OVERDUE": "Overdue",
+      "PAID": "Paid"
+    }
+  },
+  "reports": {
+    "title": "Reports",
+    "subtitle": "Generated from your own data, on the server. Read on screen, print, or take the PDF.",
+    "downloadPdf": "PDF",
+    "print": "Print",
+    "vatNumber": "VAT {number}",
+    "noData": "Nothing to report yet",
+    "asset": "Asset",
+    "unknownAsset": "Unknown asset",
+    "category": "Category",
+    "status": "Status",
+    "health": "Health",
+    "frequency": "Frequency",
+    "scheduled": "Scheduled",
+    "completed": "Completed",
+    "missed": "Missed",
+    "overdue": "Overdue",
+    "upcoming": "Upcoming",
+    "dueDate": "Due",
+    "compliance": "Compliance",
+    "complianceNote": "{done} of {due} visits that fell due",
+    "byFrequency": "By frequency",
+    "overdueVisits": "Overdue visits",
+    "nothingOverdue": "Nothing is overdue",
+    "totalAssets": "Assets",
+    "inService": "In service",
+    "underMaintenance": "Under maintenance",
+    "averageHealth": "Average health",
+    "byCategory": "By category",
+    "worstCondition": "Worst condition",
+    "openWorkOrdersNote": "{count, plural, =0 {no open work orders} one {# open work order} other {# open work orders}}",
+    "invoiced": "Invoiced",
+    "collected": "Collected",
+    "outstanding": "Outstanding",
+    "overdueMoney": "Overdue",
+    "invoiceCountNote": "{count, plural, =0 {no invoices} one {# invoice} other {# invoices}}",
+    "overdueCountNote": "{count, plural, =0 {none late} one {# late} other {# late}}",
+    "contracts": "Contracts",
+    "measure": "Measure",
+    "value": "Value",
+    "contractValue": "Contract value",
+    "activeContracts": "Active contracts",
+    "expiringContracts": "Expiring within 60 days",
+    "averageContractCompliance": "Average contract compliance",
+    "workloadTrend": "Workload, last 6 months",
+    "month": "Month",
+    "preventive": "Preventive",
+    "corrective": "Corrective",
+    "kind": {
+      "PM": {
+        "title": "Preventive maintenance",
+        "body": "How much of the plan was kept, by frequency, and what is late."
+      },
+      "ASSET": {
+        "title": "Assets",
+        "body": "What you maintain, by category, and the equipment in the worst condition."
+      },
+      "FINANCIAL": {
+        "title": "Financial",
+        "body": "Invoiced, collected and outstanding, with contract value and workload."
+      }
+    }
+  },
+  "aiInsights": {
+    "title": "AI insights",
+    "subtitle": "Four analyses of your own maintenance data, run on the server. Nothing here leaves your organisation's scope.",
+    "privacyNote": "Each analysis sends a small, capped snapshot of your organisation's own maintenance figures to Anthropic's API from our server. The API key never reaches your browser, no other tenant's data is included, and no client names, user names or money figures are sent.",
+    "notConfiguredNote": "AI insights are not configured on this deployment.",
+    "run": "Run analysis",
+    "rerun": "Run again",
+    "stop": "Stop",
+    "thinking": "Analysing…",
+    "failed": "The analysis could not be run. Try again in a moment.",
+    "analysis": {
+      "FAILURE_RISK": {
+        "title": "Failure risk",
+        "body": "Which equipment is most likely to fail in the next 90 days, and what points that way."
+      },
+      "BREAKDOWN_PATTERNS": {
+        "title": "Repeated breakdowns",
+        "body": "The same asset failing twice, or the same fault across a category — and the likely common cause."
+      },
+      "PM_OPTIMIZATION": {
+        "title": "Schedule optimisation",
+        "body": "Where the preventive plan is visiting too often, and where it is not visiting often enough."
+      },
+      "SPARE_PARTS": {
+        "title": "Spare parts forecast",
+        "body": "What the fault history suggests is worth holding in stores this quarter."
+      }
+    }
+  },
+  "myJobs": {
+    "title": "My jobs",
+    "subtitle": "Your shift and your work today.",
+    "greeting": "Good day, {name}. Here is your work.",
+    "todaysShift": "Today's shift",
+    "checkIn": "Check in",
+    "checkOut": "Check out",
+    "checkedIn": "Checked in.",
+    "checkedOut": "Checked out.",
+    "checkedInAt": "Started",
+    "checkedOutAt": "Finished",
+    "hoursWorked": "Time on site",
+    "hoursValue": "{hours}h {minutes}m",
+    "locationRecorded": "Location recorded with your consent.",
+    "consentLabel": "Record my location when I check in or out. Optional — leave this unticked and your shift is recorded without a position.",
+    "noRecord": "No technician record yet",
+    "noRecordBody": "Your login is not linked to a technician record. Ask your supervisor to link it, and your jobs will appear here.",
+    "yourJobs": "{count, plural, =0 {Your jobs} one {Your job} other {Your {count} jobs}}",
+    "noJobs": "Nothing assigned",
+    "noJobsBody": "Planned visits and work orders assigned to you appear here, soonest first.",
+    "late": "Late",
+    "status": {
+      "NOT_CHECKED_IN": "Not started",
+      "ON_SITE": "On site",
+      "CHECKED_OUT": "Finished"
+    },
+    "kind": {
+      "PPM": "Planned visit",
+      "WORK_ORDER": "Work order"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "ariaLabel": "{count, plural, =0 {Notifications} one {Notifications, # unread} other {Notifications, # unread}}",
+    "empty": "Nothing to report.",
+    "markAllRead": "Mark all read",
+    "message": {
+      "ppmOverdue": "A {frequency, select, DAILY {daily} WEEKLY {weekly} MONTHLY {monthly} QUARTERLY {quarterly} HALF_YEARLY {half-yearly} ANNUAL {annual} other {planned}} visit due {dueOn} has not been done.",
+      "contractExpiring": "Contract {contractNumber} — {title} — ends in {days, plural, =0 {today} one {# day} other {# days}}."
+    }
+  },
+  "files": {
+    "title": "Files",
+    "hint": "JPEG, PNG, WEBP, HEIC or PDF, up to 10 MB. Location data is stripped from photographs before they are stored.",
+    "upload": "Upload",
+    "uploaded": "File uploaded.",
+    "delete": "Delete",
+    "deleted": "File deleted.",
+    "failed": "That file could not be uploaded.",
+    "tooLarge": "Files must be under 10 MB.",
+    "empty": "No files yet",
+    "emptyBody": "Photographs of nameplates, faults and completed work appear here."
+  },
+  "marketing": {
+    "primaryNav": "Main",
+    "footerNav": "Footer",
+    "footerNote": "Built for facility maintenance providers in the Gulf.",
+    "nav": {
+      "pricing": "Pricing",
+      "contact": "Contact",
+      "signIn": "Sign in"
+    },
+    "meta": {
+      "description": "A bilingual maintenance management platform for Gulf facility providers: assets, planned and reactive work, contracts, approvals and VAT invoicing — with every tenant's data isolated by design."
+    },
+    "hero": {
+      "eyebrow": "Facility maintenance management",
+      "tagline": "maintenance management for the Gulf",
+      "title": "Every asset, every visit, every invoice — in one place.",
+      "body": "PPM Platform runs planned and reactive maintenance for facility providers across the Gulf: the asset register, the PPM calendar, the ticket queue, the approval chain and the VAT invoice that comes out of the end of it.",
+      "primaryCta": "Sign in",
+      "secondaryCta": "See pricing",
+      "note": "Bilingual English and Arabic. Currency in SAR. VAT at the rate in force."
+    },
+    "features": {
+      "title": "What it does",
+      "body": "Eleven modules that cover the work a maintenance provider actually does, from the nameplate on a chiller to the invoice a client pays.",
+      "assets": {
+        "title": "Asset register",
+        "body": "Every piece of plant, where it is, whose it is, and what condition it is in — with photographs attached to the record."
+      },
+      "planned": {
+        "title": "Planned maintenance",
+        "body": "Daily to annual schedules, with compliance measured against what actually fell due rather than against everything ever planned."
+      },
+      "approvals": {
+        "title": "Approval chain",
+        "body": "Technician, supervisor, FM manager, then the client. Every signature recorded, every stage enforced on the server."
+      },
+      "invoicing": {
+        "title": "VAT invoicing",
+        "body": "Invoices raised from approved work, with VAT and totals calculated on the server and a bilingual tax invoice as a PDF."
+      },
+      "insights": {
+        "title": "AI insights",
+        "body": "Failure risk, repeated breakdowns, schedule optimisation and spare-parts forecasting, over your own data and nobody else's."
+      },
+      "bilingual": {
+        "title": "English and Arabic",
+        "body": "Not a translation layer — the whole interface mirrors, the typography changes, and every document prints in both languages."
+      }
+    },
+    "trust": {
+      "title": "Your data is your data",
+      "body": "Multi-tenancy is not a filter somebody remembered to apply. Every query in this product goes through a data-access layer that injects the organisation — and, for client users, the client — into the filter last, where nothing can displace it.",
+      "isolation": {
+        "title": "Isolated by construction",
+        "body": "Feature code cannot reach the database directly; a lint rule fails the build if it tries. Cross-tenant reads are tested against a real database, not assumed."
+      },
+      "audit": {
+        "title": "Auditable approvals",
+        "body": "Every approval records who acted, at which stage, in what role, and when. History is appended to and never rewritten."
+      },
+      "residency": {
+        "title": "Your own deployment",
+        "body": "Runs on your infrastructure or ours, against your own MongoDB. Files sit in a private bucket namespaced by tenant and are served only through authenticated routes."
+      }
+    },
+    "cta": {
+      "title": "See it against your own data",
+      "body": "Tell us how many sites and assets you run, and we will set up a walkthrough.",
+      "primary": "Talk to us",
+      "secondary": "See pricing"
+    },
+    "pricing": {
+      "metaTitle": "Pricing",
+      "metaDescription": "Straightforward monthly pricing for PPM Platform, in Saudi riyals, by the size of the portfolio you maintain.",
+      "title": "Pricing",
+      "body": "By the size of the portfolio you maintain, in Saudi riyals, per month. Every plan includes both languages, the full module set and unlimited users.",
+      "mostPopular": "Most chosen",
+      "perMonth": "/ month",
+      "custom": "Let's talk",
+      "cta": "Get in touch",
+      "note": "Prices exclude VAT. Annual agreements are discounted. Migration from an existing CMMS is quoted separately and usually takes a fortnight.",
+      "plans": {
+        "starter": {
+          "name": "Starter",
+          "for": "One provider, up to 500 assets",
+          "feature1": "Assets, planned and reactive maintenance",
+          "feature2": "Checklists and technician mobile view",
+          "feature3": "Contracts and VAT invoicing",
+          "feature4": "Email support, next business day"
+        },
+        "growth": {
+          "name": "Growth",
+          "for": "Multi-site, up to 5,000 assets",
+          "feature1": "Everything in Starter",
+          "feature2": "Approval chain with client acceptance",
+          "feature3": "Client portal for every customer",
+          "feature4": "Reports and PDF exports",
+          "feature5": "Priority support"
+        },
+        "enterprise": {
+          "name": "Enterprise",
+          "for": "Unlimited assets and organisations",
+          "feature1": "Everything in Growth",
+          "feature2": "AI insights over your own data",
+          "feature3": "Deployment in your own cloud",
+          "feature4": "Single sign-on and audit export",
+          "feature5": "Named account manager"
+        }
+      }
+    },
+    "contact": {
+      "metaTitle": "Contact",
+      "metaDescription": "Talk to the PPM Platform team about a walkthrough, a migration from an existing CMMS, or a deployment in your own cloud.",
+      "title": "Talk to us",
+      "body": "A walkthrough takes half an hour and we will run it against equipment you recognise. Tell us how many sites you maintain and we will come prepared.",
+      "email": {
+        "label": "Email"
+      },
+      "phone": {
+        "label": "Phone"
+      },
+      "office": {
+        "label": "Office",
+        "value": "Riyadh, Kingdom of Saudi Arabia"
+      },
+      "existing": {
+        "title": "Already a customer?",
+        "body": "Sign in to your organisation's workspace.",
+        "cta": "Sign in"
+      }
     }
   }
 }

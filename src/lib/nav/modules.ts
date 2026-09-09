@@ -1,7 +1,7 @@
 import type { Role } from "../auth/roles";
 
 /**
- * The thirteen modules, and who may see each one.
+ * The fourteen modules, and who may see each one.
  *
  * This table is the single source of truth for two things that must never
  * disagree: what the sidebar renders, and what the middleware lets through. A
@@ -34,6 +34,18 @@ export interface ModuleDefinition {
    */
   readonly primary?: boolean;
   /**
+   * Roles for which this module is NOT a bottom-bar destination, even though it
+   * is `primary` for everyone else.
+   *
+   * Exists for exactly one case, and the case is the reason the bar has a limit
+   * at all: a technician's home is "My jobs", not the operations dashboard, and
+   * with both marked primary a technician would have five tabs in a five-slot
+   * bar whose fifth slot belongs to the drawer trigger. Dropping the dashboard
+   * for that one role is the honest fix — it is still in their drawer, one tap
+   * away, and it was never the screen they open at the start of a shift.
+   */
+  readonly notPrimaryFor?: readonly Role[];
+  /**
    * For CLIENT users this module lives somewhere else. Only "dashboard" uses
    * it: a client's home is their portal, not the operations overview.
    */
@@ -50,6 +62,7 @@ export interface ModuleDefinition {
 
 export const MODULE_KEYS = [
   "dashboard",
+  "myJobs",
   "assets",
   "preventive",
   "corrective",
@@ -72,9 +85,24 @@ export const MODULES: readonly ModuleDefinition[] = [
     href: "/app",
     roles: EVERYONE,
     primary: true,
+    notPrimaryFor: ["TECHNICIAN"],
     clientHref: "/app/portal",
     exact: true,
   },
+  /**
+   * The technician's own screen: their shift and their jobs, nobody else's.
+   *
+   * TECHNICIAN only, and the narrowness is the feature. "My jobs" means the
+   * signed-in person's jobs — the list is filtered by a technician record
+   * resolved from the session — so there is nothing on it for a role that has
+   * no technician record. A supervisor's view of the same data is the
+   * attendance board and the PPM calendar, which are different screens with
+   * different questions.
+   *
+   * `primary`, because it is the first thing a technician opens on a phone and
+   * belongs in the bottom tab bar rather than three taps into a drawer.
+   */
+  { key: "myJobs", href: "/app/my-jobs", roles: ["TECHNICIAN"], primary: true },
   { key: "assets", href: "/app/assets", roles: EVERYONE, primary: true },
   // Planned maintenance: the schedule technicians work from.
   { key: "preventive", href: "/app/preventive", roles: STAFF, primary: true },
@@ -117,6 +145,18 @@ export const MODULES: readonly ModuleDefinition[] = [
  */
 export function moduleHref(entry: ModuleDefinition, role: Role): string {
   return role === "CLIENT" && entry.clientHref ? entry.clientHref : entry.href;
+}
+
+/**
+ * Is this module a bottom-bar destination for this role?
+ *
+ * The shell and the test that guards the four-tab limit both read THIS rather
+ * than `entry.primary`, so the per-role exception cannot be honoured in one
+ * place and forgotten in the other.
+ */
+export function isPrimaryFor(entry: ModuleDefinition, role: Role): boolean {
+  if (!entry.primary) return false;
+  return !entry.notPrimaryFor?.includes(role);
 }
 
 /** Every module this role may open, in table order. */

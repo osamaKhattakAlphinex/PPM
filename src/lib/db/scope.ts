@@ -48,6 +48,46 @@ export interface TenantScope {
 }
 
 /**
+ * The actor id a scheduled job runs under: twenty-four zeroes.
+ *
+ * A real, valid ObjectId that belongs to no user and never will — so a
+ * notification's `readBy`, or any later audit field, can record "the system"
+ * without borrowing a person's identity or leaving a null nobody can interpret.
+ * It is greppable, which a random id would not be.
+ */
+export const SYSTEM_ACTOR_ID = "000000000000000000000000";
+
+/**
+ * A scope for a scheduled job, for ONE organisation.
+ *
+ * The only constructor of a `TenantScope` that does not take a session, and it
+ * exists because a cron job genuinely has none — the alternative would be a job
+ * that reaches models directly, which is the thing the whole data-access layer
+ * exists to prevent.
+ *
+ * It is safe for a narrow, checkable reason rather than by assertion: it takes
+ * ONE organisation id and produces a scope for exactly that tenant, so a job
+ * holding it can still only see one tenant's data, and every repository below
+ * behaves exactly as it does for a signed-in manager. What it cannot do is
+ * widen: there is no "all organisations" scope, which is why the job loops.
+ *
+ * `role: "ADMIN"` because a job acts with the tenant's own full staff view and
+ * never as a client — `isClientScope()` is false for it, so a job can write a
+ * notification FOR a customer without ever reading AS one.
+ *
+ * Deliberately NOT exported from `@/lib/db`'s barrel under a friendly name: it
+ * is imported explicitly, so `systemScopeForOrganization` is grep-able and a
+ * reviewer can see every place a request-less scope is minted.
+ */
+export function systemScopeForOrganization(organizationId: Types.ObjectId): TenantScope {
+  return {
+    organizationId,
+    role: "ADMIN",
+    userId: requireObjectId(SYSTEM_ACTOR_ID),
+  };
+}
+
+/**
  * Derive the tenant scope from a server session.
  *
  * @throws ScopeResolutionError when there is no session, the session fails

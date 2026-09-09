@@ -11,6 +11,7 @@ import { BottomTabs } from "./bottom-tabs";
 import { MobileDrawer } from "./mobile-drawer";
 import { Sidebar } from "./sidebar";
 import { Topbar } from "./topbar";
+import type { NotificationFeed } from "@/lib/notifications/queries";
 import type { ShellModule, ShellUser } from "./types";
 
 /**
@@ -30,12 +31,15 @@ export function AppShell({
   modules,
   user,
   homeHref,
+  notifications,
   children,
 }: {
   /** Already filtered to this user's role, server-side. */
   modules: readonly ShellModule[];
   user: ShellUser;
   homeHref: string;
+  /** The bell's first page, rendered on the server. See `Topbar`. */
+  notifications?: NotificationFeed;
   children: ReactNode;
 }) {
   const t = useTranslations("shell");
@@ -86,6 +90,7 @@ export function AppShell({
         <Topbar
           user={user}
           homeHref={homeHref}
+          notifications={notifications}
           onOpenMenu={() => openFrom(headerTriggerRef)}
           menuButtonRef={headerTriggerRef}
           isMenuOpen={isDrawerOpen}

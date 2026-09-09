@@ -38,6 +38,74 @@ const serverEnvSchema = z.object({
   // middleware imports and which therefore cannot import this module (parsing
   // it would demand MONGODB_URI on the Edge, where nothing connects).
 
+  // --- AI insights ---------------------------------------------------------
+  /**
+   * The Anthropic API key. SERVER-ONLY, and this module is the only thing that
+   * reads it — `src/lib/env.ts` is never imported from a Client Component, and
+   * the key is never placed on a `NEXT_PUBLIC_` variable, so there is no path
+   * by which it can reach a browser bundle.
+   *
+   * OPTIONAL, deliberately. The AI module is one feature of eleven, and a
+   * deployment that has not bought an Anthropic key must still boot, sign
+   * people in and run maintenance. The route answers a clear "not configured"
+   * instead, and `hasAiKey()` below is what the UI asks before offering the
+   * screen at all.
+   */
+  ANTHROPIC_API_KEY: z.string().min(1).optional(),
+
+  /**
+   * Which model the insight route calls. Overridable per environment so a
+   * staging deploy can point at a cheaper model without a code change, and
+   * bounded to a plausible id shape so a typo fails at boot rather than as a
+   * 404 from the API on somebody's first click.
+   */
+  ANTHROPIC_MODEL: z
+    .string()
+    .min(3)
+    .max(64)
+    .regex(/^[a-z0-9][a-z0-9.-]*$/, "must be a model id, e.g. claude-opus-5")
+    .default("claude-opus-5"),
+
+  // --- Scheduled jobs ------------------------------------------------------
+  /**
+   * The shared secret a scheduler sends to `/api/jobs/*`.
+   *
+   * OPTIONAL in the schema and REQUIRED by the route: a deployment that has not
+   * configured it gets a 503 from the job rather than an open endpoint. Treating
+   * "no secret configured" as "no authentication required" is how an internal
+   * job URL ends up on the public internet.
+   *
+   * Long enough that a brute force is not worth attempting; the route compares
+   * it in constant time regardless.
+   */
+  CRON_SECRET: z.string().min(24).optional(),
+
+  // --- File storage --------------------------------------------------------
+  /**
+   * Where uploads live when no bucket is configured: a directory on the host.
+   *
+   * The DEVELOPMENT default, and the reason it has one is that the alternative
+   * is nobody being able to exercise the upload path without an S3 account.
+   * It is not a production store — a serverless host has no durable disk and a
+   * multi-instance host has a different one per instance — which is why the
+   * pre-launch checklist in `docs/DEPLOYMENT.md` names it.
+   */
+  UPLOAD_DIR: z.string().min(1).default(".uploads"),
+
+  /**
+   * S3-compatible object storage. Present together or not at all.
+   *
+   * `getStorage()` chooses the driver by whether these are set, so there is no
+   * flag to forget: either the bucket and its credentials are configured and
+   * uploads go to it, or they are not and uploads go to disk.
+   */
+  S3_BUCKET: z.string().min(1).optional(),
+  S3_REGION: z.string().min(1).default("me-south-1"),
+  /** For R2, MinIO and anything else that is not AWS itself. */
+  S3_ENDPOINT: z.string().url().optional(),
+  S3_ACCESS_KEY_ID: z.string().min(1).optional(),
+  S3_SECRET_ACCESS_KEY: z.string().min(1).optional(),
+
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 });
 
@@ -67,6 +135,18 @@ export function getServerEnv(): ServerEnv {
 
   cachedEnv = parsed.data;
   return cachedEnv;
+}
+
+/**
+ * Is the AI feature configured at all?
+ *
+ * Asked by the page before it renders the analysis cards, so a deployment with
+ * no key shows an honest "not configured" panel rather than four buttons that
+ * all fail. Returns a BOOLEAN and never the key — a helper that returned the
+ * key would be one import away from a Client Component.
+ */
+export function hasAnthropicKey(): boolean {
+  return getServerEnv().ANTHROPIC_API_KEY !== undefined;
 }
 
 /** Test-only escape hatch so a suite can re-read a mutated `process.env`. */

@@ -77,9 +77,14 @@ describe("canAccessPath", () => {
 });
 
 describe("landingPathForRole", () => {
-  it("sends a client to the portal and everyone else to the shell", () => {
+  it("sends each role to the home that answers its own question", () => {
+    // A client cannot read the operations dashboard at all — it aggregates
+    // preventive maintenance, which a client scope is refused.
     expect(landingPathForRole("CLIENT")).toBe("/app/portal");
-    for (const role of ["ADMIN", "FM_MANAGER", "SUPERVISOR", "TECHNICIAN"] as const) {
+    // A technician signs in on a phone to find out what they are doing.
+    expect(landingPathForRole("TECHNICIAN")).toBe("/app/my-jobs");
+
+    for (const role of ["ADMIN", "FM_MANAGER", "SUPERVISOR"] as const) {
       expect(landingPathForRole(role)).toBe("/app");
     }
   });

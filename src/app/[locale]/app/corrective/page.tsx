@@ -10,6 +10,7 @@ import {
   WORK_ORDER_READERS,
 } from "@/lib/corrective/queries";
 import { listTechnicians } from "@/lib/technicians/queries";
+import { canRaiseApprovals } from "@/lib/approvals/queries";
 import { CorrectiveManager, type PickerOption } from "./corrective-manager";
 
 /**
@@ -49,6 +50,14 @@ export default async function CorrectivePage() {
       canAssign={canAssign}
       canExecute={canExecuteWorkOrders(user.role)}
       canManage={canManageWorkOrders(user.role)}
+      /**
+       * Whether the "send for approval" button appears on a closed ticket.
+       *
+       * `canRaiseApprovals` is the approvals module's own list, imported rather
+       * than restated — a screen that decided for itself who may start a chain
+       * would be a second policy, and the second one is the one that goes stale.
+       */
+      canSubmitForApproval={canRaiseApprovals(user.role)}
       isClientSession={user.role === "CLIENT"}
       assetOptions={pickers.assets}
       technicianOptions={pickers.technicians}

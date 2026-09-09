@@ -3,12 +3,14 @@ import Link from "next/link";
 import { MapPin } from "lucide-react";
 
 import { requireRole } from "@/lib/auth/guard";
+import { loadPortalKpis } from "@/lib/dashboard/queries";
 import { getOwnClient, listLocations } from "@/lib/master-data/queries";
 import { localeHref, type Locale } from "@/lib/i18n/config";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeading } from "../_components/page-heading";
+import { PortalFigures } from "./portal-figures";
 import { StatusBadge } from "../_components/status-badge";
 
 /**
@@ -42,11 +44,25 @@ export default async function PortalPage({
   const tl = await getTranslations("masterData.locations");
   const tc = await getTranslations("masterData.clients");
 
-  const [client, locations] = await Promise.all([
+  const [client, locations, figures] = await Promise.all([
     getOwnClient(),
     // A handful, newest page first. The full list is at /app/locations, which a
     // CLIENT may open — narrowed the same way.
     listLocations({ pageSize: 5 }),
+    /**
+     * The customer's own figures.
+     *
+     * A DIFFERENT function from the staff dashboard's, not the same one with a
+     * flag, and the difference is the guarantee: `loadPortalKpis` reads only
+     * collections a client scope can legally reach. Preventive maintenance is
+     * absent entirely — `ppmSchedulesRepository` refuses a client scope, because
+     * a PPM plan is the provider's internal schedule — so there is no compliance
+     * figure here that could accidentally be widened to the whole organization.
+     *
+     * Every read inside it goes through the DAL, which appends
+     * `clientId: scope.clientId` to the filter last.
+     */
+    loadPortalKpis(),
   ]);
 
   return (
@@ -55,6 +71,8 @@ export default async function PortalPage({
         title={client?.name ?? tp("yourAccount")}
         subtitle={tp("scopeNote")}
       />
+
+      <PortalFigures figures={figures} />
 
       {client && (
         <Card className="mb-6">

@@ -18,7 +18,11 @@ import {
   splitLocale,
   type Locale,
 } from "@/lib/i18n/config";
-import { buildRequestSecurityHeaders } from "@/lib/security/headers";
+import {
+  buildRequestSecurityHeaders,
+  buildStaticContentSecurityPolicy,
+} from "@/lib/security/headers";
+import { PUBLIC_ROUTES } from "@/lib/seo/site";
 
 /**
  * The first gate in front of every request. Three jobs, in this order:
@@ -85,6 +89,19 @@ function redirectToLogin(request: NextRequest, locale: Locale, bare: string): Ne
   return NextResponse.redirect(url);
 }
 
+/**
+ * Is this one of the statically generated marketing pages?
+ *
+ * Compared against the UNPREFIXED path, so `/en/pricing` and `/ar/pricing` are
+ * both the pricing page, and derived from `PUBLIC_ROUTES` — the same list the
+ * sitemap and the marketing navigation read, so a fourth public page cannot be
+ * added and then quietly served a policy that breaks its hydration.
+ */
+function isStaticPublicPath(bare: string): boolean {
+  const normalised = bare === "" ? "/" : bare;
+  return PUBLIC_ROUTES.some((route) => (route === "" ? "/" : route) === normalised);
+}
+
 export default auth((request) => {
   const { nonce, contentSecurityPolicy } = buildRequestSecurityHeaders();
 
@@ -99,8 +116,26 @@ export default auth((request) => {
   requestHeaders.set("content-security-policy", contentSecurityPolicy);
   requestHeaders.set("x-nonce", nonce);
 
+  /**
+   * Which policy this response gets.
+   *
+   * The nonce policy for everything dynamic, and the prerendered variant for
+   * the three marketing pages — computed here rather than at the top because
+   * `finish` is called from several branches and the path is what decides.
+   *
+   * A statically generated page's HTML was written at build time and cannot
+   * carry a nonce minted this morning, so a nonce policy would block Next's own
+   * hydration bootstrap and ship HTML that never comes alive. See
+   * `buildStaticContentSecurityPolicy` for what that variant gives up and why
+   * it is safe on a page with no session and no user data.
+   */
+  const policyFor = (pathname: string): string =>
+    isStaticPublicPath(splitLocale(pathname).pathname)
+      ? buildStaticContentSecurityPolicy()
+      : contentSecurityPolicy;
+
   const finish = (response: NextResponse, locale?: Locale): NextResponse => {
-    response.headers.set("Content-Security-Policy", contentSecurityPolicy);
+    response.headers.set("Content-Security-Policy", policyFor(request.nextUrl.pathname));
     if (locale && request.cookies.get(LOCALE_COOKIE)?.value !== locale) {
       response.cookies.set(LOCALE_COOKIE, locale, {
         path: "/",

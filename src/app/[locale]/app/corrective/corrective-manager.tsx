@@ -20,6 +20,7 @@ import {
   CirclePause,
   CirclePlay,
   Plus,
+  SendHorizontal,
   Trash2,
   Undo2,
   UserPlus,
@@ -46,6 +47,7 @@ import {
 } from "@/lib/corrective/actions";
 import type { ActionResult } from "@/lib/security/action";
 import { cn } from "@/lib/cn";
+import { createApprovalAction } from "@/lib/approvals/actions";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Field } from "@/components/ui/field";
@@ -145,6 +147,7 @@ export function CorrectiveManager({
   canAssign,
   canExecute,
   canManage,
+  canSubmitForApproval,
   isClientSession,
   assetOptions,
   technicianOptions,
@@ -155,6 +158,15 @@ export function CorrectiveManager({
   canAssign: boolean;
   canExecute: boolean;
   canManage: boolean;
+  /**
+   * Whether this session may send a CLOSED ticket up the approval chain.
+   *
+   * Decided on the server from `APPROVAL_REQUESTERS`. Hiding the button hides an
+   * affordance and nothing more — `createApproval` re-checks the role, and reads
+   * the work order back through its OWN scoped repository before it will name a
+   * counterparty.
+   */
+  canSubmitForApproval: boolean;
   isClientSession: boolean;
   /** Empty for a session that cannot raise — the picker is not loaded for them. */
   assetOptions: PickerOption[];
@@ -182,6 +194,7 @@ export function CorrectiveManager({
   const [isAssigning, startAssigning] = useTransition();
   const [isDeleting, startDeleting] = useTransition();
   const [isMoving, startMoving] = useTransition();
+  const [isSendingForApproval, startSendingForApproval] = useTransition();
 
   /**
    * The optimistic layer.
@@ -416,6 +429,37 @@ export function CorrectiveManager({
     <span className={cn("block", row.pending && "opacity-50")}>{node}</span>
   );
 
+  /**
+   * Send a closed ticket up the approval chain.
+   *
+   * The label is composed here, from what is already on screen, because the
+   * queue has to be readable without a cross-collection read per row and this
+   * is the only place that knows a good handle for the job. Everything that
+   * matters — the counterparty, the tenant — is resolved on the SERVER from the
+   * work order itself; the id in this payload is a filter term with
+   * organizationId layered on top, so a ticket outside the caller's scope simply
+   * matches nothing.
+   */
+  function submitForApproval(row: Row) {
+    startSendingForApproval(async () => {
+      const response = await createApprovalAction({
+        refType: "WORK_ORDER",
+        refId: row.id,
+        refLabel: [row.assetName, row.issue].filter(Boolean).join(" · ").slice(0, 120),
+      });
+
+      if (response.ok) {
+        toast({ title: tc("sentForApproval"), variant: "success" });
+        return;
+      }
+
+      toast({
+        title: response.error.fields?.refId ?? response.error.message,
+        variant: "danger",
+      });
+    });
+  }
+
   const columns: TableColumn<Row>[] = [
     {
       key: "issue",
@@ -490,14 +534,34 @@ export function CorrectiveManager({
     cell: (row) => <WorkOrderStatusBadge status={row.status} />,
   });
 
-  if (canAssign || canExecute) {
+  if (canAssign || canExecute || canSubmitForApproval) {
     columns.push({
       key: "move",
       header: <span className="sr-only">{tc("actions")}</span>,
       cell: (row) => {
         const moves = nextStatuses(row.status);
         if (moves.length === 0) {
-          return <span className="text-xs text-muted-foreground">{ts("CLOSED")}</span>;
+          /**
+           * A closed ticket has nowhere left to go operationally — but it is
+           * exactly the thing an approval chain starts from, so this is where
+           * that button belongs rather than in a menu of its own.
+           */
+          if (!canSubmitForApproval) {
+            return <span className="text-xs text-muted-foreground">{ts("CLOSED")}</span>;
+          }
+
+          return (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => submitForApproval(row)}
+              disabled={isSendingForApproval || isPending || row.pending}
+              aria-label={`${tc("sendForApproval")} — ${row.assetName ?? row.issue}`}
+            >
+              <SendHorizontal className="size-4 rtl:rotate-180" aria-hidden />
+              {tc("sendForApproval")}
+            </Button>
+          );
         }
 
         const busy = isMoving || isAssigning || isPending || row.pending;

@@ -37,6 +37,8 @@ export {
   isClientScope,
   describeScope,
   ScopeResolutionError,
+  SYSTEM_ACTOR_ID,
+  systemScopeForOrganization,
   type TenantScope,
 } from "./scope";
 
@@ -83,6 +85,8 @@ export {
 export {
   clientBelongsToOrganization,
   ensureOrganization,
+  listActiveOrganizationIds,
+  MAX_ORGANIZATIONS_PER_JOB,
   findIdentityById,
   findOrganizationBySlug,
   findSignInCandidate,
@@ -149,6 +153,61 @@ export {
   type ContractSummaryTotals,
   type ContractUpdateInput,
 } from "./repositories/contracts";
+
+export {
+  approvalsRepository,
+  countApprovalsByStage,
+  type ApprovalCreateInput,
+  type ApprovalStageCount,
+  type ApprovalUpdateInput,
+} from "./repositories/approvals";
+
+export {
+  assetNamesFor,
+  assetsByCategory,
+  countWorkOrdersByStatus,
+  maintenanceTrend,
+  summariseAssets,
+  ppmByFrequency,
+  summarisePpmCompliance,
+  type AssetCategoryRow,
+  type AssetHealthSummary,
+  type PpmFrequencyRow,
+  type MaintenanceTrendPoint,
+  type PpmComplianceSummary,
+  type WorkOrderStatusCount,
+} from "./repositories/analytics";
+
+export {
+  countUnreadNotifications,
+  listNotificationsFor,
+  notificationsRepository,
+  type NotificationCreateInput,
+  type NotificationUpdateInput,
+} from "./repositories/notifications";
+
+export {
+  attachmentsRepository,
+  listAttachmentsFor,
+  type AttachmentCreateInput,
+  type AttachmentUpdateInput,
+} from "./repositories/attachments";
+
+export {
+  attendanceRepository,
+  findAttendanceForDay,
+  listAttendanceForDay,
+  type AttendanceCreateInput,
+  type AttendanceUpdateInput,
+} from "./repositories/attendance";
+
+export {
+  invoicesRepository,
+  summariseInvoices,
+  type InvoiceCreateInput,
+  type InvoiceSummaryTotals,
+  type InvoiceUpdateInput,
+} from "./repositories/invoices";
 
 export {
   checklistsRepository,
@@ -233,6 +292,43 @@ export {
   type ChecklistDocument,
   type ChecklistItem,
 } from "./models/checklist";
+
+// And again: the stage order, the status and ref-type vocabularies and the
+// stage predicates are domain constants (`src/lib/domain/approvals.ts`) that the
+// pending queue, its filters and its progress indicator import as values, so
+// they are not re-exported here.
+export {
+  approvalHistoryEntrySchema,
+  approvalInputSchema,
+  type ApprovalDocument,
+  type ApprovalHistoryEntry,
+} from "./models/approval";
+
+// And again: the stored and display status vocabularies, the VAT arithmetic and
+// the derived-status functions are domain constants
+// (`src/lib/domain/invoicing.ts`) that the ledger, its filters, its KPI header
+// and its badge import as values, so they are not re-exported here.
+export { invoiceInputSchema, type InvoiceDocument } from "./models/invoice";
+
+// And again: the attendance statuses, the coordinate schema and the shift
+// arithmetic are domain constants (`src/lib/domain/attendance.ts`) that the
+// check-in button and the status pill import as values, so they are not
+// re-exported here.
+export { attendanceInputSchema, type AttendanceDocument } from "./models/attendance";
+
+// And again: the allowed types, the size cap, the sniffer, the filename
+// sanitiser and the EXIF stripper are domain functions
+// (`src/lib/domain/files.ts`) that the upload button and the route both use, so
+// they are not re-exported here.
+export { attachmentInputSchema, type AttachmentDocument } from "./models/attachment";
+
+// And again: the kinds, severities and the dedupe-key builder are domain
+// constants (`src/lib/domain/notifications.ts`) that the bell menu imports as
+// values, so they are not re-exported here.
+export {
+  notificationInputSchema,
+  type NotificationDocument,
+} from "./models/notification";
 
 export {
   checklistRunInputSchema,

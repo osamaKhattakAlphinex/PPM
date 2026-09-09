@@ -1,0 +1,108 @@
+# The gate. Everything that must be true of a commit before it can reach main.
+#
+# Four checks, in the order that fails fastest: types, then lint (which carries
+# the data-isolation boundary rule), then the test suite against a real MongoDB,
+# then a production build. Any one of them failing fails the job, and the branch
+# protection described in docs/DEPLOYMENT.md is what turns that into a block on
+# merging rather than a red mark somebody can ignore.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # So a green result can be re-established by hand after a flaky infrastructure
+  # failure, without pushing an empty commit.
+  workflow_dispatch:
+
+# A second push to the same branch cancels the first: the older run is answering
+# a question nobody is asking any more.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# The workflow reads code and writes nothing.
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Typecheck, lint, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      # A real mongod, so the data-access suites test what MongoDB actually
+      # does rather than what a mock agrees to. `mongodb-memory-server` would
+      # otherwise download its own binary on every run — same result, one more
+      # network dependency, and a minute of latency. See MONGO_TEST_URI in
+      # src/lib/db/__tests__/helpers/memory-mongo.ts.
+      mongodb:
+        image: mongo:8.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # Tests connect here; each vitest worker takes its own database on it.
+      MONGO_TEST_URI: mongodb://127.0.0.1:27017
+
+      # `next build` prerenders the public pages, so the environment has to
+      # parse. These are BUILD values and every one of them is deliberately
+      # inert: a local database that is not used, and a throwaway secret that
+      # signs nothing. No production credential belongs in a CI file — the real
+      # ones live in the host's environment, per docs/DEPLOYMENT.md.
+      MONGODB_URI: mongodb://127.0.0.1:27017
+      MONGODB_DB_NAME: ppm_ci_build
+      AUTH_SECRET: ci-build-only-not-a-real-secret-000000000000
+      NEXT_PUBLIC_SITE_URL: https://ppm.example.com
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          # .nvmrc is the single source of the version, so CI and a developer's
+          # machine cannot drift apart silently.
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        # --frozen-lockfile: CI installs what the lockfile says and fails if the
+        # manifest disagrees. A CI run that quietly resolves a different tree is
+        # not testing the commit.
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint (includes the data-access boundary rule)
+        # --max-warnings 0: the dal-boundary rule reports as an error, but a
+        # warning nobody fails on is a warning nobody reads.
+        run: pnpm lint:dal
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+      # A build artifact must never contain a credential. The check is cheap and
+      # catches the one mistake that is invisible in review: a secret read into
+      # a Client Component, which Next then inlines into the JavaScript it ships
+      # to every visitor.
+      - name: Assert no secret reached the client bundle
+        run: |
+          if grep -rIlE 'sk-ant-|ci-build-only-not-a-real-secret' .next/static; then
+            echo "::error::A secret appears in the client bundle."
+            exit 1
+          fi
+          echo "No secret found in .next/static."

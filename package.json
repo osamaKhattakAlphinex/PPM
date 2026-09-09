@@ -1,6 +1,7 @@
 {
   "name": "ppm-platform",
   "version": "0.1.0",
+  "packageManager": "pnpm@10.33.0",
   "private": true,
   "engines": {
     "node": ">=22"
@@ -14,11 +15,15 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "lint:dal": "eslint \"src/**/*.{ts,tsx}\" --max-warnings 0",
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx scripts/seed.ts",
+    "indexes": "tsx scripts/build-indexes.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.124.0",
+    "@aws-sdk/client-s3": "^3.1128.0",
     "@node-rs/argon2": "^2.1.0",
     "@radix-ui/react-dialog": "^1.1.23",
+    "@react-pdf/renderer": "^4.9.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^13.1.1",
@@ -29,6 +34,7 @@
     "next-intl": "^4.14.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "recharts": "^3.10.1",
     "server-only": "^0.0.1",
     "tailwind-merge": "^3.6.0",
     "zod": "^4.5.1"

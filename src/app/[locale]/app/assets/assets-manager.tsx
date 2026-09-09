@@ -14,8 +14,9 @@ import {
   useTransition,
   type ReactNode,
 } from "react";
-import { useTranslations } from "next-intl";
-import { Boxes, Plus, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
+import { Boxes, Paperclip, Plus, Trash2 } from "lucide-react";
 
 import type { AssetSummary } from "@/lib/assets/dto";
 import {
@@ -39,6 +40,7 @@ import { Modal } from "@/components/ui/modal";
 import { Select } from "@/components/ui/select";
 import { Table, type TableColumn } from "@/components/ui/table";
 import { useToast } from "@/components/ui/toast";
+import { localeHref, type Locale } from "@/lib/i18n/config";
 import { HealthBar } from "../_components/health-bar";
 import { Pagination } from "../_components/pagination";
 import { PageHeading } from "../_components/page-heading";
@@ -90,6 +92,8 @@ export function AssetsManager({
   const t = useTranslations("masterData");
   const ta = useTranslations("masterData.assets");
   const tc = useTranslations("masterData.assets.category");
+  const tf = useTranslations("files");
+  const locale = useLocale() as Locale;
   const { toast } = useToast();
 
   const [result, setResult] = useState(initialPage);
@@ -331,6 +335,32 @@ export function AssetsManager({
       cell: (row) => dim(row, <StatusBadge status={row.status} />),
     },
   ];
+
+  /**
+   * The gallery link, for every reader rather than only for managers.
+   *
+   * A customer looking at their own chiller should be able to see the
+   * photograph of its nameplate; what they cannot do is add to or remove from
+   * it, which is decided on the files page from `UPLOADERS`.
+   *
+   * A `Link`, not a Button: a Button here would be a motion.button that
+   * navigates, losing middle-click, open-in-new-tab and the browser's own
+   * affordances.
+   */
+  columns.push({
+    key: "files",
+    header: <span className="sr-only">{tf("title")}</span>,
+    cell: (row) => (
+      <Link
+        href={localeHref(`/app/assets/${row.id}/files`, locale)}
+        className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        aria-label={`${tf("title")} — ${row.name}`}
+      >
+        <Paperclip className="size-4" aria-hidden />
+        <span className="sr-only md:not-sr-only md:inline">{tf("title")}</span>
+      </Link>
+    ),
+  });
 
   if (canManage) {
     columns.push({

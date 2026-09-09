@@ -174,7 +174,15 @@ export const WorkOrder = defineModel("WorkOrder", workOrderInputSchema, {
     // One person's queue: the technician filter, and the "my jobs" view a
     // mobile app will want. Status second because the useful question is
     // "what is still on Yousef", not "everything he ever touched".
-    { fields: { organizationId: 1, technicianId: 1, status: 1 } },
+    /**
+     * "My jobs" — one technician's open tickets, newest first.
+     *
+     * `createdAt` is on the end because the personal list SORTS by it. Without
+     * it MongoDB matches the first three keys from the index and then sorts the
+     * result in memory, which is fine for one technician's dozen tickets and
+     * not fine for the supervisor screens that share this prefix.
+     */
+    { fields: { organizationId: 1, technicianId: 1, status: 1, createdAt: -1 } },
 
     // Every fault ever raised on one asset — the drill-down from the register,
     // and what an asset-history view and a health score will both read.
@@ -184,5 +192,15 @@ export const WorkOrder = defineModel("WorkOrder", workOrderInputSchema, {
     // a client-scoped session, so for those users this is the index that serves
     // the list and the status filter alike.
     { fields: { organizationId: 1, clientId: 1, status: 1 } },
+
+    /**
+     * The six-month trend, and the AI module's recent-fault window.
+     *
+     * Both are a bare range on `createdAt` with no status or priority term, so
+     * none of the compounds above can serve them — the leading equality key is
+     * missing and the index degenerates to a scan of the tenant's whole ticket
+     * history. Added during the performance pass in `docs/PERFORMANCE.md`.
+     */
+    { fields: { organizationId: 1, createdAt: -1 } },
   ],
 });
