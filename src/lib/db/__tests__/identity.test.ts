@@ -6,8 +6,10 @@ import { resetServerEnvCache } from "../../env";
 import { connectToDatabase, disconnectFromDatabase } from "../connect";
 import {
   clientBelongsToOrganization,
+  completeInvitation,
   ensureOrganization,
   findIdentityById,
+  findInvitedAccount,
   findOrganizationBySlug,
   findSignInCandidate,
   recordSuccessfulLogin,
@@ -19,6 +21,7 @@ import { User } from "../models/user";
 import { clientsRepository } from "../repositories/clients";
 import { usersRepository } from "../repositories/users";
 import { ScopeResolutionError } from "../scope";
+import { hashInviteToken, issueInvitation } from "../../signup/tokens";
 import { clearCollections } from "./helpers/memory-mongo";
 
 /**
@@ -456,5 +459,83 @@ describe("sign-in bookkeeping", () => {
   it("ignores a malformed id instead of throwing", async () => {
     await expect(recordSuccessfulLogin("not-an-id")).resolves.toBeUndefined();
     await expect(updatePasswordHash("not-an-id", HASH)).resolves.toBeUndefined();
+  });
+});
+
+/**
+ * Redeeming an invitation, against a real mongod.
+ *
+ * This is the one flow in the product that writes a password without a
+ * session, so it gets an end-to-end test rather than a schema one: issue,
+ * look up by digest, complete, sign in with what was just set.
+ *
+ * The expiry case is the regression. `completeInvitation` compares
+ * `inviteExpiresAt` with `$gt`, and `sanitizeFilter` is on process-wide — so
+ * an unmarked operator is rewritten into an `$eq` on the literal object and
+ * the update throws a CastError against a Date path before it reaches
+ * MongoDB. Every invited user was left INVITED with no password, which is
+ * invisible in a mocked test and total in a real one.
+ */
+describe("redeeming an invitation", () => {
+  async function invite(status: "INVITED" | "SUSPENDED" = "INVITED") {
+    const { scope } = await seedTenant("alpha");
+    const user = await usersRepository
+      .forScope(scope)
+      .create({ name: "Sami", email: "sami@ppm.local", passwordHash: HASH, role: "TECHNICIAN", status });
+
+    const invitation = issueInvitation();
+    await usersRepository.forScope(scope).update(user._id, {
+      inviteTokenHash: invitation.tokenHash,
+      inviteExpiresAt: invitation.expiresAt,
+    });
+
+    return { scope, user, invitation };
+  }
+
+  it("sets the password, activates the account, and burns the token", async () => {
+    const { invitation } = await invite();
+
+    expect(await findInvitedAccount(invitation.tokenHash)).toMatchObject({
+      name: "Sami",
+      email: "sami@ppm.local",
+    });
+
+    expect(await completeInvitation(invitation.tokenHash, `${HASH}-chosen`)).toBe(true);
+
+    const candidate = await findSignInCandidate("sami@ppm.local");
+    expect(candidate?.status).toBe("ACTIVE");
+    expect(candidate?.passwordHash).toBe(`${HASH}-chosen`);
+
+    // The token is gone, so the link cannot set a password a second time.
+    expect(await findInvitedAccount(invitation.tokenHash)).toBeNull();
+    expect(await completeInvitation(invitation.tokenHash, `${HASH}-again`)).toBe(false);
+  });
+
+  it("refuses an expired invitation without throwing", async () => {
+    const { scope, user, invitation } = await invite();
+    await usersRepository
+      .forScope(scope)
+      .update(user._id, { inviteExpiresAt: new Date(Date.now() - 1_000) });
+
+    expect(await completeInvitation(invitation.tokenHash, `${HASH}-chosen`)).toBe(false);
+    expect(await findInvitedAccount(invitation.tokenHash)).toBeNull();
+
+    // Still unusable, rather than half-redeemed.
+    const candidate = await findSignInCandidate("sami@ppm.local");
+    expect(candidate?.status).toBe("INVITED");
+    expect(candidate?.passwordHash).toBe(HASH);
+  });
+
+  it("hides a suspended account behind the same null as an unknown token", async () => {
+    const { invitation } = await invite("SUSPENDED");
+    expect(await findInvitedAccount(invitation.tokenHash)).toBeNull();
+  });
+
+  it("returns nothing for a token of the wrong shape or an unknown one", async () => {
+    await invite();
+
+    expect(await findInvitedAccount("not-a-digest")).toBeNull();
+    expect(await findInvitedAccount(hashInviteToken("never issued"))).toBeNull();
+    expect(await completeInvitation("not-a-digest", HASH)).toBe(false);
   });
 });

@@ -1,4 +1,4 @@
-import type { Types } from "mongoose";
+import mongoose, { type Types } from "mongoose";
 import { z } from "zod";
 
 import type { Role } from "../auth/roles";
@@ -512,6 +512,14 @@ export async function findInvitedAccount(
  * two people racing the same link cannot both succeed — the second update
  * matches nothing, because the first already cleared the field. Checking first
  * and writing second would let both through.
+ *
+ * The expiry comparison has to be marked `mongoose.trusted`. `sanitizeFilter`
+ * is on process-wide, so Mongoose rewrites ANY filter value carrying a `$` key
+ * into an `$eq` on that literal object — including the ones we wrote — and
+ * casting `{ $eq: { $gt: Date } }` against a Date path throws a CastError
+ * before the update reaches MongoDB. Every other operator in the product is
+ * marked by the repository's `markTrusted`; this module queries the model
+ * directly, so it has to do it itself.
  */
 export async function completeInvitation(
   tokenHash: string,
@@ -529,7 +537,7 @@ export async function completeInvitation(
     {
       inviteTokenHash: parsed.data,
       deletedAt: null,
-      inviteExpiresAt: { $gt: new Date() },
+      inviteExpiresAt: mongoose.trusted({ $gt: new Date() }),
     },
     {
       $set: { passwordHash, status: "ACTIVE" },
