@@ -52,3 +52,16 @@ export const setUserStatusSchema = z.strictObject({
 });
 
 export type SetUserStatusInput = z.input<typeof setUserStatusSchema>;
+
+/**
+ * Issue (or re-issue) an invitation link for one account.
+ *
+ * Only an id. The token is minted on the server — a payload that could supply
+ * one would let a caller choose a value they already know, which is the whole
+ * scheme inverted.
+ */
+export const inviteUserSchema = z.strictObject({
+  id: objectIdString,
+});
+
+export type InviteUserInput = z.input<typeof inviteUserSchema>;

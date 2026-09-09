@@ -47,6 +47,26 @@ export const userInputSchema = entity({
   status: userStatusSchema.default("INVITED"),
 
   lastLoginAt: z.date().nullable().optional(),
+
+  /**
+   * A SHA-256 digest of the outstanding invitation token, or null.
+   *
+   * The token itself is never stored. It is generated once, shown to the
+   * administrator once, and thereafter exists only in whatever they pasted it
+   * into — so a dump of this collection contains nothing anyone can redeem.
+   * SHA-256 rather than argon2 on purpose: the input is 32 bytes of CSPRNG
+   * output, which has nothing to brute-force, and this digest is looked up on
+   * every invitation page load.
+   *
+   * `select: false`, like `passwordHash`, so a forgotten projection cannot put
+   * it in a response.
+   */
+  inviteTokenHash: mongo(z.string().length(64).nullable().optional(), {
+    select: false,
+  }),
+
+  /** When the outstanding invitation stops being redeemable. */
+  inviteExpiresAt: z.date().nullable().optional(),
 });
 
 export type UserInput = z.input<typeof userInputSchema>;
@@ -63,6 +83,19 @@ export const User = defineModel("User", userInputSchema, {
     {
       fields: { email: 1 },
       options: { unique: true, partialFilterExpression: { deletedAt: null } },
+    },
+    /**
+     * The invitation lookup, which happens BEFORE there is a session and so
+     * cannot lead with the tenant — the token is what resolves it. Partial, so
+     * only the handful of accounts with a live invitation are in the index,
+     * and unique, so two invitations can never collide onto one digest.
+     */
+    {
+      fields: { inviteTokenHash: 1 },
+      options: {
+        unique: true,
+        partialFilterExpression: { inviteTokenHash: { $type: "string" } },
+      },
     },
     // Tenant-first, as every index on a tenant-scoped collection must be.
     { fields: { organizationId: 1, status: 1, role: 1 } },

@@ -15,7 +15,7 @@ fastest:
 |---|---|---|
 | Typecheck | `pnpm typecheck` | `tsc --noEmit` over the whole tree. No `any`, no unchecked property access. |
 | Lint | `pnpm lint:dal` | ESLint with `--max-warnings 0`, which includes the **data-access boundary rule** — a direct `Model.find(...)` or a `mongoose` import outside `src/lib/db` fails the build. |
-| Test | `pnpm test` | All 52 suites, including the cross-module isolation sweep and the source audit described in `docs/SECURITY.md`. |
+| Test | `pnpm test` | All 54 suites, including the cross-module isolation sweep and the source audit described in `docs/SECURITY.md`. |
 | Build | `pnpm build` | A real production build, which is also the only thing that proves the public pages still prerender. |
 
 Plus one assertion that only a built artifact can make: **no secret in the
@@ -139,8 +139,9 @@ host the default is fine.
 
 ## 4. Hosting
 
-The build is `output: "standalone"`, so both paths below work from the same
-artifact.
+Both paths below build from the same source. A container build additionally
+sets `NEXT_OUTPUT=standalone`, which produces a self-contained server bundle;
+without it the build is an ordinary one that `pnpm start` can serve.
 
 ### Vercel
 
@@ -160,15 +161,23 @@ Two Vercel-specific notes:
 
 ```bash
 pnpm install --frozen-lockfile
-pnpm build
+NEXT_OUTPUT=standalone pnpm build
 
-# `next build --output standalone` does not copy these two — they are served
-# straight from disk and would otherwise 404.
+# The standalone build does not copy these two — they are served straight from
+# disk and would otherwise 404.
 cp -r public .next/standalone/public
 cp -r .next/static .next/standalone/.next/static
 
 NODE_ENV=production node .next/standalone/server.js   # listens on PORT, default 3000
 ```
+
+Without `NEXT_OUTPUT=standalone` the same build is served with `pnpm start`,
+which is what a developer runs locally. `next start` refuses to serve a
+standalone build, which is why the flag is opt-in rather than always on.
+
+Set `AUTH_TRUST_HOST=true` when the app sits behind a proxy on a host Auth.js
+cannot infer — otherwise every `/api/auth/*` request answers "Host must be
+trusted".
 
 Run it behind a TLS-terminating reverse proxy. The proxy must forward
 `X-Forwarded-Proto` and `X-Forwarded-For`: the first is how the app knows to
@@ -222,6 +231,11 @@ and most are one command.
       overdue-PPM notice is ever raised.
 - [ ] `NEXT_PUBLIC_SITE_URL` is the production origin, not a preview URL.
 - [ ] `MONGODB_AUTO_INDEX=false`.
+- [ ] **Decide about `SIGNUP_ENABLED`.** It defaults to **true**, so anybody can
+      register a company from the public site. That endpoint can only ever
+      create a new empty tenant — it cannot reach an existing one — but if this
+      deployment provisions its customers by hand, set it to `false` and confirm
+      the sign-up page shows the closed notice.
 - [ ] `S3_*` configured, and the bucket is **private** — files are served only
       through the authenticated, scoped `/api/files/[id]` route, never by URL.
       Confirm by requesting an object URL directly and getting a 403.
@@ -239,6 +253,9 @@ and most are one command.
       returns nothing.
 - [ ] The first real ADMIN was created deliberately, with a password only that
       person knows.
+- [ ] Colleagues were added with **invitation links**, not with passwords typed
+      by an administrator — a password known to two people is not a password.
+      Confirm no account still shows as INVITED with a live link nobody used.
 
 ### Database
 

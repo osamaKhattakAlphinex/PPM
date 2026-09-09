@@ -9,10 +9,14 @@ import {
   useTransition,
 } from "react";
 import { useFormatter, useTranslations } from "next-intl";
-import { Plus, ShieldCheck, ShieldOff, UserPlus } from "lucide-react";
+import { Link2, Plus, ShieldCheck, ShieldOff, UserPlus } from "lucide-react";
 
 import { registerAction, type RegisteredUser } from "@/lib/auth/actions";
-import { setUserStatusAction, listUsersAction } from "@/lib/admin/actions";
+import {
+  inviteUserAction,
+  listUsersAction,
+  setUserStatusAction,
+} from "@/lib/admin/actions";
 import type { ClientOption } from "@/lib/admin/queries";
 import type { UserSummary } from "@/lib/admin/dto";
 import type { ActionResult } from "@/lib/security/action";
@@ -88,6 +92,18 @@ export function UsersManager({
   const [formRole, setFormRole] = useState<string>(assignableRoles[0] ?? "");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [, startStatusChange] = useTransition();
+
+  /**
+   * The invitation link, held only in this component's state and only until the
+   * dialog is closed. It is shown ONCE — the server keeps a digest, not the
+   * token — so re-opening the dialog cannot show it again, and the button says
+   * so by offering to issue a new one rather than to "view" the old.
+   */
+  const [invite, setInvite] = useState<{ name: string; url: string } | null>(
+    null,
+  );
+  const [copied, setCopied] = useState(false);
+  const [, startInvite] = useTransition();
 
   const load = useCallback(
     (
@@ -168,6 +184,42 @@ export function UsersManager({
     });
   }
 
+  function sendInvite(user: UserSummary) {
+    setBusyId(user.id);
+    startInvite(async () => {
+      const response = await inviteUserAction({ id: user.id });
+      setBusyId(null);
+
+      if (!response.ok) {
+        toast({ title: response.error.message, variant: "danger" });
+        return;
+      }
+
+      // The action returns a PATH; the origin is this browser's own. Building
+      // it server-side would mean trusting a host header, which is how a link
+      // ends up pointing somewhere else with a real token on the end.
+      setCopied(false);
+      setInvite({
+        name: user.name,
+        url: `${window.location.origin}${response.data.path}`,
+      });
+      load(result.page);
+    });
+  }
+
+  async function copyInvite() {
+    if (!invite) return;
+    try {
+      await navigator.clipboard.writeText(invite.url);
+      setCopied(true);
+    } catch {
+      // Clipboard access can be refused (an insecure origin, a browser
+      // policy). The link is on screen and selectable either way, so this is a
+      // missing convenience rather than a failure worth a toast.
+      setCopied(false);
+    }
+  }
+
   const columns: TableColumn<UserSummary>[] = [
     {
       key: "name",
@@ -229,26 +281,48 @@ export function UsersManager({
 
         const busy = busyId === user.id;
 
-        return user.status === "SUSPENDED" || user.status === "INVITED" ? (
-          <Button
-            size="sm"
-            variant="outline"
-            isLoading={busy}
-            onClick={() => changeStatus(user, "ACTIVE")}
-          >
-            <ShieldCheck className="size-4" aria-hidden />
-            {t("activate")}
-          </Button>
-        ) : (
-          <Button
-            size="sm"
-            variant="outline"
-            isLoading={busy}
-            onClick={() => changeStatus(user, "SUSPENDED")}
-          >
-            <ShieldOff className="size-4" aria-hidden />
-            {t("suspend")}
-          </Button>
+        return (
+          <div className="flex justify-end gap-2">
+            {/*
+              Only for an account that has not signed in yet. Once somebody is
+              ACTIVE they have a password of their own, and handing an
+              administrator a link that silently replaces it is a
+              password-reset feature wearing an invitation's clothes.
+            */}
+            {user.status === "INVITED" ? (
+              <Button
+                size="sm"
+                variant="ghost"
+                isLoading={busy}
+                onClick={() => sendInvite(user)}
+              >
+                <Link2 className="size-4" aria-hidden />
+                {t("invite")}
+              </Button>
+            ) : null}
+
+            {user.status === "SUSPENDED" || user.status === "INVITED" ? (
+              <Button
+                size="sm"
+                variant="outline"
+                isLoading={busy}
+                onClick={() => changeStatus(user, "ACTIVE")}
+              >
+                <ShieldCheck className="size-4" aria-hidden />
+                {t("activate")}
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                variant="outline"
+                isLoading={busy}
+                onClick={() => changeStatus(user, "SUSPENDED")}
+              >
+                <ShieldOff className="size-4" aria-hidden />
+                {t("suspend")}
+              </Button>
+            )}
+          </div>
         );
       },
     },
@@ -343,6 +417,50 @@ export function UsersManager({
         isPending={isPending}
         onChange={(page) => load(page)}
       />
+
+      {/*
+        Shown once. The server stores a digest, not the token, so there is no
+        way to display this link a second time — closing the dialog is the only
+        chance to copy it, and the copy is why the dialog exists at all.
+      */}
+      <Modal
+        open={invite !== null}
+        onOpenChange={(open) => {
+          if (!open) setInvite(null);
+        }}
+        title={t("inviteLink.title")}
+        description={
+          invite
+            ? t("inviteLink.description", { name: invite.name })
+            : undefined
+        }
+        icon={<Link2 className="size-4" aria-hidden />}
+        size="md"
+      >
+        {invite ? (
+          <div className="grid gap-4">
+            <p
+              className="break-all rounded-md border border-border bg-surface-sunken px-3 py-2.5 font-mono text-xs text-foreground"
+              dir="ltr"
+            >
+              {invite.url}
+            </p>
+
+            <p className="text-sm text-muted-foreground">
+              {t("inviteLink.note")}
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setInvite(null)}>
+                {t("inviteLink.close")}
+              </Button>
+              <Button onClick={copyInvite}>
+                {copied ? t("inviteLink.copied") : t("inviteLink.copy")}
+              </Button>
+            </div>
+          </div>
+        ) : null}
+      </Modal>
 
       <Modal
         open={formOpen}

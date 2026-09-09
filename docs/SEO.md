@@ -7,10 +7,21 @@ do, why, and the measured result.
 
 ## The surface
 
-Three pages, in two languages, at `/{locale}`, `/{locale}/pricing` and
-`/{locale}/contact`. They live in the `(public)` route group, which adds no path
-segment and exists to carry one thing the rest of the tree must not have:
-`robots: { index: true }`.
+Four prerendered pages, in two languages, at `/{locale}`, `/{locale}/pricing`,
+`/{locale}/contact` and `/{locale}/scenarios`. They live in the `(public)` route
+group, which adds no path segment and exists to carry one thing the rest of the
+tree must not have: `robots: { index: true }`.
+
+A fifth public page, `/{locale}/signup`, is indexable but **not** prerendered —
+it reads the sign-up switch and posts a form, so it renders per request. That is
+why it lives in `DYNAMIC_PUBLIC_ROUTES` rather than `PUBLIC_ROUTES`: the latter
+also decides which paths get the nonce-free static CSP, and handing that policy
+to a page with a form would break the form. The two lists are asserted disjoint
+in `src/lib/seo/__tests__/site.test.ts`.
+
+`/{locale}/invite/[token]` is public in the sense that anyone holding the link
+can open it, and is deliberately in neither list: its URL *contains* the secret,
+so it is `noindex, nofollow, noarchive` and never appears in the sitemap.
 
 That override is deliberately narrow, and there are two statements in opposite
 directions so a mistake in either place is caught by the other:

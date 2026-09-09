@@ -14,12 +14,17 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
 
   /**
-   * A self-contained server bundle in `.next/standalone`, for the Node-host
-   * deployment described in `docs/DEPLOYMENT.md`. Vercel ignores it, so it
-   * costs nothing to leave on; a container that would otherwise ship the whole
-   * `node_modules` tree gets a fraction of it.
+   * A self-contained server bundle in `.next/standalone`, for the container
+   * deployment described in `docs/DEPLOYMENT.md`.
+   *
+   * OPT-IN rather than always on, because `next start` refuses to serve a
+   * standalone build — it prints a warning and the app is then only runnable
+   * through `node .next/standalone/server.js`. Breaking the stock `pnpm start`
+   * for every developer, and for the Lighthouse run in `docs/SEO.md`, is a poor
+   * trade for a smaller image nobody asked for on that machine. A container
+   * build sets `NEXT_OUTPUT=standalone` and gets it.
    */
-  output: "standalone",
+  output: process.env.NEXT_OUTPUT === "standalone" ? "standalone" : undefined,
 
   /**
    * `@node-rs/argon2` is a native addon (a `.node` binary). Bundling it breaks

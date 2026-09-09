@@ -41,7 +41,11 @@ import { toObjectId } from "./object-id";
  * Declared here rather than imported from `src/lib/auth/schemas.ts` to keep the
  * dependency arrow pointing one way: auth may depend on db, never the reverse.
  */
-const emailLookupSchema = z.string().trim().toLowerCase().pipe(z.email().max(254));
+const emailLookupSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .pipe(z.email().max(254));
 
 export type OrganizationStatus = "ACTIVE" | "SUSPENDED";
 
@@ -92,7 +96,10 @@ interface OrganizationRow {
 async function organizationStatusOf(
   organizationId: Types.ObjectId,
 ): Promise<OrganizationStatus | null> {
-  const organization = await Organization.findOne({ _id: organizationId }, { status: 1 })
+  const organization = await Organization.findOne(
+    { _id: organizationId },
+    { status: 1 },
+  )
     .lean<{ status: OrganizationStatus } | null>()
     .exec();
   return organization?.status ?? null;
@@ -106,7 +113,9 @@ async function organizationStatusOf(
  * different amount of time for a suspended account than for one that does not
  * exist — a free user-enumeration oracle.
  */
-export async function findSignInCandidate(email: unknown): Promise<SignInCandidate | null> {
+export async function findSignInCandidate(
+  email: unknown,
+): Promise<SignInCandidate | null> {
   const parsed = emailLookupSchema.safeParse(email);
   if (!parsed.success) return null;
 
@@ -147,7 +156,9 @@ export async function findSignInCandidate(email: unknown): Promise<SignInCandida
  * effect only at the next sign-in: the JWT callback calls it periodically and
  * drops the session when the answer no longer matches the token.
  */
-export async function findIdentityById(userId: unknown): Promise<IdentitySnapshot | null> {
+export async function findIdentityById(
+  userId: unknown,
+): Promise<IdentitySnapshot | null> {
   const _id = toObjectId(userId);
   if (!_id) return null;
 
@@ -200,7 +211,10 @@ export async function recordSuccessfulLogin(userId: unknown): Promise<void> {
  * session (and therefore a scope) exists; the id comes from the row that was
  * just authenticated, never from a caller.
  */
-export async function updatePasswordHash(userId: unknown, passwordHash: string): Promise<void> {
+export async function updatePasswordHash(
+  userId: unknown,
+  passwordHash: string,
+): Promise<void> {
   const _id = toObjectId(userId);
   if (!_id || !passwordHash) return;
 
@@ -224,10 +238,17 @@ export interface OrganizationRecord {
 }
 
 function toOrganizationRecord(row: OrganizationRow): OrganizationRecord {
-  return { id: row._id.toHexString(), name: row.name, slug: row.slug, status: row.status };
+  return {
+    id: row._id.toHexString(),
+    name: row.name,
+    slug: row.slug,
+    status: row.status,
+  };
 }
 
-export async function findOrganizationBySlug(slug: unknown): Promise<OrganizationRecord | null> {
+export async function findOrganizationBySlug(
+  slug: unknown,
+): Promise<OrganizationRecord | null> {
   const parsed = z.string().min(2).max(64).safeParse(slug);
   if (!parsed.success) return null;
 
@@ -248,7 +269,9 @@ export async function findOrganizationBySlug(slug: unknown): Promise<Organizatio
  * one. Idempotent, so the seed can be re-run; provisioning a real tenant should
  * check `findOrganizationBySlug` first and report the conflict instead.
  */
-export async function ensureOrganization(input: OrganizationInput): Promise<OrganizationRecord> {
+export async function ensureOrganization(
+  input: OrganizationInput,
+): Promise<OrganizationRecord> {
   await connectToDatabase();
 
   const existing = await findOrganizationBySlug(input.slug);
@@ -319,4 +342,200 @@ export async function listActiveOrganizationIds(): Promise<Types.ObjectId[]> {
     .exec();
 
   return rows.map((row) => row._id);
+}
+
+/**
+ * Provision a brand-new tenant and its first administrator, atomically enough.
+ *
+ * This is the second thing in the product that legitimately runs without a
+ * tenant scope, for the same reason sign-in does: there is no organization yet,
+ * and creating one IS the job. It is deliberately the ONLY way a tenant comes
+ * into existence from outside, and it lives here so the exemption stays in the
+ * one module the DAL-boundary rule already watches.
+ *
+ * What it does NOT do is touch anything that exists. It reads two uniqueness
+ * constraints and writes two brand-new rows; there is no path through it that
+ * can read, modify or even name a row belonging to an existing tenant. That
+ * property is what makes a public endpoint on top of it defensible at all.
+ *
+ * Both conflicts are reported as a single neutral outcome rather than as "that
+ * email is taken" or "that company exists": email is unique system-wide, so a
+ * specific answer would turn this into an oracle for who already uses the
+ * product.
+ *
+ * There is no multi-document transaction. A replica set would allow one and a
+ * standalone mongod would not, so instead the order is chosen to fail safe: the
+ * organization is written first, and if the user then collides on email the
+ * organization is removed again. The worst outcome of a crash in between is an
+ * empty organization nobody can sign in to, which is inert — the opposite order
+ * could leave a user with no tenant, which is an account that fails scope
+ * resolution on every request.
+ */
+export type ProvisionTenantOutcome =
+  | { ok: true; organizationId: string; userId: string }
+  | { ok: false; reason: "TAKEN" };
+
+export async function provisionTenant(input: {
+  organizationName: string;
+  slug: string;
+  name: string;
+  email: unknown;
+  passwordHash: string;
+  defaultLocale: "en" | "ar";
+}): Promise<ProvisionTenantOutcome> {
+  const email = emailLookupSchema.safeParse(input.email);
+  if (!email.success) return { ok: false, reason: "TAKEN" };
+
+  await connectToDatabase();
+
+  // Checked before writing so the common case gives a clean answer; the unique
+  // indexes below are what actually guarantee it under a race.
+  const [existingUser, existingOrganization] = await Promise.all([
+    User.findOne({ email: email.data, deletedAt: null }, { _id: 1 })
+      .lean()
+      .exec(),
+    Organization.findOne({ slug: input.slug }, { _id: 1 }).lean().exec(),
+  ]);
+
+  if (existingUser || existingOrganization)
+    return { ok: false, reason: "TAKEN" };
+
+  const organization = new Organization({
+    name: input.organizationName,
+    slug: input.slug,
+    status: "ACTIVE",
+    defaultLocale: input.defaultLocale,
+  });
+  await organization.save();
+
+  try {
+    const user = new User({
+      organizationId: organization._id,
+      name: input.name,
+      email: email.data,
+      passwordHash: input.passwordHash,
+      role: "ADMIN",
+      clientId: null,
+      /**
+       * ACTIVE, not INVITED. Every other account is activated by an
+       * administrator — but this IS the administrator, and there is nobody
+       * above them to do it. The account they just proved they control is the
+       * account they get.
+       */
+      status: "ACTIVE",
+    });
+    await user.save();
+
+    return {
+      ok: true,
+      organizationId: organization._id.toHexString(),
+      userId: user._id.toHexString(),
+    };
+  } catch (error) {
+    // A unique-index collision on email, almost certainly, from a request that
+    // raced past the check above. Roll the organization back so a retry is
+    // clean, and answer exactly as the checked path does.
+    await Organization.deleteOne({ _id: organization._id }).exec();
+    console.warn("[identity] tenant provisioning rolled back", error);
+    return { ok: false, reason: "TAKEN" };
+  }
+}
+
+/**
+ * Redeem an invitation: find the account holding this token digest.
+ *
+ * Unscoped for the same reason as sign-in — the person following the link has
+ * no session, and the token is what resolves the tenant. The lookup is by
+ * DIGEST, so the raw token is never compared against anything stored, and a
+ * caller supplies a value rather than a filter.
+ *
+ * Expiry is checked here rather than by the caller: an expired invitation and a
+ * forged one must be indistinguishable, and the only way to be sure of that is
+ * for both to leave through the same `return null`.
+ */
+export interface InvitedAccount {
+  id: string;
+  name: string;
+  email: string;
+  organizationId: string;
+}
+
+export async function findInvitedAccount(
+  tokenHash: string,
+): Promise<InvitedAccount | null> {
+  const parsed = z
+    .string()
+    .regex(/^[0-9a-f]{64}$/)
+    .safeParse(tokenHash);
+  if (!parsed.success) return null;
+
+  await connectToDatabase();
+
+  const row = await User.findOne(
+    {
+      inviteTokenHash: parsed.data,
+      deletedAt: null,
+    },
+    { name: 1, email: 1, organizationId: 1, inviteExpiresAt: 1, status: 1 },
+  )
+    .lean<{
+      _id: Types.ObjectId;
+      name: string;
+      email: string;
+      organizationId: Types.ObjectId;
+      inviteExpiresAt?: Date | null;
+      status: UserStatus;
+    } | null>()
+    .exec();
+
+  if (!row) return null;
+
+  // Expired, or a suspended account somebody is trying to revive through an
+  // old link. Both leave the same way an unknown token does.
+  if (!row.inviteExpiresAt || row.inviteExpiresAt.getTime() < Date.now())
+    return null;
+  if (row.status === "SUSPENDED") return null;
+
+  return {
+    id: row._id.toHexString(),
+    name: row.name,
+    email: row.email,
+    organizationId: row.organizationId.toHexString(),
+  };
+}
+
+/**
+ * Complete an invitation: set the password, activate the account, and burn the
+ * token in ONE conditional update.
+ *
+ * The condition is the point. Matching on the digest inside the update means
+ * two people racing the same link cannot both succeed — the second update
+ * matches nothing, because the first already cleared the field. Checking first
+ * and writing second would let both through.
+ */
+export async function completeInvitation(
+  tokenHash: string,
+  passwordHash: string,
+): Promise<boolean> {
+  const parsed = z
+    .string()
+    .regex(/^[0-9a-f]{64}$/)
+    .safeParse(tokenHash);
+  if (!parsed.success) return false;
+
+  await connectToDatabase();
+
+  const result = await User.updateOne(
+    {
+      inviteTokenHash: parsed.data,
+      deletedAt: null,
+      inviteExpiresAt: { $gt: new Date() },
+    },
+    {
+      $set: { passwordHash, status: "ACTIVE" },
+      $unset: { inviteTokenHash: "", inviteExpiresAt: "" },
+    },
+  ).exec();
+
+  return result.modifiedCount === 1;
 }

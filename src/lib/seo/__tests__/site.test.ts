@@ -7,6 +7,7 @@ import sitemap from "@/app/sitemap";
 import {
   absoluteUrl,
   alternatesFor,
+  DYNAMIC_PUBLIC_ROUTES,
   organizationJsonLd,
   PUBLIC_ROUTES,
   SITE_ORIGIN,
@@ -34,13 +35,39 @@ import {
 describe("the sitemap", () => {
   const entries = sitemap();
 
+  const allRoutes = [...PUBLIC_ROUTES, ...DYNAMIC_PUBLIC_ROUTES];
+
   it("lists every public route in every locale, and nothing else", () => {
-    expect(entries).toHaveLength(PUBLIC_ROUTES.length * LOCALES.length);
+    expect(entries).toHaveLength(allRoutes.length * LOCALES.length);
 
     for (const locale of LOCALES) {
-      for (const route of PUBLIC_ROUTES) {
-        expect(entries.some((entry) => entry.url === absoluteUrl(route, locale))).toBe(true);
+      for (const route of allRoutes) {
+        expect(
+          entries.some((entry) => entry.url === absoluteUrl(route, locale)),
+        ).toBe(true);
       }
+    }
+  });
+
+  /**
+   * Sign-up is public and indexable but renders per request, so it lives in
+   * its own list — `PUBLIC_ROUTES` also decides which paths get the nonce-free
+   * static CSP, and handing that policy to a page with a form would break the
+   * form. The lists must therefore stay disjoint.
+   */
+  it("keeps the prerendered and per-request lists disjoint", () => {
+    for (const route of DYNAMIC_PUBLIC_ROUTES) {
+      expect(PUBLIC_ROUTES).not.toContain(route);
+    }
+  });
+
+  /**
+   * The invitation page is public in the sense that anyone holding the link can
+   * open it — and its URL CONTAINS the token, so it must never be advertised.
+   */
+  it("never lists the invitation page", () => {
+    for (const entry of entries) {
+      expect(entry.url).not.toContain("/invite");
     }
   });
 
@@ -57,7 +84,10 @@ describe("the sitemap", () => {
     for (const entry of entries) {
       const languages = entry.alternates?.languages ?? {};
       for (const locale of LOCALES) {
-        expect(languages[locale], `${entry.url} is missing ${locale}`).toBeDefined();
+        expect(
+          languages[locale],
+          `${entry.url} is missing ${locale}`,
+        ).toBeDefined();
       }
     }
   });
@@ -107,7 +137,9 @@ describe("alternatesFor", () => {
    * for a Gulf audience is not predictable.
    */
   it("names English as x-default", () => {
-    expect(alternatesFor("", "ar").languages["x-default"]).toBe(`${SITE_ORIGIN}/en`);
+    expect(alternatesFor("", "ar").languages["x-default"]).toBe(
+      `${SITE_ORIGIN}/en`,
+    );
   });
 });
 
