@@ -159,6 +159,18 @@ export {
 } from "./repositories/approvals";
 
 export {
+  assetNamesFor,
+  countWorkOrdersByStatus,
+  maintenanceTrend,
+  summariseAssets,
+  summarisePpmCompliance,
+  type AssetHealthSummary,
+  type MaintenanceTrendPoint,
+  type PpmComplianceSummary,
+  type WorkOrderStatusCount,
+} from "./repositories/analytics";
+
+export {
   invoicesRepository,
   summariseInvoices,
   type InvoiceCreateInput,

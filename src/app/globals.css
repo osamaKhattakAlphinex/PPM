@@ -139,6 +139,42 @@
   --warning-hover: var(--accent-hover);
   --ring: #bd8a32;
 
+  /* ---- Chart tokens ----------------------------------------------------
+   * Chart colour is a separate decision from UI colour, so it gets its own
+   * tokens rather than borrowing `--primary` and `--danger`. Two things follow
+   * from that which the UI palette does not have to satisfy:
+   *
+   *  - Every categorical pair below was checked with a colour-vision
+   *    simulation (OKLab ΔE ≥ 8 under protanopia, deuteranopia and
+   *    tritanopia), a chroma floor so nothing reads as grey, and ≥ 3:1
+   *    against the surface it is drawn on. The two-series pair passes all
+   *    five checks in BOTH themes, which is why the light and dark values are
+   *    different colours rather than the same hex on two backgrounds.
+   *  - The work-status ramp is SEQUENTIAL, not categorical: the five statuses
+   *    are an ordered progression (open → assigned → in progress → pending →
+   *    closed), so they take one hue from light to dark rather than five
+   *    competing hues. Five categorical hues could not have passed the checks
+   *    out of this palette's ramps anyway, and pretending an ordered series is
+   *    an unordered one is what makes a status donut unreadable.
+   *
+   * The dark ramp is not an automatic inversion of the light one — it is
+   * stepped from the same hue against the dark surface and re-checked.
+   */
+  --chart-planned: #1c9a92;
+  --chart-reactive: #c44e36;
+
+  --chart-seq-1: #beeae7;
+  --chart-seq-2: #93dcd8;
+  --chart-seq-3: #2dccc3;
+  --chart-seq-4: #1e8680;
+  --chart-seq-5: #0f4d49;
+
+  /* Recessive by construction: the grid is scaffolding, not data. */
+  --chart-grid: #e7e2d9;
+  --chart-axis: #565f5c;
+  /* The gap drawn between adjacent fills, so two segments never touch. */
+  --chart-gap: #ffffff;
+
   --elevation-sm: 0 1px 2px rgb(14 25 23 / 0.06);
   --elevation-md: 0 4px 12px rgb(14 25 23 / 0.1);
   --elevation-lg: 0 12px 32px rgb(14 25 23 / 0.16);
@@ -158,6 +194,19 @@
 
     --foreground: #edeae1;
     --muted-foreground: #a7b0ab;
+
+  --chart-planned: #25a79f;
+  --chart-reactive: #d3725f;
+
+  --chart-seq-1: #145a56;
+  --chart-seq-2: #1e8680;
+  --chart-seq-3: #25a79f;
+  --chart-seq-4: #58dad2;
+  --chart-seq-5: #93dcd8;
+
+  --chart-grid: #25403a;
+  --chart-axis: #a7b0ab;
+  --chart-gap: #152522;
     --on-primary: #0e1917;
     --on-accent: #0e1917;
     --accent-text: #d9a853;
@@ -193,6 +242,19 @@
 
   --foreground: #edeae1;
   --muted-foreground: #a7b0ab;
+
+  --chart-planned: #25a79f;
+  --chart-reactive: #d3725f;
+
+  --chart-seq-1: #145a56;
+  --chart-seq-2: #1e8680;
+  --chart-seq-3: #25a79f;
+  --chart-seq-4: #58dad2;
+  --chart-seq-5: #93dcd8;
+
+  --chart-grid: #25403a;
+  --chart-axis: #a7b0ab;
+  --chart-gap: #152522;
   --on-primary: #0e1917;
   --on-accent: #0e1917;
   --accent-text: #d9a853;
@@ -267,6 +329,11 @@
   --color-warning: var(--warning);
   --color-warning-hover: var(--warning-hover);
   --color-ring: var(--ring);
+
+  --color-chart-planned: var(--chart-planned);
+  --color-chart-reactive: var(--chart-reactive);
+  --color-chart-grid: var(--chart-grid);
+  --color-chart-axis: var(--chart-axis);
 
   --shadow-sm: var(--elevation-sm);
   --shadow-md: var(--elevation-md);
