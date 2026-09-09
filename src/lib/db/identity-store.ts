@@ -286,3 +286,37 @@ export async function clientBelongsToOrganization(
 
   return found !== null;
 }
+
+/**
+ * Every ACTIVE organisation's id.
+ *
+ * The one read in this file that is not about signing somebody in, and it is
+ * here rather than in a repository for the reason this module exists at all:
+ * there is no tenant scope to run it under. A scheduled job has no session, so
+ * it cannot obtain a `TenantScope`, and the DAL correctly refuses to build one
+ * from nothing.
+ *
+ * What keeps that safe is the shape of what it returns — a list of IDS, and
+ * nothing else. The job then builds a scope PER ORGANISATION and does every
+ * subsequent read through the ordinary scoped repositories, so the unscoped
+ * surface is exactly one query returning exactly one field, and the isolation
+ * guarantee holds for everything that follows it.
+ *
+ * SUSPENDED tenants are excluded: a suspended organisation's users cannot sign
+ * in, so notifying them would be writing rows nobody can ever read.
+ *
+ * The cap is a real limit rather than a rounding. Past it the job would need to
+ * page and checkpoint, which is a different piece of work; failing visibly at a
+ * thousand tenants is better than a job that silently processes the first
+ * thousand of two thousand.
+ */
+export const MAX_ORGANIZATIONS_PER_JOB = 1_000;
+
+export async function listActiveOrganizationIds(): Promise<Types.ObjectId[]> {
+  const rows = await Organization.find({ status: "ACTIVE" }, { _id: 1 })
+    .limit(MAX_ORGANIZATIONS_PER_JOB)
+    .lean<{ _id: Types.ObjectId }[]>()
+    .exec();
+
+  return rows.map((row) => row._id);
+}

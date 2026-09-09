@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { requireAuth } from "@/lib/auth/guard";
 import { landingPathForRole } from "@/lib/auth/access";
 import { isPrimaryFor, moduleHref, modulesForRole } from "@/lib/nav/modules";
+import { loadFeed } from "@/lib/notifications/queries";
 import { AppShell } from "@/components/shell/app-shell";
 import type { ShellModule } from "@/components/shell/types";
 
@@ -50,9 +51,24 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     primary: isPrimaryFor(module, user.role),
   }));
 
+  /**
+   * The bell's first page, read on the server so the unread badge is correct on
+   * first paint.
+   *
+   * Failures are swallowed to `undefined` rather than propagated, and that is a
+   * deliberate resilience decision: this is the SHELL, wrapping every screen in
+   * the product, and a notification query that fails must not take the whole
+   * app down with it. The bell simply does not render.
+   */
+  const notifications = await loadFeed().catch((error: unknown) => {
+    console.error("[shell] notification feed failed", error);
+    return undefined;
+  });
+
   return (
     <AppShell
       modules={modules}
+      notifications={notifications}
       homeHref={landingPathForRole(user.role)}
       user={{
         name: user.name ?? user.email ?? "—",

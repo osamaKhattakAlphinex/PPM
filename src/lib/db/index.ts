@@ -37,6 +37,8 @@ export {
   isClientScope,
   describeScope,
   ScopeResolutionError,
+  SYSTEM_ACTOR_ID,
+  systemScopeForOrganization,
   type TenantScope,
 } from "./scope";
 
@@ -83,6 +85,8 @@ export {
 export {
   clientBelongsToOrganization,
   ensureOrganization,
+  listActiveOrganizationIds,
+  MAX_ORGANIZATIONS_PER_JOB,
   findIdentityById,
   findOrganizationBySlug,
   findSignInCandidate,
@@ -173,6 +177,14 @@ export {
   type PpmComplianceSummary,
   type WorkOrderStatusCount,
 } from "./repositories/analytics";
+
+export {
+  countUnreadNotifications,
+  listNotificationsFor,
+  notificationsRepository,
+  type NotificationCreateInput,
+  type NotificationUpdateInput,
+} from "./repositories/notifications";
 
 export {
   attendanceRepository,
@@ -296,6 +308,14 @@ export { invoiceInputSchema, type InvoiceDocument } from "./models/invoice";
 // check-in button and the status pill import as values, so they are not
 // re-exported here.
 export { attendanceInputSchema, type AttendanceDocument } from "./models/attendance";
+
+// And again: the kinds, severities and the dedupe-key builder are domain
+// constants (`src/lib/domain/notifications.ts`) that the bell menu imports as
+// values, so they are not re-exported here.
+export {
+  notificationInputSchema,
+  type NotificationDocument,
+} from "./models/notification";
 
 export {
   checklistRunInputSchema,

@@ -760,5 +760,15 @@
       "PPM": "Planned visit",
       "WORK_ORDER": "Work order"
     }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "ariaLabel": "{count, plural, =0 {Notifications} one {Notifications, # unread} other {Notifications, # unread}}",
+    "empty": "Nothing to report.",
+    "markAllRead": "Mark all read",
+    "message": {
+      "ppmOverdue": "A {frequency, select, DAILY {daily} WEEKLY {weekly} MONTHLY {monthly} QUARTERLY {quarterly} HALF_YEARLY {half-yearly} ANNUAL {annual} other {planned}} visit due {dueOn} has not been done.",
+      "contractExpiring": "Contract {contractNumber} — {title} — ends in {days, plural, =0 {today} one {# day} other {# days}}."
+    }
   }
 }

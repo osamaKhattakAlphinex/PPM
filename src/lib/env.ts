@@ -66,6 +66,20 @@ const serverEnvSchema = z.object({
     .regex(/^[a-z0-9][a-z0-9.-]*$/, "must be a model id, e.g. claude-opus-5")
     .default("claude-opus-5"),
 
+  // --- Scheduled jobs ------------------------------------------------------
+  /**
+   * The shared secret a scheduler sends to `/api/jobs/*`.
+   *
+   * OPTIONAL in the schema and REQUIRED by the route: a deployment that has not
+   * configured it gets a 503 from the job rather than an open endpoint. Treating
+   * "no secret configured" as "no authentication required" is how an internal
+   * job URL ends up on the public internet.
+   *
+   * Long enough that a brute force is not worth attempting; the route compares
+   * it in constant time regardless.
+   */
+  CRON_SECRET: z.string().min(24).optional(),
+
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 });
 

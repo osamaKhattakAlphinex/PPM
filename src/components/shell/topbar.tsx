@@ -5,7 +5,9 @@ import { useTranslations } from "next-intl";
 
 import { LocaleToggle } from "@/components/ui/locale-toggle";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import type { NotificationFeed } from "@/lib/notifications/queries";
 import { Brand } from "./brand";
+import { NotificationBell } from "./notification-bell";
 import { UserMenu } from "./user-menu";
 import type { ShellUser } from "./types";
 
@@ -28,6 +30,7 @@ export function Topbar({
   menuButtonRef,
   isMenuOpen,
   title,
+  notifications,
 }: {
   user: ShellUser;
   homeHref: string;
@@ -36,6 +39,13 @@ export function Topbar({
   isMenuOpen: boolean;
   /** The active module's name. Desktop only — mobile shows the wordmark. */
   title?: string;
+  /**
+   * Rendered on the SERVER by the layout and handed down, so the unread badge
+   * is correct on first paint. Absent only if the read failed, in which case
+   * the bell is simply not shown — a shell must not fail to render because a
+   * notification query did.
+   */
+  notifications?: NotificationFeed;
 }) {
   const t = useTranslations("shell");
 
@@ -63,6 +73,7 @@ export function Topbar({
 
       {/* Pushes the controls to the inline-end edge in both directions. */}
       <div className="ms-auto flex shrink-0 items-center gap-2">
+        {notifications && <NotificationBell initial={notifications} />}
         <LocaleToggle />
         <ThemeToggle />
         <UserMenu user={user} />
