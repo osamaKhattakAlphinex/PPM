@@ -441,3 +441,98 @@ body {
     min-width: 2.5rem;
   }
 }
+
+/* ---- The pointer cursor, everywhere something is pressable --------------
+ * `<a href>` gets a pointer from the browser; `<button>` does not, and never
+ * has. The difference is felt rather than noticed — a control that does not
+ * change the cursor reads as inert, and on a page of otherwise identical
+ * rectangles it is the cursor that says which ones do something.
+ *
+ * Done once here rather than per component, so a control added next year
+ * inherits it instead of being remembered. Everything listed is genuinely
+ * activatable: elements with a button-ish role, a label bound to a control
+ * (clicking it focuses or toggles that control), and the input types whose
+ * whole interaction is a click.
+ *
+ * The disabled cases get `not-allowed` instead, so a refusal is legible
+ * before it is attempted. `:disabled` covers real form controls and
+ * `[aria-disabled]` covers the ones built out of divs.
+ * ---------------------------------------------------------------------- */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+[role="menuitem"]:not([aria-disabled="true"]),
+[role="tab"]:not([aria-disabled="true"]),
+[role="option"]:not([aria-disabled="true"]),
+[role="switch"]:not([aria-disabled="true"]),
+[role="checkbox"]:not([aria-disabled="true"]),
+summary,
+label[for],
+select:not(:disabled),
+input[type="checkbox"]:not(:disabled),
+input[type="radio"]:not(:disabled),
+input[type="range"]:not(:disabled),
+input[type="file"]:not(:disabled),
+input[type="color"]:not(:disabled),
+input[type="submit"]:not(:disabled),
+input[type="reset"]:not(:disabled) {
+  cursor: pointer;
+}
+
+button:disabled,
+select:disabled,
+input:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+/* ---- Marketing artwork motion ------------------------------------------
+ * The plant-room drawing has two moving parts: the condenser and supply fans
+ * turn, and chilled water travels the pipe run. Both are decorative, so both
+ * stop completely under `prefers-reduced-motion` — not slowed, stopped. The
+ * drawing is designed to read as a schematic when still, so nothing is lost.
+ *
+ * `animation-play-state: paused` on the SMIL flow rather than removing it:
+ * the dots stay where they are on the pipe, which looks deliberate, instead of
+ * collecting at the origin.
+ * ---------------------------------------------------------------------- */
+.pr-fan {
+  animation: pr-spin 9s linear infinite;
+}
+
+@keyframes pr-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* A slow pulse on the one fault in the drawing, so the eye finds it. */
+.pr-alert {
+  animation: pr-pulse 3.2s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes pr-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pr-fan,
+  .pr-alert {
+    animation: none;
+  }
+
+  .pr-alert {
+    opacity: 1;
+  }
+
+  .pr-flow * {
+    animation-play-state: paused;
+  }
+}

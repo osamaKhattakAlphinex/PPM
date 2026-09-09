@@ -92,7 +92,10 @@ production build.
 | Page | Performance | Accessibility | Best practices | SEO |
 |---|---|---|---|---|
 | `/en` | 99 | 100 | 100 | 100 |
-| `/en/pricing` | 100 | 100 | 100 | 100 |
+| `/en/pricing` | 99 | 100 | 100 | 100 |
+| `/en/contact` | 99 | 100 | 100 | 100 |
+| `/en/scenarios` | 99 | 100 | 100 | 100 |
+| `/en/signup` | 100 | 100 | 100 | 100 |
 | `/ar` | 99 | 100 | 100 | 100 |
 
 The target in CLAUDE.md is ≥ 95 on the public pages; all four categories clear

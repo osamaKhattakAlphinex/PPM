@@ -4,8 +4,15 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Mail, MapPin, Phone } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { DEFAULT_LOCALE, isLocale, localeHref, type Locale } from "@/lib/i18n/config";
+import {
+  DEFAULT_LOCALE,
+  isLocale,
+  localeHref,
+  type Locale,
+} from "@/lib/i18n/config";
 import { absoluteUrl, alternatesFor, SITE_NAME } from "@/lib/seo/site";
+import { ContourField } from "@/components/artwork/schematic";
+import { Reveal, RevealGroup, RevealItem } from "../_components/reveal";
 
 /**
  * Contact.
@@ -78,69 +85,103 @@ export default async function ContactPage({
 
   setRequestLocale(locale);
   const t = await getTranslations("marketing.contact");
+  const tNav = await getTranslations("marketing.nav");
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-5 py-16 sm:py-20">
-      <header className="max-w-2xl">
-        <h1 className="font-display text-3xl font-semibold text-foreground sm:text-4xl">
-          {t("title")}
-        </h1>
-        <p className="mt-3 text-lg leading-relaxed text-muted-foreground">{t("body")}</p>
-      </header>
+    <div className="relative">
+      {/*
+        Survey contours behind the contact details — the closest this site gets
+        to a map, and a great deal more honest than an embedded one nobody can
+        use to find a Riyadh office.
+      */}
+      <ContourField
+        id="contact-contour"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[380px] w-full text-petrol-700 opacity-[0.16] [mask-image:linear-gradient(to_bottom,black,transparent)] dark:text-petrol-300 dark:opacity-[0.1]"
+      />
 
-      <dl className="mt-10 grid gap-5 sm:grid-cols-2">
-        <div className="rounded-md border border-border bg-surface p-5">
-          <dt className="flex items-center gap-2 font-display text-base font-semibold text-foreground">
-            <Mail className="size-4 text-accent-text" aria-hidden />
-            {t("email.label")}
-          </dt>
-          <dd className="mt-1">
-            {/*
+      <div className="relative mx-auto w-full max-w-3xl px-5 py-16 sm:py-20">
+        <Reveal>
+          <header className="max-w-2xl">
+            <h1 className="font-display text-3xl font-semibold text-foreground sm:text-4xl">
+              {t("title")}
+            </h1>
+            <p className="mt-3 text-lg leading-relaxed text-muted-foreground">
+              {t("body")}
+            </p>
+          </header>
+        </Reveal>
+
+        <RevealGroup as="dl" className="mt-10 grid gap-5 sm:grid-cols-2">
+          <RevealItem className="h-full rounded-md border border-border bg-surface p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-md">
+            <dt className="flex items-center gap-2 font-display text-base font-semibold text-foreground">
+              <Mail className="size-4 text-accent-text" aria-hidden />
+              {t("email.label")}
+            </dt>
+            <dd className="mt-1">
+              {/*
               `bidi-isolate` because an email address is left-to-right text that
               may sit inside a right-to-left paragraph, and without isolation the
               punctuation migrates to the wrong end of it.
             */}
-            <a
-              href="mailto:sales@ppm-platform.example"
-              className="bidi-isolate text-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              sales@ppm-platform.example
-            </a>
-          </dd>
-        </div>
+              <a
+                href="mailto:sales@ppm-platform.example"
+                className="bidi-isolate text-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                sales@ppm-platform.example
+              </a>
+            </dd>
+          </RevealItem>
 
-        <div className="rounded-md border border-border bg-surface p-5">
-          <dt className="flex items-center gap-2 font-display text-base font-semibold text-foreground">
-            <Phone className="size-4 text-accent-text" aria-hidden />
-            {t("phone.label")}
-          </dt>
-          <dd className="mt-1">
-            <a
-              href="tel:+966110000000"
-              className="bidi-isolate text-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              +966 11 000 0000
-            </a>
-          </dd>
-        </div>
+          <RevealItem className="h-full rounded-md border border-border bg-surface p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-md">
+            <dt className="flex items-center gap-2 font-display text-base font-semibold text-foreground">
+              <Phone className="size-4 text-accent-text" aria-hidden />
+              {t("phone.label")}
+            </dt>
+            <dd className="mt-1">
+              <a
+                href="tel:+966110000000"
+                className="bidi-isolate text-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                +966 11 000 0000
+              </a>
+            </dd>
+          </RevealItem>
 
-        <div className="rounded-md border border-border bg-surface p-5 sm:col-span-2">
-          <dt className="flex items-center gap-2 font-display text-base font-semibold text-foreground">
-            <MapPin className="size-4 text-accent-text" aria-hidden />
-            {t("office.label")}
-          </dt>
-          <dd className="mt-1 text-sm text-muted-foreground">{t("office.value")}</dd>
-        </div>
-      </dl>
+          <RevealItem className="rounded-md border border-border bg-surface p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-md sm:col-span-2">
+            <dt className="flex items-center gap-2 font-display text-base font-semibold text-foreground">
+              <MapPin className="size-4 text-accent-text" aria-hidden />
+              {t("office.label")}
+            </dt>
+            <dd className="mt-1 text-sm text-muted-foreground">
+              {t("office.value")}
+            </dd>
+          </RevealItem>
+        </RevealGroup>
 
-      <div className="mt-10 rounded-md border border-border bg-surface-sunken p-6">
-        <h2 className="font-display text-lg font-semibold text-foreground">
-          {t("existing.title")}
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">{t("existing.body")}</p>
-        <Link href={localeHref("/login", locale)} className="mt-4 inline-block">
-          <Button>{t("existing.cta")}</Button>
-        </Link>
+        <Reveal className="mt-10">
+          <div className="rounded-md border border-border bg-surface-sunken p-6">
+            <h2 className="font-display text-lg font-semibold text-foreground">
+              {t("existing.title")}
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {t("existing.body")}
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link
+                href={localeHref("/login", locale)}
+                className="inline-block"
+              >
+                <Button>{t("existing.cta")}</Button>
+              </Link>
+              <Link
+                href={localeHref("/signup", locale)}
+                className="inline-block"
+              >
+                <Button variant="outline">{tNav("signUp")}</Button>
+              </Link>
+            </div>
+          </div>
+        </Reveal>
       </div>
     </div>
   );
