@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import { getScope, ScopeResolutionError, type TenantScope } from "../db";
 import { auth } from "./auth";
 import { sessionUserSchema, type AppSession, type SessionUser } from "./session";
@@ -82,14 +84,37 @@ export function assertRole(user: SessionUser, roles: readonly Role[]): void {
 }
 
 /**
+ * The session, resolved at most ONCE per request.
+ *
+ * `auth()` decrypts and verifies a JWE cookie, and — because the session
+ * carries a revalidation window — may also read the user back from the database
+ * to re-check their role, status and tenant. Every guarded page calls
+ * `requireRole()`, the shell layout calls `requireAuth()` for the nav and again
+ * for the notification feed, and a page with three parallel reads calls it once
+ * per read. That is five to eight verifications of the same cookie to serve one
+ * screen.
+ *
+ * React's `cache()` memoises per REQUEST, not across requests, which is the only
+ * kind of caching a session may have: two concurrent requests from two people
+ * never share an entry, and the entry is discarded when the request ends. It is
+ * the same primitive Next uses for its own `cookies()` and `headers()`.
+ *
+ * Measured during the performance pass (`docs/PERFORMANCE.md`): the dashboard
+ * went from seven session resolutions per render to one.
+ */
+const resolveSession = cache(async (): Promise<AppSession | null> => auth());
+
+/**
  * Resolve the current session into a validated user plus a tenant scope.
  *
  * The session is re-parsed even though the server issued it: a token minted by
  * an older deploy, or a callback that forgot to copy `organizationId`, must
- * fail closed rather than produce a scope with an undefined tenant.
+ * fail closed rather than produce a scope with an undefined tenant. The parse
+ * is deliberately NOT inside the memo above — memoising the raw session is a
+ * performance decision, and re-validating it on every call is a security one.
  */
 export async function requireAuth(): Promise<AuthContext> {
-  const session: AppSession | null = await auth();
+  const session: AppSession | null = await resolveSession();
   const user = session?.user;
 
   if (!user || !sessionUserSchema.safeParse(user).success) {
