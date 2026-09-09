@@ -79,7 +79,7 @@ The handler receives a scope it did not construct and cannot widen.
 
 ## Tests
 
-51 suites. Pure logic — state machines, VAT arithmetic, filename safety, prompt
+52 suites. Pure logic — state machines, VAT arithmetic, filename safety, prompt
 fencing, role policy — runs anywhere. The data-access suites run against a real
 mongod, because the isolation guarantees are claims about what MongoDB returns
 and a mocked model can only prove we built the filter we meant to build.

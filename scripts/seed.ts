@@ -120,24 +120,136 @@ const ASSETS: ReadonlyArray<{
   site: "Al Faisaliah Tower" | "Central Stores & Workshop";
 }> = [
   // --- The client's tower ---------------------------------------------------
-  { name: "Chiller Plant A", category: "HVAC", type: "Centrifugal Chiller", status: "ACTIVE", health: 92, site: "Al Faisaliah Tower" },
-  { name: "Chiller Plant B", category: "HVAC", type: "Centrifugal Chiller", status: "MAINTENANCE", health: 48, site: "Al Faisaliah Tower" },
-  { name: "AHU-02 Rooftop", category: "HVAC", type: "Air Handling Unit", status: "ACTIVE", health: 76, site: "Al Faisaliah Tower" },
-  { name: "Cooling Tower 1", category: "HVAC", type: "Cooling Tower", status: "ACTIVE", health: 64, site: "Al Faisaliah Tower" },
-  { name: "Main Switchgear", category: "ELECTRICAL", type: "LV Switchboard", status: "ACTIVE", health: 88, site: "Al Faisaliah Tower" },
-  { name: "Standby Generator", category: "ELECTRICAL", type: "Diesel Generator", status: "ACTIVE", health: 71, site: "Al Faisaliah Tower" },
-  { name: "Distribution Board 4F", category: "ELECTRICAL", type: "Distribution Board", status: "INACTIVE", health: 31, site: "Al Faisaliah Tower" },
-  { name: "Fire Alarm Panel", category: "ELV", type: "Addressable Panel", status: "ACTIVE", health: 95, site: "Al Faisaliah Tower" },
-  { name: "CCTV Head End", category: "ELV", type: "NVR Rack", status: "ACTIVE", health: 57, site: "Al Faisaliah Tower" },
-  { name: "Passenger Lift 3", category: "CIVIL", type: "Traction Lift", status: "MAINTENANCE", health: 23, site: "Al Faisaliah Tower" },
-  { name: "Domestic Water Pump", category: "PLUMBING", type: "Booster Set", status: "ACTIVE", health: 82, site: "Al Faisaliah Tower" },
-  { name: "Sump Pump B1", category: "PLUMBING", type: "Submersible Pump", status: "ACTIVE", health: 39, site: "Al Faisaliah Tower" },
+  {
+    name: "Chiller Plant A",
+    category: "HVAC",
+    type: "Centrifugal Chiller",
+    status: "ACTIVE",
+    health: 92,
+    site: "Al Faisaliah Tower",
+  },
+  {
+    name: "Chiller Plant B",
+    category: "HVAC",
+    type: "Centrifugal Chiller",
+    status: "MAINTENANCE",
+    health: 48,
+    site: "Al Faisaliah Tower",
+  },
+  {
+    name: "AHU-02 Rooftop",
+    category: "HVAC",
+    type: "Air Handling Unit",
+    status: "ACTIVE",
+    health: 76,
+    site: "Al Faisaliah Tower",
+  },
+  {
+    name: "Cooling Tower 1",
+    category: "HVAC",
+    type: "Cooling Tower",
+    status: "ACTIVE",
+    health: 64,
+    site: "Al Faisaliah Tower",
+  },
+  {
+    name: "Main Switchgear",
+    category: "ELECTRICAL",
+    type: "LV Switchboard",
+    status: "ACTIVE",
+    health: 88,
+    site: "Al Faisaliah Tower",
+  },
+  {
+    name: "Standby Generator",
+    category: "ELECTRICAL",
+    type: "Diesel Generator",
+    status: "ACTIVE",
+    health: 71,
+    site: "Al Faisaliah Tower",
+  },
+  {
+    name: "Distribution Board 4F",
+    category: "ELECTRICAL",
+    type: "Distribution Board",
+    status: "INACTIVE",
+    health: 31,
+    site: "Al Faisaliah Tower",
+  },
+  {
+    name: "Fire Alarm Panel",
+    category: "ELV",
+    type: "Addressable Panel",
+    status: "ACTIVE",
+    health: 95,
+    site: "Al Faisaliah Tower",
+  },
+  {
+    name: "CCTV Head End",
+    category: "ELV",
+    type: "NVR Rack",
+    status: "ACTIVE",
+    health: 57,
+    site: "Al Faisaliah Tower",
+  },
+  {
+    name: "Passenger Lift 3",
+    category: "CIVIL",
+    type: "Traction Lift",
+    status: "MAINTENANCE",
+    health: 23,
+    site: "Al Faisaliah Tower",
+  },
+  {
+    name: "Domestic Water Pump",
+    category: "PLUMBING",
+    type: "Booster Set",
+    status: "ACTIVE",
+    health: 82,
+    site: "Al Faisaliah Tower",
+  },
+  {
+    name: "Sump Pump B1",
+    category: "PLUMBING",
+    type: "Submersible Pump",
+    status: "ACTIVE",
+    health: 39,
+    site: "Al Faisaliah Tower",
+  },
 
   // --- The organization's own depot (clientId null, invisible to CLIENT) ----
-  { name: "Workshop Compressor", category: "HVAC", type: "Air Compressor", status: "ACTIVE", health: 68, site: "Central Stores & Workshop" },
-  { name: "Depot Distribution Board", category: "ELECTRICAL", type: "Distribution Board", status: "ACTIVE", health: 90, site: "Central Stores & Workshop" },
-  { name: "Access Control Server", category: "ELV", type: "Controller", status: "ACTIVE", health: 45, site: "Central Stores & Workshop" },
-  { name: "Loading Bay Door", category: "CIVIL", type: "Roller Shutter", status: "INACTIVE", health: 18, site: "Central Stores & Workshop" },
+  {
+    name: "Workshop Compressor",
+    category: "HVAC",
+    type: "Air Compressor",
+    status: "ACTIVE",
+    health: 68,
+    site: "Central Stores & Workshop",
+  },
+  {
+    name: "Depot Distribution Board",
+    category: "ELECTRICAL",
+    type: "Distribution Board",
+    status: "ACTIVE",
+    health: 90,
+    site: "Central Stores & Workshop",
+  },
+  {
+    name: "Access Control Server",
+    category: "ELV",
+    type: "Controller",
+    status: "ACTIVE",
+    health: 45,
+    site: "Central Stores & Workshop",
+  },
+  {
+    name: "Loading Bay Door",
+    category: "CIVIL",
+    type: "Roller Shutter",
+    status: "INACTIVE",
+    health: 18,
+    site: "Central Stores & Workshop",
+  },
 ];
 
 /**
@@ -197,12 +309,21 @@ const TECHNICIANS: ReadonlyArray<{
     skills: ["Traction lifts", "Roller shutters", "Waterproofing"],
     status: "ON_LEAVE",
   },
-  { name: "Salim Baloch", trade: "HVAC", skills: ["AHU filters and belts"], status: "INACTIVE" },
+  {
+    name: "Salim Baloch",
+    trade: "HVAC",
+    skills: ["AHU filters and belts"],
+    status: "INACTIVE",
+  },
 ];
 
 const USERS: ReadonlyArray<{ name: string; email: string; role: Role }> = [
   { name: "Layla Al-Harbi", email: "admin@ppm.local", role: "ADMIN" },
   { name: "Omar Nasser", email: "fm@ppm.local", role: "FM_MANAGER" },
+  // The fifth role. Without it the role matrix cannot be walked end to end —
+  // a supervisor is the one account that sees operations but no money, which
+  // is exactly the boundary worth checking on a fresh install.
+  { name: "Huda Al-Rashid", email: "supervisor@ppm.local", role: "SUPERVISOR" },
   { name: "Yousef Karim", email: "tech@ppm.local", role: "TECHNICIAN" },
   { name: "Nada Al-Sabah", email: "client@ppm.local", role: "CLIENT" },
 ];
@@ -219,7 +340,8 @@ function resolvePassword(): string {
   if (!supplied) return DEFAULT_PASSWORD;
 
   const parsed = z.string().min(12).max(128).safeParse(supplied);
-  if (!parsed.success) throw new Error("SEED_PASSWORD must be 12-128 characters.");
+  if (!parsed.success)
+    throw new Error("SEED_PASSWORD must be 12-128 characters.");
   return parsed.data;
 }
 
@@ -268,7 +390,9 @@ async function main(): Promise<void> {
   for (const seed of LOCATIONS) {
     const existing = await locations.findOne({ name: seed.name });
     if (existing) {
-      console.log(`location      ${seed.name.padEnd(28)} exists   ${existing._id.toHexString()}`);
+      console.log(
+        `location      ${seed.name.padEnd(28)} exists   ${existing._id.toHexString()}`,
+      );
       continue;
     }
 
@@ -281,7 +405,9 @@ async function main(): Promise<void> {
       address: { ...seed.address },
       status: "ACTIVE",
     });
-    console.log(`location      ${seed.name.padEnd(28)} created  ${created._id.toHexString()}`);
+    console.log(
+      `location      ${seed.name.padEnd(28)} created  ${created._id.toHexString()}`,
+    );
   }
 
   // 3c. The assets. Written through the scoped repository like everything else,
@@ -292,7 +418,9 @@ async function main(): Promise<void> {
   for (const seed of ASSETS) {
     const existing = await assets.findOne({ name: seed.name });
     if (existing) {
-      console.log(`asset         ${seed.name.padEnd(28)} exists   ${existing._id.toHexString()}`);
+      console.log(
+        `asset         ${seed.name.padEnd(28)} exists   ${existing._id.toHexString()}`,
+      );
       continue;
     }
 
@@ -300,7 +428,9 @@ async function main(): Promise<void> {
     // idempotent on a re-run where the locations already existed.
     const site = await locations.findOne({ name: seed.site });
     if (!site) {
-      console.warn(`asset         ${seed.name.padEnd(28)} SKIPPED  no site "${seed.site}"`);
+      console.warn(
+        `asset         ${seed.name.padEnd(28)} SKIPPED  no site "${seed.site}"`,
+      );
       continue;
     }
 
@@ -315,7 +445,9 @@ async function main(): Promise<void> {
       status: seed.status,
       health: seed.health,
     });
-    console.log(`asset         ${seed.name.padEnd(28)} created  ${created._id.toHexString()}`);
+    console.log(
+      `asset         ${seed.name.padEnd(28)} created  ${created._id.toHexString()}`,
+    );
   }
 
   // 4. The users. One hash for all four: argon2 is deliberately slow, and four
@@ -361,7 +493,9 @@ async function main(): Promise<void> {
   for (const seed of TECHNICIANS) {
     const existing = await technicians.findOne({ name: seed.name });
     if (existing) {
-      console.log(`technician    ${seed.name.padEnd(28)} exists   ${existing._id.toHexString()}`);
+      console.log(
+        `technician    ${seed.name.padEnd(28)} exists   ${existing._id.toHexString()}`,
+      );
       continue;
     }
 
@@ -371,7 +505,9 @@ async function main(): Promise<void> {
      * is optional precisely because most technicians never sign in, so the
      * record is still worth creating unlinked.
      */
-    const account = seed.email ? await users.findOne({ email: seed.email }) : null;
+    const account = seed.email
+      ? await users.findOne({ email: seed.email })
+      : null;
 
     const created = await technicians.create({
       name: seed.name,
@@ -392,7 +528,10 @@ async function main(): Promise<void> {
 
 main()
   .catch((error: unknown) => {
-    console.error("\nSeed failed:", error instanceof Error ? error.message : error);
+    console.error(
+      "\nSeed failed:",
+      error instanceof Error ? error.message : error,
+    );
     process.exitCode = 1;
   })
   .finally(() => disconnectFromDatabase());

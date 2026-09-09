@@ -277,7 +277,7 @@ two files.
 
 ### Suite totals
 
-51 test files. **749 assertions pass** in this environment; 425 more live in the
+52 test files. **765 assertions pass** in this environment; 425 more live in the
 15 MongoDB-backed suites.
 
 > **Honest note on the 425.** They do not fail — they never start. This
@@ -322,7 +322,7 @@ trusted past them.
 ```bash
 pnpm typecheck                 # no any, no unchecked access
 pnpm lint                      # includes the dal-boundary rule
-pnpm test                      # 51 suites, including the two above
+pnpm test                      # 52 suites, including the two above
 ```
 
 The audit is those three commands. It is not a document, and it does not depend

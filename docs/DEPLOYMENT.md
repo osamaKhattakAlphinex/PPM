@@ -15,7 +15,7 @@ fastest:
 |---|---|---|
 | Typecheck | `pnpm typecheck` | `tsc --noEmit` over the whole tree. No `any`, no unchecked property access. |
 | Lint | `pnpm lint:dal` | ESLint with `--max-warnings 0`, which includes the **data-access boundary rule** — a direct `Model.find(...)` or a `mongoose` import outside `src/lib/db` fails the build. |
-| Test | `pnpm test` | All 51 suites, including the cross-module isolation sweep and the source audit described in `docs/SECURITY.md`. |
+| Test | `pnpm test` | All 52 suites, including the cross-module isolation sweep and the source audit described in `docs/SECURITY.md`. |
 | Build | `pnpm build` | A real production build, which is also the only thing that proves the public pages still prerender. |
 
 Plus one assertion that only a built artifact can make: **no secret in the

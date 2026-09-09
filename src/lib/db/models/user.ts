@@ -1,13 +1,20 @@
 import { z } from "zod";
 
 import { roleSchema } from "../../auth/roles";
+import {
+  USER_STATUSES,
+  userStatusSchema,
+  type UserStatus,
+} from "../../domain/users";
 import { defineModel } from "../define-model";
 import { entity, mongo, objectId, type DocumentOf } from "../zod-mongoose";
 
-/** Only an ACTIVE user may hold a session. The rest are refused at sign-in. */
-export const USER_STATUSES = ["ACTIVE", "INVITED", "SUSPENDED"] as const;
-export const userStatusSchema = z.enum(USER_STATUSES);
-export type UserStatus = (typeof USER_STATUSES)[number];
+/**
+ * The status vocabulary lives in `src/lib/domain/users.ts` with the lifecycle
+ * rule that governs it, as every other module's vocabulary does. Re-exported
+ * here so `src/lib/db` stays the one import site for anything model-shaped.
+ */
+export { USER_STATUSES, userStatusSchema, type UserStatus };
 
 /**
  * An account. Tenant-scoped like everything else: `organizationId` is added by
@@ -72,19 +79,28 @@ export const User = defineModel("User", userInputSchema, {
      * why `changeUserRole()` in `identity-store.ts` re-reads and saves rather
      * than issuing a bare `$set`.
      */
-    schema.pre("validate", function enforceClientScope(this: {
-      get: (path: string) => unknown;
-      invalidate: (path: string, message: string) => void;
-    }) {
-      const role = this.get("role");
-      const clientId = this.get("clientId");
+    schema.pre(
+      "validate",
+      function enforceClientScope(this: {
+        get: (path: string) => unknown;
+        invalidate: (path: string, message: string) => void;
+      }) {
+        const role = this.get("role");
+        const clientId = this.get("clientId");
 
-      if (role === "CLIENT" && clientId == null) {
-        this.invalidate("clientId", "A CLIENT user must be attached to a client.");
-      }
-      if (role !== "CLIENT" && clientId != null) {
-        this.invalidate("clientId", "Only a CLIENT user may be attached to a client.");
-      }
-    });
+        if (role === "CLIENT" && clientId == null) {
+          this.invalidate(
+            "clientId",
+            "A CLIENT user must be attached to a client.",
+          );
+        }
+        if (role !== "CLIENT" && clientId != null) {
+          this.invalidate(
+            "clientId",
+            "Only a CLIENT user may be attached to a client.",
+          );
+        }
+      },
+    );
   },
 });

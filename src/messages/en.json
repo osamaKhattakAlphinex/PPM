@@ -68,6 +68,54 @@
     "body": "This module is scheduled for a later prompt. The shell around it — navigation, locale, theme, session — is what is live today.",
     "scopeNote": "Every query this module will make is scoped to your organization before it reaches the database."
   },
+  "admin": {
+    "title": "Users",
+    "subtitle": "Who may sign in, and what they may do. Creating an account does not let it in — activate it here when the person is ready to start.",
+    "new": "New user",
+    "created": "User created. Activate the account when they are ready to sign in.",
+    "activated": "Account activated",
+    "suspended": "Account suspended",
+    "activate": "Activate",
+    "suspend": "Suspend",
+    "you": "You",
+    "columns": {
+      "name": "Name",
+      "role": "Role",
+      "client": "Client",
+      "status": "Status",
+      "created": "Created",
+      "actions": "Actions"
+    },
+    "statuses": {
+      "ACTIVE": "Active",
+      "INVITED": "Invited",
+      "SUSPENDED": "Suspended"
+    },
+    "filters": {
+      "search": "Search",
+      "searchPlaceholder": "Search by name",
+      "role": "Role",
+      "allRoles": "All roles",
+      "status": "Status",
+      "allStatuses": "All statuses"
+    },
+    "empty": {
+      "title": "No users match",
+      "description": "Nobody matches these filters. Clear them to see everyone, or add the first colleague."
+    },
+    "form": {
+      "title": "New user",
+      "name": "Full name",
+      "email": "Work email",
+      "password": "Temporary password",
+      "passwordHint": "At least 12 characters. Give it to them directly and ask them to change it.",
+      "role": "Role",
+      "client": "Client",
+      "clientPlaceholder": "Choose a client",
+      "cancel": "Cancel",
+      "submit": "Create user"
+    }
+  },
   "dashboard": {
     "title": "Dashboard",
     "subtitle": "Your organisation this morning — what you own, how much of the plan is being kept, and what is on fire.",
