@@ -770,5 +770,17 @@
       "ppmOverdue": "زيارة {frequency, select, DAILY {يومية} WEEKLY {أسبوعية} MONTHLY {شهرية} QUARTERLY {ربع سنوية} HALF_YEARLY {نصف سنوية} ANNUAL {سنوية} other {مخططة}} مستحقة في {dueOn} لم تُنفَّذ.",
       "contractExpiring": "العقد {contractNumber} — {title} — ينتهي خلال {days, plural, =0 {اليوم} one {يوم واحد} two {يومين} few {# أيام} many {# يوماً} other {# يوم}}."
     }
+  },
+  "files": {
+    "title": "الملفات",
+    "hint": "JPEG أو PNG أو WEBP أو HEIC أو PDF، حتى ١٠ ميغابايت. تُزال بيانات الموقع من الصور قبل حفظها.",
+    "upload": "رفع",
+    "uploaded": "تم رفع الملف.",
+    "delete": "حذف",
+    "deleted": "تم حذف الملف.",
+    "failed": "تعذّر رفع الملف.",
+    "tooLarge": "يجب ألا يتجاوز حجم الملف ١٠ ميغابايت.",
+    "empty": "لا توجد ملفات بعد",
+    "emptyBody": "ستظهر هنا صور لوحات البيانات والأعطال والأعمال المنجزة."
   }
 }

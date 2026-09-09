@@ -80,6 +80,32 @@ const serverEnvSchema = z.object({
    */
   CRON_SECRET: z.string().min(24).optional(),
 
+  // --- File storage --------------------------------------------------------
+  /**
+   * Where uploads live when no bucket is configured: a directory on the host.
+   *
+   * The DEVELOPMENT default, and the reason it has one is that the alternative
+   * is nobody being able to exercise the upload path without an S3 account.
+   * It is not a production store — a serverless host has no durable disk and a
+   * multi-instance host has a different one per instance — which is why the
+   * pre-launch checklist in `docs/DEPLOYMENT.md` names it.
+   */
+  UPLOAD_DIR: z.string().min(1).default(".uploads"),
+
+  /**
+   * S3-compatible object storage. Present together or not at all.
+   *
+   * `getStorage()` chooses the driver by whether these are set, so there is no
+   * flag to forget: either the bucket and its credentials are configured and
+   * uploads go to it, or they are not and uploads go to disk.
+   */
+  S3_BUCKET: z.string().min(1).optional(),
+  S3_REGION: z.string().min(1).default("me-south-1"),
+  /** For R2, MinIO and anything else that is not AWS itself. */
+  S3_ENDPOINT: z.string().url().optional(),
+  S3_ACCESS_KEY_ID: z.string().min(1).optional(),
+  S3_SECRET_ACCESS_KEY: z.string().min(1).optional(),
+
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 });
 

@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.124.0",
+    "@aws-sdk/client-s3": "^3.1128.0",
     "@node-rs/argon2": "^2.1.0",
     "@radix-ui/react-dialog": "^1.1.23",
     "@react-pdf/renderer": "^4.9.0",

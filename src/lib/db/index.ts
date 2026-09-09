@@ -187,6 +187,13 @@ export {
 } from "./repositories/notifications";
 
 export {
+  attachmentsRepository,
+  listAttachmentsFor,
+  type AttachmentCreateInput,
+  type AttachmentUpdateInput,
+} from "./repositories/attachments";
+
+export {
   attendanceRepository,
   findAttendanceForDay,
   listAttendanceForDay,
@@ -308,6 +315,12 @@ export { invoiceInputSchema, type InvoiceDocument } from "./models/invoice";
 // check-in button and the status pill import as values, so they are not
 // re-exported here.
 export { attendanceInputSchema, type AttendanceDocument } from "./models/attendance";
+
+// And again: the allowed types, the size cap, the sniffer, the filename
+// sanitiser and the EXIF stripper are domain functions
+// (`src/lib/domain/files.ts`) that the upload button and the route both use, so
+// they are not re-exported here.
+export { attachmentInputSchema, type AttachmentDocument } from "./models/attachment";
 
 // And again: the kinds, severities and the dedupe-key builder are domain
 // constants (`src/lib/domain/notifications.ts`) that the bell menu imports as

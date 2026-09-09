@@ -770,5 +770,17 @@
       "ppmOverdue": "A {frequency, select, DAILY {daily} WEEKLY {weekly} MONTHLY {monthly} QUARTERLY {quarterly} HALF_YEARLY {half-yearly} ANNUAL {annual} other {planned}} visit due {dueOn} has not been done.",
       "contractExpiring": "Contract {contractNumber} — {title} — ends in {days, plural, =0 {today} one {# day} other {# days}}."
     }
+  },
+  "files": {
+    "title": "Files",
+    "hint": "JPEG, PNG, WEBP, HEIC or PDF, up to 10 MB. Location data is stripped from photographs before they are stored.",
+    "upload": "Upload",
+    "uploaded": "File uploaded.",
+    "delete": "Delete",
+    "deleted": "File deleted.",
+    "failed": "That file could not be uploaded.",
+    "tooLarge": "Files must be under 10 MB.",
+    "empty": "No files yet",
+    "emptyBody": "Photographs of nameplates, faults and completed work appear here."
   }
 }

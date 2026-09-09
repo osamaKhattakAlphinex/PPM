@@ -41,3 +41,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local file-upload store (UPLOAD_DIR). Development only.
+.uploads/
