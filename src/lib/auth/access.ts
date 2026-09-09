@@ -114,7 +114,20 @@ export function canAccessPath(role: Role, pathname: string): boolean {
  * sending it to `/app` would only produce a second 403.
  */
 export function landingPathForRole(role: Role): string {
-  return role === "CLIENT" ? "/app/portal" : "/app";
+  /**
+   * Three landings, not two, and the third is the mobile one.
+   *
+   * A CLIENT's home is their portal — the operations dashboard aggregates
+   * preventive maintenance, which a client scope cannot read at all.
+   *
+   * A TECHNICIAN's home is their own job list. They sign in on a phone, at a
+   * site, to find out what they are doing; the organisation-wide dashboard is a
+   * management screen that answers a question they were not asking, and making
+   * it their landing costs them two taps at the start of every shift.
+   */
+  if (role === "CLIENT") return "/app/portal";
+  if (role === "TECHNICIAN") return "/app/my-jobs";
+  return "/app";
 }
 
 /**

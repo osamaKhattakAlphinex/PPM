@@ -2,11 +2,18 @@ import { describe, expect, it } from "vitest";
 
 import { canAccessPath, resolveRouteAccess } from "../../auth/access";
 import { ROLES, type Role } from "../../auth/roles";
-import { activeModuleKey, MODULES, MODULE_KEYS, moduleHref, modulesForRole } from "../modules";
+import {
+  activeModuleKey,
+  isPrimaryFor,
+  MODULES,
+  MODULE_KEYS,
+  moduleHref,
+  modulesForRole,
+} from "../modules";
 
 describe("the module table", () => {
-  it("has exactly the thirteen modules the product ships", () => {
-    expect(MODULES).toHaveLength(13);
+  it("has exactly the fourteen modules the product ships", () => {
+    expect(MODULES).toHaveLength(14);
     expect(MODULES.map((entry) => entry.key)).toEqual([...MODULE_KEYS]);
   });
 
@@ -18,7 +25,9 @@ describe("the module table", () => {
 
   it("keeps the mobile bottom bar to four destinations per role", () => {
     for (const role of ROLES) {
-      const primary = modulesForRole(role).filter((entry) => entry.primary);
+      // `isPrimaryFor`, not `entry.primary`: the dashboard is primary for
+      // everyone except a technician, whose bar leads with "My jobs".
+      const primary = modulesForRole(role).filter((entry) => isPrimaryFor(entry, role));
       expect(primary.length, `${role} has ${primary.length} primary modules`).toBeLessThanOrEqual(4);
     }
   });

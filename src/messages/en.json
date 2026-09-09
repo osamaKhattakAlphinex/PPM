@@ -6,6 +6,7 @@
   "nav": {
     "sectionLabel": "Modules",
     "dashboard": "Dashboard",
+    "myJobs": "My jobs",
     "assets": "Assets",
     "preventive": "Preventive",
     "corrective": "Corrective",
@@ -727,6 +728,37 @@
         "title": "Spare parts forecast",
         "body": "What the fault history suggests is worth holding in stores this quarter."
       }
+    }
+  },
+  "myJobs": {
+    "title": "My jobs",
+    "subtitle": "Your shift and your work today.",
+    "greeting": "Good day, {name}. Here is your work.",
+    "todaysShift": "Today's shift",
+    "checkIn": "Check in",
+    "checkOut": "Check out",
+    "checkedIn": "Checked in.",
+    "checkedOut": "Checked out.",
+    "checkedInAt": "Started",
+    "checkedOutAt": "Finished",
+    "hoursWorked": "Time on site",
+    "hoursValue": "{hours}h {minutes}m",
+    "locationRecorded": "Location recorded with your consent.",
+    "consentLabel": "Record my location when I check in or out. Optional — leave this unticked and your shift is recorded without a position.",
+    "noRecord": "No technician record yet",
+    "noRecordBody": "Your login is not linked to a technician record. Ask your supervisor to link it, and your jobs will appear here.",
+    "yourJobs": "{count, plural, =0 {Your jobs} one {Your job} other {Your {count} jobs}}",
+    "noJobs": "Nothing assigned",
+    "noJobsBody": "Planned visits and work orders assigned to you appear here, soonest first.",
+    "late": "Late",
+    "status": {
+      "NOT_CHECKED_IN": "Not started",
+      "ON_SITE": "On site",
+      "CHECKED_OUT": "Finished"
+    },
+    "kind": {
+      "PPM": "Planned visit",
+      "WORK_ORDER": "Work order"
     }
   }
 }

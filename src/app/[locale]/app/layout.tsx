@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 import { requireAuth } from "@/lib/auth/guard";
 import { landingPathForRole } from "@/lib/auth/access";
-import { moduleHref, modulesForRole } from "@/lib/nav/modules";
+import { isPrimaryFor, moduleHref, modulesForRole } from "@/lib/nav/modules";
 import { AppShell } from "@/components/shell/app-shell";
 import type { ShellModule } from "@/components/shell/types";
 
@@ -44,7 +44,10 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   const modules: ShellModule[] = modulesForRole(user.role).map((module) => ({
     key: module.key,
     href: moduleHref(module, user.role),
-    primary: module.primary ?? false,
+    // Per-role, not per-module: a technician's bottom bar leads with "My jobs"
+    // and drops the dashboard, which would otherwise be a fifth tab in a
+    // four-tab bar. See `isPrimaryFor`.
+    primary: isPrimaryFor(module, user.role),
   }));
 
   return (

@@ -3,6 +3,7 @@ import {
   Building2,
   CalendarCheck,
   ChartColumn,
+  ClipboardList,
   HardHat,
   LayoutDashboard,
   ListChecks,
@@ -28,6 +29,7 @@ import type { ModuleKey } from "@/lib/nav/modules";
  */
 export const MODULE_ICONS: Readonly<Record<ModuleKey, LucideIcon>> = {
   dashboard: LayoutDashboard,
+  myJobs: ClipboardList,
   assets: Boxes,
   preventive: CalendarCheck,
   corrective: Wrench,

@@ -175,6 +175,14 @@ export {
 } from "./repositories/analytics";
 
 export {
+  attendanceRepository,
+  findAttendanceForDay,
+  listAttendanceForDay,
+  type AttendanceCreateInput,
+  type AttendanceUpdateInput,
+} from "./repositories/attendance";
+
+export {
   invoicesRepository,
   summariseInvoices,
   type InvoiceCreateInput,
@@ -282,6 +290,12 @@ export {
 // (`src/lib/domain/invoicing.ts`) that the ledger, its filters, its KPI header
 // and its badge import as values, so they are not re-exported here.
 export { invoiceInputSchema, type InvoiceDocument } from "./models/invoice";
+
+// And again: the attendance statuses, the coordinate schema and the shift
+// arithmetic are domain constants (`src/lib/domain/attendance.ts`) that the
+// check-in button and the status pill import as values, so they are not
+// re-exported here.
+export { attendanceInputSchema, type AttendanceDocument } from "./models/attendance";
 
 export {
   checklistRunInputSchema,
