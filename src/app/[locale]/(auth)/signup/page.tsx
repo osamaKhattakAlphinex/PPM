@@ -5,56 +5,70 @@ import { getTranslations } from "next-intl/server";
 
 import { landingPathForRole } from "@/lib/auth/access";
 import { getCurrentUser } from "@/lib/auth/guard";
-import { safeRedirectPath } from "@/lib/auth/schemas";
+import { isSignupEnabled } from "@/lib/env";
 import { DEFAULT_LOCALE, isLocale, localeHref } from "@/lib/i18n/config";
+import { alternatesFor } from "@/lib/seo/site";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { LoginForm } from "./login-form";
+import { SignupForm } from "./signup-form";
 
-export const metadata: Metadata = {
-  title: "Sign in · PPM Platform",
-  // The authenticated app is noindex (set in the root layout); the sign-in door
-  // to it should not be indexed either.
-  robots: { index: false, follow: false },
-};
-
-/**
- * Two panels: an identity plate and the form.
- *
- * The plate is petrol with a brass rule and a hairline grid — a valve-tag
- * reference from DESIGN.md §1, not a gradient. It collapses on mobile, where a
- * technician signing in on a phone in the sun needs the form above the fold and
- * nothing else.
- */
-export default async function LoginPage({
-  params: routeParams,
-  searchParams,
+export async function generateMetadata({
+  params,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<Metadata> {
+  const { locale: rawLocale } = await params;
+  const locale = isLocale(rawLocale) ? rawLocale : DEFAULT_LOCALE;
+  const t = await getTranslations({ locale, namespace: "signup" });
+
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+    alternates: alternatesFor("/signup", locale),
+    /**
+     * Indexable, unlike every other page under `(auth)`. This one is the front
+     * door of the marketing funnel — the `[locale]` layout's blanket
+     * `index: false` is right for the app and wrong here, so it is overridden
+     * deliberately and only here.
+     */
+    robots: { index: true, follow: true },
+  };
+}
+
+/**
+ * Register a company.
+ *
+ * The product's one open write endpoint, and the one deliberate exception to
+ * CLAUDE.md's "no public write endpoints". What makes it defensible is what it
+ * cannot reach: it creates a NEW organization and its first administrator, and
+ * there is no path through it that reads, changes or even names a row
+ * belonging to an existing tenant.
+ *
+ * `isSignupEnabled()` is checked here AND in the action. Not a duplicate: this
+ * one decides what to render, and the action's decides what happens — a hidden
+ * form is not a disabled endpoint, because the action is reachable by POST
+ * whatever this page drew.
+ *
+ * A signed-in visitor is redirected away rather than shown the form. Somebody
+ * with a session who lands here has almost certainly followed an old link, and
+ * offering to make them a second company is not the helpful reading.
+ */
+export default async function SignupPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
 }) {
-  const { locale: rawLocale } = await routeParams;
+  const { locale: rawLocale } = await params;
   const locale = isLocale(rawLocale) ? rawLocale : DEFAULT_LOCALE;
 
   const user = await getCurrentUser();
   if (user) redirect(localeHref(landingPathForRole(user.role), locale));
 
-  const params = await searchParams;
-  const requested = Array.isArray(params.callbackUrl)
-    ? params.callbackUrl[0]
-    : params.callbackUrl;
-  // Checked here as well as in the action: this value ends up in a hidden field
-  // that is posted straight back to us.
-  const callbackUrl = safeRedirectPath(requested, "");
-
-  // Auth.js redirects a failed direct POST to `pages.error`, which is this
-  // page. The code it appends is not shown: it distinguishes cases the visitor
-  // is not entitled to distinguish.
-  const hasError = typeof params.error === "string" && params.error.length > 0;
-
   const t = await getTranslations("signup");
+  const open = isSignupEnabled();
 
   return (
     <main className="grid min-h-dvh lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+      {/* The same identity plate the sign-in page uses — DESIGN.md §1. */}
       <section
         aria-hidden
         className="relative hidden overflow-hidden bg-petrol-800 lg:block"
@@ -72,12 +86,13 @@ export default async function LoginPage({
           <div className="max-w-md">
             <div className="mb-6 h-0.5 w-16 bg-brass-400" />
             <p className="font-display text-3xl font-semibold leading-tight text-stone-100">
-              Planned maintenance, work orders and compliance — for every asset
-              you look after.
+              {t("plate.title")}
             </p>
-            <p className="mt-4 text-sm text-petrol-200">
-              الصيانة الوقائية وأوامر العمل والامتثال
-            </p>
+            <ul className="mt-6 grid gap-2 text-sm text-petrol-200">
+              <li>{t("plate.pointOne")}</li>
+              <li>{t("plate.pointTwo")}</li>
+              <li>{t("plate.pointThree")}</li>
+            </ul>
           </div>
 
           <p className="text-xs text-petrol-200">
@@ -94,36 +109,34 @@ export default async function LoginPage({
                 PPM Platform
               </p>
               <h1 className="mt-2 font-display text-3xl font-semibold text-foreground lg:mt-0">
-                Sign in
+                {t("title")}
               </h1>
               <p className="mt-2 text-sm text-muted-foreground">
-                Use the work email your administrator set up for you.
+                {t("subtitle")}
               </p>
             </div>
             <ThemeToggle />
           </div>
 
-          <LoginForm
-            callbackUrl={callbackUrl || undefined}
-            initialError={
-              hasError
-                ? "That email and password combination is not valid."
-                : undefined
-            }
-          />
+          {open ? (
+            <SignupForm />
+          ) : (
+            <p
+              role="status"
+              className="rounded-md border border-border bg-surface-sunken px-4 py-3 text-sm text-muted-foreground"
+            >
+              {t("closed")}
+            </p>
+          )}
 
           <p className="mt-8 border-t border-border pt-5 text-sm text-muted-foreground">
-            {t("noAccount")}{" "}
+            {t("haveAccount")}{" "}
             <Link
-              href={localeHref("/signup", locale)}
+              href={localeHref("/login", locale)}
               className="font-medium text-accent-text underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              {t("signUpLink")}
+              {t("signInLink")}
             </Link>
-          </p>
-
-          <p className="mt-3 text-xs text-muted-foreground">
-            {t("invitedNote")}
           </p>
         </div>
       </section>

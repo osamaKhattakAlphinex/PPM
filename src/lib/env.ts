@@ -19,7 +19,11 @@ const serverEnvSchema = z.object({
 
   MONGODB_MAX_POOL_SIZE: z.coerce.number().int().min(1).max(100).default(10),
   MONGODB_MIN_POOL_SIZE: z.coerce.number().int().min(0).max(100).default(0),
-  MONGODB_SERVER_SELECTION_TIMEOUT_MS: z.coerce.number().int().min(500).default(8_000),
+  MONGODB_SERVER_SELECTION_TIMEOUT_MS: z.coerce
+    .number()
+    .int()
+    .min(500)
+    .default(8_000),
   MONGODB_SOCKET_TIMEOUT_MS: z.coerce.number().int().min(1_000).default(45_000),
   MONGODB_AUTO_INDEX: z
     .enum(["true", "false"])
@@ -31,7 +35,10 @@ const serverEnvSchema = z.object({
   // session, which is the intended behaviour for a leaked secret.
   AUTH_SECRET: z
     .string()
-    .min(32, "must be at least 32 characters (generate with `openssl rand -base64 32`)"),
+    .min(
+      32,
+      "must be at least 32 characters (generate with `openssl rand -base64 32`)",
+    ),
 
   // AUTH_SESSION_MAX_AGE and AUTH_SESSION_REVALIDATE_AFTER are deliberately
   // absent: they are read in `src/lib/auth/config.ts`, which the Edge-runtime
@@ -106,7 +113,26 @@ const serverEnvSchema = z.object({
   S3_ACCESS_KEY_ID: z.string().min(1).optional(),
   S3_SECRET_ACCESS_KEY: z.string().min(1).optional(),
 
-  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  /**
+   * Whether anybody may register a new company from the public site.
+   *
+   * CLAUDE.md forbids public write endpoints; sign-up is the deliberate
+   * exception, so it comes with an off switch that needs no deploy to think
+   * about. Default ON, because a product whose sign-up page 503s out of the box
+   * looks broken rather than careful — and because the endpoint can only ever
+   * create a NEW empty tenant, never touch an existing one.
+   *
+   * Set it to `false` for a deployment that provisions its customers by hand.
+   * The pre-launch checklist in `docs/DEPLOYMENT.md` asks the question.
+   */
+  SIGNUP_ENABLED: z
+    .enum(["true", "false"])
+    .default("true")
+    .transform((value) => value === "true"),
+
+  NODE_ENV: z
+    .enum(["development", "test", "production"])
+    .default("development"),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
@@ -126,7 +152,9 @@ export function getServerEnv(): ServerEnv {
 
   if (!parsed.success) {
     const problems = parsed.error.issues
-      .map((issue) => `  - ${issue.path.join(".") || "(root)"}: ${issue.message}`)
+      .map(
+        (issue) => `  - ${issue.path.join(".") || "(root)"}: ${issue.message}`,
+      )
       .join("\n");
     throw new Error(
       `Invalid server environment. Check .env.example and your .env.local:\n${problems}`,
@@ -147,6 +175,17 @@ export function getServerEnv(): ServerEnv {
  */
 export function hasAnthropicKey(): boolean {
   return getServerEnv().ANTHROPIC_API_KEY !== undefined;
+}
+
+/**
+ * May a visitor register a new company?
+ *
+ * A boolean, asked by both the page (which renders a closed notice instead of a
+ * form) and the action (which refuses regardless of what the page did). Two
+ * checks rather than one, because a hidden form is not a disabled endpoint.
+ */
+export function isSignupEnabled(): boolean {
+  return getServerEnv().SIGNUP_ENABLED;
 }
 
 /** Test-only escape hatch so a suite can re-read a mutated `process.env`. */

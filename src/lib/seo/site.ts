@@ -36,12 +36,38 @@ export const SITE_ORIGIN = (
 export const SITE_NAME = "PPM Platform";
 
 /** The public pages, in sitemap order. Unprefixed — the locale is added. */
-export const PUBLIC_ROUTES = ["", "/pricing", "/contact"] as const;
+export const PUBLIC_ROUTES = [
+  "",
+  "/pricing",
+  "/contact",
+  "/scenarios",
+] as const;
 
 export type PublicRoute = (typeof PUBLIC_ROUTES)[number];
 
+/**
+ * Public, indexable, and NOT prerendered.
+ *
+ * Kept separate from `PUBLIC_ROUTES` because that list means one specific
+ * thing — pages written at build time — and two other things read it: the
+ * sitemap, and the middleware's choice between the nonce policy and the
+ * static one. Sign-up is a public page a crawler should find, but it renders
+ * per request (it reads the sign-up switch and posts a form), so it needs the
+ * nonce policy. Adding it to `PUBLIC_ROUTES` would hand it the static CSP and
+ * silently break the very form it exists for.
+ *
+ * The invitation page is deliberately absent from both: its URL contains a
+ * token, and a page whose address is a secret does not belong in a sitemap.
+ */
+export const DYNAMIC_PUBLIC_ROUTES = ["/signup"] as const;
+
+export type DynamicPublicRoute = (typeof DYNAMIC_PUBLIC_ROUTES)[number];
+
 /** An absolute URL for one route in one locale. */
-export function absoluteUrl(route: PublicRoute, locale: Locale): string {
+export function absoluteUrl(
+  route: PublicRoute | DynamicPublicRoute,
+  locale: Locale,
+): string {
   return `${SITE_ORIGIN}/${locale}${route}`;
 }
 
@@ -57,7 +83,10 @@ export function absoluteUrl(route: PublicRoute, locale: Locale): string {
  *  - `x-default`, pointing at English. Without it a crawler picks one itself,
  *    and the one it picks for a Gulf audience is not predictable.
  */
-export function alternatesFor(route: PublicRoute, locale: Locale) {
+export function alternatesFor(
+  route: PublicRoute | DynamicPublicRoute,
+  locale: Locale,
+) {
   const languages: Record<string, string> = {};
   for (const alternate of LOCALES) {
     languages[alternate] = absoluteUrl(route, alternate);

@@ -8,7 +8,11 @@
  * `eslint-rules/dal-boundary.mjs`.
  */
 
-export { connectToDatabase, disconnectFromDatabase, DatabaseConnectionError } from "./connect";
+export {
+  connectToDatabase,
+  disconnectFromDatabase,
+  DatabaseConnectionError,
+} from "./connect";
 
 export {
   basePlugin,
@@ -84,17 +88,22 @@ export {
 
 export {
   clientBelongsToOrganization,
+  completeInvitation,
   ensureOrganization,
+  findInvitedAccount,
   listActiveOrganizationIds,
   MAX_ORGANIZATIONS_PER_JOB,
   findIdentityById,
   findOrganizationBySlug,
   findSignInCandidate,
+  provisionTenant,
   recordSuccessfulLogin,
   updatePasswordHash,
   type IdentitySnapshot,
+  type InvitedAccount,
   type OrganizationRecord,
   type OrganizationStatus,
+  type ProvisionTenantOutcome,
   type SignInCandidate,
 } from "./identity-store";
 
@@ -232,7 +241,12 @@ export {
 // The MODELS stay unexported (see above); their zod schemas do not, because
 // they are the source of truth every action payload schema is derived from.
 
-export { USER_STATUSES, userStatusSchema, type UserDocument, type UserStatus } from "./models/user";
+export {
+  USER_STATUSES,
+  userStatusSchema,
+  type UserDocument,
+  type UserStatus,
+} from "./models/user";
 
 export {
   CLIENT_STATUSES,
@@ -262,18 +276,27 @@ export { assetInputSchema, type AssetDocument } from "./models/asset";
 // Same rule as assets above: the trade and status vocabularies, and the bounds
 // on a skills list, are domain constants (`src/lib/domain/technicians.ts`) that
 // the directory grid imports as values, so they are not re-exported here.
-export { technicianInputSchema, type TechnicianDocument } from "./models/technician";
+export {
+  technicianInputSchema,
+  type TechnicianDocument,
+} from "./models/technician";
 
 // Same rule again: the frequency and status vocabularies are domain constants
 // (`src/lib/domain/preventive.ts`) that the schedule list, its filters and its
 // tiles import as values, so they are not re-exported here.
-export { ppmScheduleInputSchema, type PpmScheduleDocument } from "./models/ppm-schedule";
+export {
+  ppmScheduleInputSchema,
+  type PpmScheduleDocument,
+} from "./models/ppm-schedule";
 
 // And again: the priority and status vocabularies are domain constants
 // (`src/lib/domain/corrective.ts`) that the ticket list, its filters, its tiles
 // and — uniquely — its per-row action buttons import as values, so they are not
 // re-exported here.
-export { workOrderInputSchema, type WorkOrderDocument } from "./models/work-order";
+export {
+  workOrderInputSchema,
+  type WorkOrderDocument,
+} from "./models/work-order";
 
 // And again: the contract type and status vocabularies, the display statuses
 // and the two derived-status functions are domain constants
@@ -314,13 +337,19 @@ export { invoiceInputSchema, type InvoiceDocument } from "./models/invoice";
 // arithmetic are domain constants (`src/lib/domain/attendance.ts`) that the
 // check-in button and the status pill import as values, so they are not
 // re-exported here.
-export { attendanceInputSchema, type AttendanceDocument } from "./models/attendance";
+export {
+  attendanceInputSchema,
+  type AttendanceDocument,
+} from "./models/attendance";
 
 // And again: the allowed types, the size cap, the sniffer, the filename
 // sanitiser and the EXIF stripper are domain functions
 // (`src/lib/domain/files.ts`) that the upload button and the route both use, so
 // they are not re-exported here.
-export { attachmentInputSchema, type AttachmentDocument } from "./models/attachment";
+export {
+  attachmentInputSchema,
+  type AttachmentDocument,
+} from "./models/attachment";
 
 // And again: the kinds, severities and the dedupe-key builder are domain
 // constants (`src/lib/domain/notifications.ts`) that the bell menu imports as

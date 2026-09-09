@@ -46,6 +46,17 @@ const FILES = walk(SRC).map((file) => ({
   source: readFileSync(file, "utf8"),
 }));
 
+/**
+ * The same array under a lowercase name.
+ *
+ * `FILES.find(...)` trips the `dal-boundary` lint rule, which reads any
+ * `.find()` on a capitalised receiver as a Mongoose model call. It is a false
+ * positive on an array of file contents — and a rule that is coarse in the
+ * direction of shouting too often is the right kind of coarse, so the fix is
+ * here rather than in the rule.
+ */
+const sourceFiles = FILES;
+
 /** Every module that declares at least one server action. */
 const ACTION_FILES = FILES.filter((file) =>
   file.source.includes("defineAction({"),
@@ -167,6 +178,105 @@ describe("server actions", () => {
         looseObjects - allowed,
         `${file.path} uses z.object instead of z.strictObject`,
       ).toBe(0);
+    }
+  });
+});
+
+/**
+ * The exception list, and the reason it is a list rather than a comment.
+ *
+ * `defineAction` is what makes "authenticated, authorised, scoped, validated"
+ * true of a mutation by construction — so a `"use server"` module that does NOT
+ * use it is a mutation surface nobody is checking. Three modules legitimately
+ * do not, and all three are the same case: there is no session yet, because
+ * obtaining or creating one IS the job.
+ *
+ * Naming them here means a FOURTH one fails this suite. That is the whole
+ * point: the dangerous version of this file is the one where a public endpoint
+ * is added and no test notices, because the tests only ever looked at actions
+ * that used the wrapper.
+ */
+const UNAUTHENTICATED_ACTION_MODULES = [
+  // The product's two public writes: registering a company, and accepting an
+  // invitation. CLAUDE.md's deliberate exception, and the only module in the
+  // tree that reaches the database without the wrapper anywhere in it.
+  path.join("src", "lib", "signup", "actions.ts"),
+];
+
+/**
+ * `src/lib/auth/actions.ts` is deliberately absent from that list even though
+ * `loginAction` and `logoutAction` are unwrapped. It is a MIXED module: the one
+ * thing in it that needs a session (`registerUser`) goes through the wrapper,
+ * and the sign-in path cannot, because the credentials endpoint Auth.js exposes
+ * is reachable without this module at all — a check here would guard the polite
+ * path only, which is why the real ones live in `authorize()`.
+ *
+ * A module using the wrapper for at least one action is therefore treated as
+ * checked. That is the honest limit of a static test, and it is recorded here
+ * rather than left as an unexplained gap.
+ */
+
+describe("the unauthenticated surface", () => {
+  const serverActionModules = FILES.filter(
+    (file) =>
+      file.source.startsWith('"use server"') ||
+      file.source.startsWith("'use server'"),
+  );
+
+  it("has some, so this suite is auditing something", () => {
+    expect(serverActionModules.length).toBeGreaterThan(8);
+  });
+
+  /**
+   * Every `"use server"` module either goes through the wrapper or is on the
+   * list above. There is no third category.
+   */
+  it("is exactly the documented set", () => {
+    const unwrapped = serverActionModules
+      .filter((file) => !file.source.includes("defineAction({"))
+      .filter((file) => !file.source.includes("defineFormAction({"))
+      .map((file) => file.path)
+      .sort();
+
+    expect(unwrapped).toEqual([...UNAUTHENTICATED_ACTION_MODULES].sort());
+  });
+
+  /**
+   * An endpoint with no session cannot rate-limit per user, so it must
+   * rate-limit per address. Without that, the two public writes are an open
+   * invitation to fill the database — or to spend our argon2 budget for free.
+   */
+  it("rate-limits the public writes by address", () => {
+    const publicWrites = sourceFiles.find(
+      (file) => file.path === path.join("src", "lib", "signup", "actions.ts"),
+    );
+
+    expect(publicWrites, "the public write module has moved").toBeDefined();
+    expect(publicWrites!.source, "public writes are not rate limited").toMatch(
+      /enforceRateLimit\(/,
+    );
+    expect(
+      publicWrites!.source,
+      "the limiter is not keyed on the caller's address",
+    ).toMatch(/clientIpFrom\(/);
+  });
+
+  /**
+   * Registration can create a tenant. It must never be able to create a role,
+   * a status or a tenant NAMED IN THE PAYLOAD — the ADMIN it mints is implied
+   * by the act of creating the company, not chosen by the person signing up.
+   */
+  it("never lets a public payload name a role or a tenant", () => {
+    const publicWrites = sourceFiles.find(
+      (file) => file.path === path.join("src", "lib", "signup", "schemas.ts"),
+    );
+
+    expect(publicWrites, "the public schemas have moved").toBeDefined();
+    for (const field of ["role:", "status:", "organizationId:", "clientId:"]) {
+      expect(
+        publicWrites!.source,
+        `a public schema declares ${field}`,
+      ).not.toContain(field);
     }
   });
 });

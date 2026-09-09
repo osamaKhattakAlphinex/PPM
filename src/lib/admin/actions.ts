@@ -5,7 +5,9 @@ import { revalidatePath } from "next/cache";
 import { canAssignRole } from "@/lib/auth/access";
 import { connectToDatabase, usersRepository, type Page } from "@/lib/db";
 import { canTransitionUserStatus } from "@/lib/domain/users";
+import { invitePath, issueInvitation } from "@/lib/signup/tokens";
 import { defineAction, type ActionResult } from "@/lib/security/action";
+import { sensitiveMutationRateLimiter } from "@/lib/security/rate-limit";
 import {
   AppError,
   NotFoundError,
@@ -13,7 +15,11 @@ import {
 } from "@/lib/security/errors";
 import { toUserSummary, type UserSummary } from "./dto";
 import { listUsersForScope, USER_ADMINS } from "./queries";
-import { listUsersSchema, setUserStatusSchema } from "./schemas";
+import {
+  inviteUserSchema,
+  listUsersSchema,
+  setUserStatusSchema,
+} from "./schemas";
 
 /**
  * The write side of user administration.
@@ -120,6 +126,90 @@ const runSetUserStatus = defineAction({
 });
 
 /**
+ * Mint a single-use invitation link for one account.
+ *
+ * The link is the way a colleague sets their OWN password. Without it an
+ * administrator has to invent one, tell them what it is, and hope they change
+ * it — which means a password known to two people, communicated over whatever
+ * channel was to hand.
+ *
+ * The scheme, all of which is in `src/lib/signup/tokens.ts`:
+ *
+ *  - 32 bytes of CSPRNG output. The RAW token is returned here, once, and is
+ *    never stored: what goes into the database is a SHA-256 digest of it, so a
+ *    dump of the users collection contains nothing anybody can redeem.
+ *  - Seven days. An invitation that never expired would be a permanent
+ *    password-reset link living in an inbox.
+ *  - Re-issuing REPLACES the digest, so the previous link stops working. That
+ *    is what makes "I forwarded it to the wrong person" recoverable.
+ *
+ * The same two authority checks as a status change, for the same reason: an
+ * FM_MANAGER must not be able to mint a link that sets an ADMIN's password, and
+ * nobody needs to invite themselves.
+ */
+const runInviteUser = defineAction({
+  name: "inviteUser",
+  roles: USER_ADMINS,
+  input: inviteUserSchema,
+  // Minting credentials is not an ordinary write. Ten a minute is far above an
+  // administrator onboarding a team and far below a script harvesting links.
+  rateLimit: sensitiveMutationRateLimiter,
+  async handler({ input, user, scope }): Promise<{ path: string }> {
+    await connectToDatabase();
+
+    const users = usersRepository.forScope(scope);
+
+    const existing = await users.findById(input.id, {
+      select: ["_id", "role", "status"],
+    });
+    if (!existing) throw new NotFoundError("User");
+
+    if (existing._id.toHexString() === user.id) {
+      throw new ValidationError("an administrator may not invite themselves", {
+        id: "You already have an account.",
+      });
+    }
+
+    if (!canAssignRole(user.role, existing.role)) {
+      throw new AppError(
+        "FORBIDDEN",
+        403,
+        "You cannot invite that account.",
+        `${user.role} attempted to invite a ${existing.role}`,
+      );
+    }
+
+    if (existing.status === "SUSPENDED") {
+      throw new ValidationError("cannot invite a suspended account", {
+        id: "Activate the account before sending an invitation.",
+      });
+    }
+
+    const invitation = issueInvitation();
+
+    const updated = await users.update(input.id, {
+      inviteTokenHash: invitation.tokenHash,
+      inviteExpiresAt: invitation.expiresAt,
+    });
+    if (!updated) throw new NotFoundError("User");
+
+    revalidatePath(ADMIN_PATH, "page");
+
+    /**
+     * A PATH, not an absolute URL. The origin belongs to whoever is reading —
+     * building it here would mean trusting a request header for the host, which
+     * is how a link ends up pointing at an attacker's domain with a real token
+     * on the end of it. The browser prepends its own origin.
+     *
+     * The locale is the invitee's starting language, not the administrator's
+     * current one; "en" is the safe default, and the invitation page has its
+     * own language switch.
+     */
+    return { path: invitePath("en", invitation.token) };
+  },
+});
+
+/**
  * Re-exported as plain async functions because every export of a `"use server"`
  * module has to be one — and because every export of such a module is a
  * browser-callable endpoint, nothing that takes a `TenantScope` may appear
@@ -135,4 +225,10 @@ export async function setUserStatusAction(
   payload: unknown,
 ): Promise<ActionResult<UserSummary>> {
   return runSetUserStatus(payload);
+}
+
+export async function inviteUserAction(
+  payload: unknown,
+): Promise<ActionResult<{ path: string }>> {
+  return runInviteUser(payload);
 }

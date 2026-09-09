@@ -1,7 +1,11 @@
 import type { MetadataRoute } from "next";
 
 import { LOCALES } from "@/lib/i18n/config";
-import { absoluteUrl, PUBLIC_ROUTES } from "@/lib/seo/site";
+import {
+  absoluteUrl,
+  DYNAMIC_PUBLIC_ROUTES,
+  PUBLIC_ROUTES,
+} from "@/lib/seo/site";
 
 /**
  * The sitemap.
@@ -10,8 +14,10 @@ import { absoluteUrl, PUBLIC_ROUTES } from "@/lib/seo/site";
  * `noindex`, so listing `/app/assets` here would be telling a crawler to fetch
  * something it is explicitly forbidden to index — and, worse, publishing the
  * shape of a private application to anybody who reads the file. What is in this
- * file is exactly `PUBLIC_ROUTES`, which is also what the marketing navigation
- * renders, so the two cannot drift.
+ * file is exactly `PUBLIC_ROUTES` plus `DYNAMIC_PUBLIC_ROUTES` — the marketing
+ * pages, and the one public page that renders per request. Both lists live in
+ * `src/lib/seo/site.ts`, which is also what the marketing navigation reads, so
+ * they cannot drift.
  *
  * Each entry carries its `alternates.languages` map, which Next renders as the
  * `xhtml:link rel="alternate" hreflang` elements a crawler needs to understand
@@ -28,8 +34,10 @@ import { absoluteUrl, PUBLIC_ROUTES } from "@/lib/seo/site";
 const BUILT_AT = new Date();
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  const routes = [...PUBLIC_ROUTES, ...DYNAMIC_PUBLIC_ROUTES];
+
   return LOCALES.flatMap((locale) =>
-    PUBLIC_ROUTES.map((route) => ({
+    routes.map((route) => ({
       url: absoluteUrl(route, locale),
       lastModified: BUILT_AT,
       // The landing page is the entry point; the other two are secondary. A
@@ -39,7 +47,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly" as const,
       alternates: {
         languages: Object.fromEntries(
-          LOCALES.map((alternate) => [alternate, absoluteUrl(route, alternate)]),
+          LOCALES.map((alternate) => [
+            alternate,
+            absoluteUrl(route, alternate),
+          ]),
         ),
       },
     })),

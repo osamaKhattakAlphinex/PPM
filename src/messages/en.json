@@ -114,6 +114,15 @@
       "clientPlaceholder": "Choose a client",
       "cancel": "Cancel",
       "submit": "Create user"
+    },
+    "invite": "Invite link",
+    "inviteLink": {
+      "title": "Invitation link",
+      "description": "Send this to {name}. It works once and expires in seven days.",
+      "note": "This is the only time the link is shown — we store a fingerprint of it, not the link itself. If you lose it, issue a new one, which cancels this one.",
+      "copy": "Copy link",
+      "copied": "Copied",
+      "close": "Close"
     }
   },
   "account": {
@@ -147,6 +156,56 @@
       "submit": "Change password",
       "saved": "Password changed."
     }
+  },
+  "signup": {
+    "metaTitle": "Start free · PPM Platform",
+    "metaDescription": "Create your company workspace and start managing planned maintenance, work orders, contracts and VAT invoicing in minutes.",
+    "title": "Create your company",
+    "subtitle": "You will be the first administrator. You can add your team afterwards.",
+    "company": "Company name",
+    "companyPlaceholder": "Gulf Facility Services",
+    "name": "Your full name",
+    "email": "Work email",
+    "password": "Password",
+    "passwordHint": "At least 12 characters. Length matters more than symbols.",
+    "terms": "I agree to the terms of service and the privacy policy.",
+    "submit": "Create company",
+    "submitting": "Creating your workspace…",
+    "closed": "Registration is not open on this deployment. Contact us and we will set your company up.",
+    "haveAccount": "Already have an account?",
+    "signInLink": "Sign in",
+    "plate": {
+      "title": "Your assets, your visits, your invoices — from the first day.",
+      "pointOne": "Planned and reactive maintenance in one queue",
+      "pointTwo": "Contracts, approvals and 15% VAT invoicing",
+      "pointThree": "English and Arabic, with your data kept to yourself"
+    },
+    "noAccount": "Do not have an account?",
+    "signUpLink": "Create your company",
+    "invitedNote": "If a colleague invited you, use the link they sent instead — it lets you set your own password."
+  },
+  "invite": {
+    "title": "Set your password",
+    "subtitle": "Welcome, {name}. Choose a password and you are in.",
+    "forAccount": "This invitation is for",
+    "password": "Choose a password",
+    "passwordHint": "At least 12 characters. Length matters more than symbols.",
+    "confirm": "Confirm password",
+    "submit": "Set password and sign in",
+    "submitting": "Setting your password…",
+    "invalidTitle": "This link is no longer valid",
+    "invalidBody": "Invitation links expire after seven days, and each one can be used only once. Ask your administrator to send a new one.",
+    "goToSignIn": "Go to sign in"
+  },
+  "scenarios": {
+    "metaTitle": "What the platform does",
+    "metaDescription": "Every part of PPM Platform, written as things you can go and check: planned maintenance, work orders, approvals, contracts, VAT invoicing and the rule that keeps each company's data to itself.",
+    "eyebrow": "How it behaves",
+    "title": "What the platform does, in plain words",
+    "intro": "Every module below is described as behaviour you can go and check for yourself — not a feature list. If you are evaluating the platform, this is what it does. If you are testing it, this is what should happen.",
+    "count": "{total} scenarios across {groups} areas.",
+    "contents": "Contents",
+    "footer": "Nothing on this page describes how any of it is built. It is the behaviour the product is held to."
   },
   "dashboard": {
     "title": "Dashboard",
@@ -875,7 +934,8 @@
       "goToApp": "Go to the app",
       "signOut": "Sign out",
       "signingOut": "Signing out…",
-      "signUp": "Start free"
+      "signUp": "Start free",
+      "scenarios": "What it does"
     },
     "meta": {
       "description": "A bilingual maintenance management platform for Gulf facility providers: assets, planned and reactive work, contracts, approvals and VAT invoicing — with every tenant's data isolated by design."
