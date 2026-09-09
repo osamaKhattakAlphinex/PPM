@@ -338,7 +338,9 @@
       "IN_PROGRESS": "قيد التنفيذ",
       "PENDING": "معلّق",
       "CLOSED": "مغلق"
-    }
+    },
+    "sendForApproval": "إرسال للاعتماد",
+    "sentForApproval": "تم الإرسال للاعتماد."
   },
   "checklists": {
     "title": "قوائم الفحص",
@@ -480,6 +482,69 @@
       "EXPIRED": "منتهٍ",
       "SUSPENDED": "معلّق",
       "CANCELLED": "ملغى"
+    }
+  },
+  "approvals": {
+    "title": "الموافقات",
+    "subtitle": "الأعمال المنجزة في طريقها إلى الفوترة — من اعتمدها، وعند من هي الآن.",
+    "clientSubtitle": "أعمال أنجزها مزوّد الخدمة ويطلب قبولها قبل إصدار الفاتورة.",
+    "clientNote": "مطلوب منك قبول العمل في مرحلة العميل.",
+    "item": "البند",
+    "progress": "التقدّم",
+    "statusLabel": "الحالة",
+    "raised": "تاريخ الطلب",
+    "actions": "إجراءات الموافقة",
+    "waiting": "بالانتظار",
+    "approve": "اعتماد",
+    "reject": "رفض",
+    "cancel": "إلغاء",
+    "approved": "تم الاعتماد — انتقل إلى المرحلة التالية.",
+    "rejected": "تم الرفض. توقّف المسار هنا.",
+    "trail": "السجل",
+    "trailFor": "السجل — {item}",
+    "mine": "بانتظاري",
+    "filterStatus": "الحالة",
+    "filterStage": "المرحلة",
+    "filterType": "نوع البند",
+    "allStatuses": "كل الحالات",
+    "allStages": "كل المراحل",
+    "allTypes": "كل الأنواع",
+    "empty": "لا يوجد ما يُعتمد",
+    "emptyBody": "الأعمال المنجزة المُرسلة للاعتماد ستظهر هنا، عند المرحلة التي تنتظرها.",
+    "rejectTitle": "رفض هذا البند",
+    "rejectBody": "يتوقّف المسار هنا ويُسجَّل السبب بشكل دائم. العمل المُعاد يُقدَّم كطلب جديد.",
+    "reason": "السبب",
+    "reasonHint": "ما الذي يجب تغييره قبل الاعتماد. سيراه مقدّم الطلب.",
+    "reasonRequired": "اذكر سبب الرفض.",
+    "stage": {
+      "TECHNICIAN": "الفني",
+      "SUPERVISOR": "المشرف",
+      "FM_MANAGER": "مدير المرافق",
+      "CLIENT": "العميل",
+      "INVOICE_TRIGGER": "جاهز للفوترة"
+    },
+    "status": {
+      "PENDING": "قيد الانتظار",
+      "APPROVED": "جاهز للفوترة",
+      "REJECTED": "مرفوض",
+      "COMPLETED": "تمت فوترته"
+    },
+    "refType": {
+      "WORK_ORDER": "أمر عمل",
+      "PM_REPORT": "تقرير صيانة",
+      "INVOICE": "فاتورة"
+    },
+    "action": {
+      "SUBMITTED": "تم التقديم",
+      "APPROVED": "تم الاعتماد",
+      "REJECTED": "تم الرفض"
+    },
+    "byRole": {
+      "ADMIN": "مسؤول النظام",
+      "FM_MANAGER": "مدير المرافق",
+      "SUPERVISOR": "المشرف",
+      "TECHNICIAN": "الفني",
+      "CLIENT": "العميل"
     }
   }
 }

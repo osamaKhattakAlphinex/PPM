@@ -338,7 +338,9 @@
       "IN_PROGRESS": "In progress",
       "PENDING": "Pending",
       "CLOSED": "Closed"
-    }
+    },
+    "sendForApproval": "Send for approval",
+    "sentForApproval": "Sent for approval."
   },
   "checklists": {
     "title": "Checklists",
@@ -480,6 +482,69 @@
       "EXPIRED": "Expired",
       "SUSPENDED": "Suspended",
       "CANCELLED": "Cancelled"
+    }
+  },
+  "approvals": {
+    "title": "Approvals",
+    "subtitle": "Completed work on its way to being billed — who has signed it off, and whose desk it is on now.",
+    "clientSubtitle": "Work your provider has completed and is asking you to accept, before it is invoiced.",
+    "clientNote": "You are asked to accept work at the client stage.",
+    "item": "Item",
+    "progress": "Progress",
+    "statusLabel": "Status",
+    "raised": "Raised",
+    "actions": "Approval actions",
+    "waiting": "waiting",
+    "approve": "Approve",
+    "reject": "Reject",
+    "cancel": "Cancel",
+    "approved": "Approved — moved to the next stage.",
+    "rejected": "Rejected. The chain has stopped here.",
+    "trail": "History",
+    "trailFor": "History — {item}",
+    "mine": "Waiting on me",
+    "filterStatus": "Status",
+    "filterStage": "Stage",
+    "filterType": "Item type",
+    "allStatuses": "All statuses",
+    "allStages": "All stages",
+    "allTypes": "All types",
+    "empty": "Nothing to approve",
+    "emptyBody": "Completed work sent for sign-off will appear here, at the stage it is waiting on.",
+    "rejectTitle": "Reject this item",
+    "rejectBody": "The chain stops here and the reason is recorded permanently. Redone work is submitted as a new request.",
+    "reason": "Reason",
+    "reasonHint": "What has to change before this can be approved. The requester sees this.",
+    "reasonRequired": "Say why this is being rejected.",
+    "stage": {
+      "TECHNICIAN": "Technician",
+      "SUPERVISOR": "Supervisor",
+      "FM_MANAGER": "FM manager",
+      "CLIENT": "Client",
+      "INVOICE_TRIGGER": "Ready to invoice"
+    },
+    "status": {
+      "PENDING": "Pending",
+      "APPROVED": "Ready to invoice",
+      "REJECTED": "Rejected",
+      "COMPLETED": "Invoiced"
+    },
+    "refType": {
+      "WORK_ORDER": "Work order",
+      "PM_REPORT": "Maintenance report",
+      "INVOICE": "Invoice"
+    },
+    "action": {
+      "SUBMITTED": "Submitted",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected"
+    },
+    "byRole": {
+      "ADMIN": "an administrator",
+      "FM_MANAGER": "the FM manager",
+      "SUPERVISOR": "the supervisor",
+      "TECHNICIAN": "the technician",
+      "CLIENT": "the client"
     }
   }
 }

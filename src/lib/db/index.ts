@@ -151,6 +151,14 @@ export {
 } from "./repositories/contracts";
 
 export {
+  approvalsRepository,
+  countApprovalsByStage,
+  type ApprovalCreateInput,
+  type ApprovalStageCount,
+  type ApprovalUpdateInput,
+} from "./repositories/approvals";
+
+export {
   checklistsRepository,
   type ChecklistCreateInput,
   type ChecklistUpdateInput,
@@ -233,6 +241,17 @@ export {
   type ChecklistDocument,
   type ChecklistItem,
 } from "./models/checklist";
+
+// And again: the stage order, the status and ref-type vocabularies and the
+// stage predicates are domain constants (`src/lib/domain/approvals.ts`) that the
+// pending queue, its filters and its progress indicator import as values, so
+// they are not re-exported here.
+export {
+  approvalHistoryEntrySchema,
+  approvalInputSchema,
+  type ApprovalDocument,
+  type ApprovalHistoryEntry,
+} from "./models/approval";
 
 export {
   checklistRunInputSchema,
