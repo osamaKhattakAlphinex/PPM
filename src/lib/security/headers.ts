@@ -38,7 +38,14 @@ function extraOrigins(raw: string | undefined): string[] {
 }
 
 export interface CspOptions {
-  readonly nonce: string;
+  /**
+   * The per-request nonce, or `null` for a statically generated page.
+   *
+   * `null` is not "no policy" — it selects the prerendered variant of
+   * `script-src`. See the comment on that directive for why a static page
+   * cannot carry a nonce and what is given up.
+   */
+  readonly nonce: string | null;
   /** Dev needs `unsafe-eval` (React Refresh) and a websocket for HMR. */
   readonly isDevelopment?: boolean;
   /** Additional https origins for `img-src` — an uploads CDN, say. */
@@ -74,6 +81,11 @@ export interface CspOptions {
  */
 export function buildContentSecurityPolicy(options: CspOptions): string {
   const { nonce, isDevelopment = false } = options;
+  /**
+   * `nonce: null` builds the STATIC variant — see `buildStaticSecurityHeaders`
+   * below for why a prerendered page cannot use a per-request nonce.
+   */
+  const isStatic = nonce === null;
 
   const imageOrigins = options.imageOrigins ?? [];
   const connectOrigins = options.connectOrigins ?? [];
@@ -83,13 +95,40 @@ export function buildContentSecurityPolicy(options: CspOptions): string {
 
     [
       "script-src",
-      [
-        "'self'",
-        `'nonce-${nonce}'`,
-        "'strict-dynamic'",
-        // React Refresh compiles modules with `eval` — dev only.
-        ...(isDevelopment ? ["'unsafe-eval'"] : []),
-      ],
+      isStatic
+        ? [
+            /**
+             * The prerendered variant.
+             *
+             * A nonce is minted per request; a statically generated page's HTML
+             * is written once at build time. The two cannot meet — Next stamps
+             * its hydration scripts with whatever nonce was present when the
+             * HTML was produced, and at build time there is none. So a
+             * nonce policy on a static page blocks Next's own bootstrap and
+             * ships HTML that never hydrates. (Lighthouse finds this
+             * immediately, as a wall of CSP violations in the console.)
+             *
+             * `'unsafe-inline'` is therefore the price of a static page, and it
+             * is charged ONLY on the three marketing pages, which have no
+             * session, no user data and no form that writes anything. Every
+             * other directive is unchanged, so the things that make an XSS
+             * useful are still shut: `object-src 'none'`, `base-uri 'self'`,
+             * `form-action 'self'` and `frame-ancestors 'none'`. Scripts still
+             * may only be LOADED from our own origin.
+             *
+             * The authenticated app keeps the nonce policy, because every page
+             * in it is dynamic.
+             */
+            "'self'",
+            "'unsafe-inline'",
+          ]
+        : [
+            "'self'",
+            `'nonce-${nonce}'`,
+            "'strict-dynamic'",
+            // React Refresh compiles modules with `eval` — dev only.
+            ...(isDevelopment ? ["'unsafe-eval'"] : []),
+          ],
     ],
 
     // See the note above: bounded, and the only way Framer Motion works.
@@ -241,4 +280,31 @@ export function buildRequestSecurityHeaders(options: { isDevelopment?: boolean }
       connectOrigins: extraOrigins(process.env.NEXT_PUBLIC_CSP_CONNECT_ORIGINS),
     }),
   };
+}
+
+/**
+ * The policy for a STATICALLY GENERATED page.
+ *
+ * Same policy, one directive different: `script-src` drops the nonce and
+ * `strict-dynamic` and accepts `'unsafe-inline'`, because a page whose HTML was
+ * written at build time cannot carry a nonce minted this morning — Next's own
+ * hydration bootstrap would be blocked and the page would render as HTML that
+ * never comes alive.
+ *
+ * Applied to the three public marketing pages and nowhere else. They hold no
+ * session, no user data and no form that writes anything; the authenticated app
+ * is dynamic and keeps the nonce policy. Everything that makes an injected
+ * script USEFUL is still closed off — `object-src 'none'`, `base-uri 'self'`,
+ * `form-action 'self'`, `frame-ancestors 'none'` — and scripts may still only
+ * be loaded from our own origin.
+ */
+export function buildStaticContentSecurityPolicy(
+  options: { isDevelopment?: boolean } = {},
+): string {
+  return buildContentSecurityPolicy({
+    nonce: null,
+    isDevelopment: options.isDevelopment ?? process.env.NODE_ENV !== "production",
+    imageOrigins: extraOrigins(process.env.NEXT_PUBLIC_CSP_IMG_ORIGINS),
+    connectOrigins: extraOrigins(process.env.NEXT_PUBLIC_CSP_CONNECT_ORIGINS),
+  });
 }

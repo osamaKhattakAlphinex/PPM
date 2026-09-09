@@ -782,5 +782,137 @@
     "tooLarge": "Files must be under 10 MB.",
     "empty": "No files yet",
     "emptyBody": "Photographs of nameplates, faults and completed work appear here."
+  },
+  "marketing": {
+    "primaryNav": "Main",
+    "footerNav": "Footer",
+    "footerNote": "Built for facility maintenance providers in the Gulf.",
+    "nav": {
+      "pricing": "Pricing",
+      "contact": "Contact",
+      "signIn": "Sign in"
+    },
+    "meta": {
+      "description": "A bilingual maintenance management platform for Gulf facility providers: assets, planned and reactive work, contracts, approvals and VAT invoicing — with every tenant's data isolated by design."
+    },
+    "hero": {
+      "eyebrow": "Facility maintenance management",
+      "tagline": "maintenance management for the Gulf",
+      "title": "Every asset, every visit, every invoice — in one place.",
+      "body": "PPM Platform runs planned and reactive maintenance for facility providers across the Gulf: the asset register, the PPM calendar, the ticket queue, the approval chain and the VAT invoice that comes out of the end of it.",
+      "primaryCta": "Sign in",
+      "secondaryCta": "See pricing",
+      "note": "Bilingual English and Arabic. Currency in SAR. VAT at the rate in force."
+    },
+    "features": {
+      "title": "What it does",
+      "body": "Eleven modules that cover the work a maintenance provider actually does, from the nameplate on a chiller to the invoice a client pays.",
+      "assets": {
+        "title": "Asset register",
+        "body": "Every piece of plant, where it is, whose it is, and what condition it is in — with photographs attached to the record."
+      },
+      "planned": {
+        "title": "Planned maintenance",
+        "body": "Daily to annual schedules, with compliance measured against what actually fell due rather than against everything ever planned."
+      },
+      "approvals": {
+        "title": "Approval chain",
+        "body": "Technician, supervisor, FM manager, then the client. Every signature recorded, every stage enforced on the server."
+      },
+      "invoicing": {
+        "title": "VAT invoicing",
+        "body": "Invoices raised from approved work, with VAT and totals calculated on the server and a bilingual tax invoice as a PDF."
+      },
+      "insights": {
+        "title": "AI insights",
+        "body": "Failure risk, repeated breakdowns, schedule optimisation and spare-parts forecasting, over your own data and nobody else's."
+      },
+      "bilingual": {
+        "title": "English and Arabic",
+        "body": "Not a translation layer — the whole interface mirrors, the typography changes, and every document prints in both languages."
+      }
+    },
+    "trust": {
+      "title": "Your data is your data",
+      "body": "Multi-tenancy is not a filter somebody remembered to apply. Every query in this product goes through a data-access layer that injects the organisation — and, for client users, the client — into the filter last, where nothing can displace it.",
+      "isolation": {
+        "title": "Isolated by construction",
+        "body": "Feature code cannot reach the database directly; a lint rule fails the build if it tries. Cross-tenant reads are tested against a real database, not assumed."
+      },
+      "audit": {
+        "title": "Auditable approvals",
+        "body": "Every approval records who acted, at which stage, in what role, and when. History is appended to and never rewritten."
+      },
+      "residency": {
+        "title": "Your own deployment",
+        "body": "Runs on your infrastructure or ours, against your own MongoDB. Files sit in a private bucket namespaced by tenant and are served only through authenticated routes."
+      }
+    },
+    "cta": {
+      "title": "See it against your own data",
+      "body": "Tell us how many sites and assets you run, and we will set up a walkthrough.",
+      "primary": "Talk to us",
+      "secondary": "See pricing"
+    },
+    "pricing": {
+      "metaTitle": "Pricing",
+      "metaDescription": "Straightforward monthly pricing for PPM Platform, in Saudi riyals, by the size of the portfolio you maintain.",
+      "title": "Pricing",
+      "body": "By the size of the portfolio you maintain, in Saudi riyals, per month. Every plan includes both languages, the full module set and unlimited users.",
+      "mostPopular": "Most chosen",
+      "perMonth": "/ month",
+      "custom": "Let's talk",
+      "cta": "Get in touch",
+      "note": "Prices exclude VAT. Annual agreements are discounted. Migration from an existing CMMS is quoted separately and usually takes a fortnight.",
+      "plans": {
+        "starter": {
+          "name": "Starter",
+          "for": "One provider, up to 500 assets",
+          "feature1": "Assets, planned and reactive maintenance",
+          "feature2": "Checklists and technician mobile view",
+          "feature3": "Contracts and VAT invoicing",
+          "feature4": "Email support, next business day"
+        },
+        "growth": {
+          "name": "Growth",
+          "for": "Multi-site, up to 5,000 assets",
+          "feature1": "Everything in Starter",
+          "feature2": "Approval chain with client acceptance",
+          "feature3": "Client portal for every customer",
+          "feature4": "Reports and PDF exports",
+          "feature5": "Priority support"
+        },
+        "enterprise": {
+          "name": "Enterprise",
+          "for": "Unlimited assets and organisations",
+          "feature1": "Everything in Growth",
+          "feature2": "AI insights over your own data",
+          "feature3": "Deployment in your own cloud",
+          "feature4": "Single sign-on and audit export",
+          "feature5": "Named account manager"
+        }
+      }
+    },
+    "contact": {
+      "metaTitle": "Contact",
+      "metaDescription": "Talk to the PPM Platform team about a walkthrough, a migration from an existing CMMS, or a deployment in your own cloud.",
+      "title": "Talk to us",
+      "body": "A walkthrough takes half an hour and we will run it against equipment you recognise. Tell us how many sites you maintain and we will come prepared.",
+      "email": {
+        "label": "Email"
+      },
+      "phone": {
+        "label": "Phone"
+      },
+      "office": {
+        "label": "Office",
+        "value": "Riyadh, Kingdom of Saudi Arabia"
+      },
+      "existing": {
+        "title": "Already a customer?",
+        "body": "Sign in to your organisation's workspace.",
+        "cta": "Sign in"
+      }
+    }
   }
 }

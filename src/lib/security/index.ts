@@ -12,6 +12,7 @@
 export {
   buildContentSecurityPolicy,
   buildRequestSecurityHeaders,
+  buildStaticContentSecurityPolicy,
   generateNonce,
   staticSecurityHeaders,
   strictTransportSecurityHeader,
