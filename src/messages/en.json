@@ -699,5 +699,34 @@
         "body": "Invoiced, collected and outstanding, with contract value and workload."
       }
     }
+  },
+  "aiInsights": {
+    "title": "AI insights",
+    "subtitle": "Four analyses of your own maintenance data, run on the server. Nothing here leaves your organisation's scope.",
+    "privacyNote": "Each analysis sends a small, capped snapshot of your organisation's own maintenance figures to Anthropic's API from our server. The API key never reaches your browser, no other tenant's data is included, and no client names, user names or money figures are sent.",
+    "notConfiguredNote": "AI insights are not configured on this deployment.",
+    "run": "Run analysis",
+    "rerun": "Run again",
+    "stop": "Stop",
+    "thinking": "Analysing…",
+    "failed": "The analysis could not be run. Try again in a moment.",
+    "analysis": {
+      "FAILURE_RISK": {
+        "title": "Failure risk",
+        "body": "Which equipment is most likely to fail in the next 90 days, and what points that way."
+      },
+      "BREAKDOWN_PATTERNS": {
+        "title": "Repeated breakdowns",
+        "body": "The same asset failing twice, or the same fault across a category — and the likely common cause."
+      },
+      "PM_OPTIMIZATION": {
+        "title": "Schedule optimisation",
+        "body": "Where the preventive plan is visiting too often, and where it is not visiting often enough."
+      },
+      "SPARE_PARTS": {
+        "title": "Spare parts forecast",
+        "body": "What the fault history suggests is worth holding in stores this quarter."
+      }
+    }
   }
 }
