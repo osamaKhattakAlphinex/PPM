@@ -15,7 +15,7 @@ fastest:
 |---|---|---|
 | Typecheck | `pnpm typecheck` | `tsc --noEmit` over the whole tree. No `any`, no unchecked property access. |
 | Lint | `pnpm lint:dal` | ESLint with `--max-warnings 0`, which includes the **data-access boundary rule** — a direct `Model.find(...)` or a `mongoose` import outside `src/lib/db` fails the build. |
-| Test | `pnpm test` | All 52 suites, including the cross-module isolation sweep and the source audit described in `docs/SECURITY.md`. |
+| Test | `pnpm test` | All 54 suites, including the cross-module isolation sweep and the source audit described in `docs/SECURITY.md`. |
 | Build | `pnpm build` | A real production build, which is also the only thing that proves the public pages still prerender. |
 
 Plus one assertion that only a built artifact can make: **no secret in the
@@ -231,6 +231,11 @@ and most are one command.
       overdue-PPM notice is ever raised.
 - [ ] `NEXT_PUBLIC_SITE_URL` is the production origin, not a preview URL.
 - [ ] `MONGODB_AUTO_INDEX=false`.
+- [ ] **Decide about `SIGNUP_ENABLED`.** It defaults to **true**, so anybody can
+      register a company from the public site. That endpoint can only ever
+      create a new empty tenant — it cannot reach an existing one — but if this
+      deployment provisions its customers by hand, set it to `false` and confirm
+      the sign-up page shows the closed notice.
 - [ ] `S3_*` configured, and the bucket is **private** — files are served only
       through the authenticated, scoped `/api/files/[id]` route, never by URL.
       Confirm by requesting an object URL directly and getting a 403.
@@ -248,6 +253,9 @@ and most are one command.
       returns nothing.
 - [ ] The first real ADMIN was created deliberately, with a password only that
       person knows.
+- [ ] Colleagues were added with **invitation links**, not with passwords typed
+      by an administrator — a password known to two people is not a password.
+      Confirm no account still shows as INVITED with a live link nobody used.
 
 ### Database
 

@@ -430,7 +430,7 @@ the result.
 |---|---|---|---|---|
 | 22.1 | Types | `pnpm typecheck` | Finishes with no errors | |
 | 22.2 | Lint and the data rule | `pnpm lint:dal` | Finishes with no errors and no warnings | |
-| 22.3 | The suite | `pnpm test` | All 52 suites pass. This needs a MongoDB — either let it download one, or point `MONGO_TEST_URI` at one you have | |
+| 22.3 | The suite | `pnpm test` | All 54 suites pass. This needs a MongoDB — either let it download one, or point `MONGO_TEST_URI` at one you have | |
 | 22.4 | The build | `pnpm build` | Finishes, and the public pages are listed as prerendered | |
 | 22.5 | CI | Push the branch and open the pull request | The CI check goes green. If it is red, the branch cannot be merged | |
 
@@ -466,6 +466,38 @@ Sign in as ADMIN and open the account menu (top right) → Administration.
 
 ---
 
+## 24. Sign-up, invitations and your own account
+
+| # | Test | What to do | What should happen | Result |
+|---|---|---|---|---|
+| 24.1 | Register a company | On the public site, click Start free. Fill in a company name, your name, an email and a 12-character password, tick the terms, submit | A new company is created, you are signed in as its administrator, and the workspace is empty | |
+| 24.2 | Nothing is borrowed | Look around the new company | No assets, no clients, no jobs. Nothing from any other company is visible | |
+| 24.3 | The terms box is required | Try to submit without ticking it | It refuses | |
+| 24.4 | A short password is refused | Try a 6-character password | It refuses and asks for at least 12 | |
+| 24.5 | A used email is refused neutrally | Register again with the same email | It is refused. The message must NOT say whether the email or the company already exists | |
+| 24.6 | Repeated attempts are blocked | Register four times in a row from the same computer | The fourth is refused with a wait message | |
+| 24.7 | Sign-up can be switched off | Set `SIGNUP_ENABLED=false`, restart, open the sign-up page | A polite closed notice instead of the form | |
+| 24.8 | And is off at the endpoint too | With it off, submit the form anyway (for example by reloading a cached page) | Still refused. Not just hidden | |
+| 24.9 | Arabic sign-up | Register from `/ar/signup` | The workspace opens in Arabic | |
+| 24.10 | An invitation link | As administrator, add a colleague, then click Invite link on their row | A link is shown once, with a note that it is shown only once | |
+| 24.11 | The colleague sets their own password | Open the link in a private window, choose a password, submit | They are signed in, and their account shows as Active | |
+| 24.12 | The link works only once | Open the same link again | It says the link is no longer valid | |
+| 24.13 | A new link cancels the old | Issue a second link for someone, then try the first | The first no longer works | |
+| 24.14 | A tampered link fails | Change one character in the link and open it | The same "no longer valid" message. It must not say why | |
+| 24.15 | Your own account | Sign in and open Account from the top-right menu | Your name, email, role, company and last sign-in are shown | |
+| 24.16 | Change your name | Change your name and save | It is saved. The name in the top bar catches up within a few minutes | |
+| 24.17 | Email cannot be edited | Look at the email box | It is shown but not editable, with a note saying why | |
+| 24.18 | Change your password | Enter your current password and a new one twice | It is changed, and you can sign in with the new one | |
+| 24.19 | The current password is required | Try to change it with the wrong current password | It refuses and says which field is wrong | |
+| 24.20 | The confirmation must match | Enter two different new passwords | It refuses | |
+| 24.21 | Signed in on the public site | While signed in, open the public home page | The header shows your name with a menu, not a Sign in button | |
+| 24.22 | The menu works | Open it | It offers Go to the app and Sign out, and Escape closes it | |
+| 24.23 | Sign out from the public site | Click Sign out there | You are signed out and stay on the public page | |
+| 24.24 | The scenarios page | Open What it does from the public menu | Every module is listed with its scenarios, in plain language | |
+| 24.25 | In Arabic too | Open the same page at `/ar/scenarios` | Fully Arabic and mirrored, with the same number of scenarios | |
+
+---
+
 ## Sign-off
 
 | Section | Cases | Passed | Failed | Tested by | Date |
@@ -493,7 +525,8 @@ Sign in as ADMIN and open the account menu (top right) → Administration.
 | 21. Look and feel | 10 | | | | |
 | 22. Automatic tests | 5 | | | | |
 | 23. User administration | 16 | | | | |
-| **Total** | **230** | | | | |
+| 24. Sign-up and account | 25 | | | | |
+| **Total** | **255** | | | | |
 
 **A release needs every case in section 19 to pass.** A failure there is not a
 bug to schedule — it is one company seeing another company's data, and nothing

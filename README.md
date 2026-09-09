@@ -8,6 +8,7 @@ ADMIN, FM_MANAGER, SUPERVISOR, TECHNICIAN, CLIENT.
 
 | Area | Modules |
 |---|---|
+| Accounts | Company sign-up, invitations, user administration, your own account |
 | Master data | Organizations, clients, locations, assets, technicians |
 | Operations | Preventive maintenance schedules, corrective work orders, checklists |
 | Money and governance | AMC contracts, a five-stage approval chain, invoicing with 15% VAT |
@@ -77,9 +78,13 @@ The handler receives a scope it did not construct and cannot widen.
 | `docs/DEPLOYMENT.md` | CI, environment, Atlas, hosting, the pre-launch checklist |
 | `docs/TEST-CASES.md` | Every module's test cases in plain language, for manual sign-off |
 
+The public site also carries a `/scenarios` page describing what the platform
+does as behaviour anybody can check — the same ground as `docs/TEST-CASES.md`,
+without the steps and the pass/fail column.
+
 ## Tests
 
-52 suites. Pure logic — state machines, VAT arithmetic, filename safety, prompt
+54 suites. Pure logic — state machines, VAT arithmetic, filename safety, prompt
 fencing, role policy — runs anywhere. The data-access suites run against a real
 mongod, because the isolation guarantees are claims about what MongoDB returns
 and a mocked model can only prove we built the filter we meant to build.

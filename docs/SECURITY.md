@@ -215,6 +215,32 @@ end of the data block and be read as instruction. The system prompt is authored
 in code and never composed from data. The output is advisory text; the model
 never writes to the database and has no tools.
 
+**The two public writes.** CLAUDE.md says there are no public write endpoints.
+There are now two, both deliberate, and both are the same shape: they run before
+anybody has a session, so `defineAction` cannot wrap them and every step it
+would have taken is taken explicitly instead — refuse if disabled, rate limit by
+IP *before* parsing, parse strictly, act.
+
+*Registering a company* (`signupAction`) creates a new organization and its
+first ADMIN. What makes it defensible is what it cannot reach: there is no path
+through it that reads, changes or names a row belonging to an existing tenant.
+Three attempts an hour per address then an hour's lockout; a honeypot field,
+answered as a success so a bot learns nothing; one neutral message for "email
+taken" and "company exists" alike, because email is unique system-wide and a
+specific answer is an oracle for who uses the product. `SIGNUP_ENABLED=false`
+closes it, checked in the action as well as the page.
+
+*Accepting an invitation* (`acceptInviteAction`) creates nothing — it completes
+an invitation an administrator already issued, to an account whose role they
+already chose. The token is 32 bytes of CSPRNG output, shown once, stored only
+as a SHA-256 digest, valid seven days, single-use. Redemption is one conditional
+update matching on the digest, so two people racing the same link cannot both
+succeed. Unknown, expired, redeemed and suspended all answer the same sentence.
+
+SHA-256 rather than argon2 for the token is deliberate: argon2 is slow to make a
+*low-entropy* secret expensive to guess, and this one has 2^256 to search, no
+dictionary and no reuse — the slowness would buy nothing and cost a page load.
+
 **The scheduled job** (`/api/jobs/notifications`) is the one route with no user.
 It authenticates with a shared secret compared using `timingSafeEqual`, and
 returns 503 rather than running when `CRON_SECRET` is unset. Its only unscoped
@@ -247,6 +273,8 @@ true only on the day it was performed.
 | 4 | `credentialsSchema` used `z.object` (strips) rather than `z.strictObject` (rejects). | Informational — required by Auth.js's envelope | Documented in the source and allow-listed by a counted annotation, so the exception cannot spread silently. |
 | 5 | A per-module isolation suite structurally cannot catch a module added later whose author wrote a repository but no test. | Medium (latent) | `cross-module-isolation.test.ts` asks the same questions of **all twelve** collections from one table, and asserts the table's own length. |
 | 6 | Public marketing pages shipped HTML that never hydrated, because a per-request nonce cannot match build-time HTML. | Medium (availability) | Separate static CSP; `docs/SEO.md`. Best-practices score 92 → 100. |
+| 7 | `registerUser` existed with no screen, and a created account is INVITED — so an administrator could create a colleague but nothing could let them in. In practice that meant passwords invented by an administrator and communicated by hand. | Medium | Admin → Users, plus single-use invitation links so a colleague sets their own password. Nobody's password is known to two people. |
+| 8 | Changing a password did not clear an outstanding invitation, so a live link could still set the password again without knowing the current one — defeating the check that exists precisely to stop that. | High | `changePassword` clears the invitation in the same update. |
 
 Findings 2, 3 and 5 are the characteristic result of auditing a codebase that
 was written carefully: the code was right, and the *guarantee that it stays
@@ -277,7 +305,7 @@ two files.
 
 ### Suite totals
 
-52 test files. **765 assertions pass** in this environment; 425 more live in the
+54 test files. **831 assertions pass** in this environment; 425 more live in the
 15 MongoDB-backed suites.
 
 > **Honest note on the 425.** They do not fail — they never start. This
@@ -303,16 +331,22 @@ trusted past them.
    from a third-party page does not carry it. There is no additional
    double-submit token; if the app is ever embedded or the cookie policy
    loosened, add one.
-3. **No audit log of reads.** Writes leave a document with `createdBy` and
+3. **A password change does not sign out other devices.** Sessions are
+   stateless JWEs, so revoking one needs a server-side session store or a
+   per-user token version, and neither exists yet. The account page says so
+   rather than implying otherwise. The lever that does work today is rotating
+   `AUTH_SECRET`, which signs out the whole deployment; suspending an account
+   takes effect within `AUTH_SESSION_REVALIDATE_AFTER` (five minutes).
+4. **No audit log of reads.** Writes leave a document with `createdBy` and
    timestamps, and approvals keep an append-only history, but a user reading a
    record they should not have opened leaves no trace beyond the web-server log.
-4. **File uploads are scanned, not virus-scanned.** Type sniffing and metadata
+5. **File uploads are scanned, not virus-scanned.** Type sniffing and metadata
    stripping stop the browser-side attacks; a PDF carrying a payload for a
    desktop reader would pass. Add an AV pass in the storage pipeline if
    untrusted parties are ever allowed to upload.
-5. **The contact page has no form.** Deliberate — CLAUDE.md forbids public write
+6. **The contact page has no form.** Deliberate — CLAUDE.md forbids public write
    endpoints, and a contact form is one. See `docs/SEO.md`.
-6. **The authenticated app has not been Lighthouse-audited**, because Lighthouse
+7. **The authenticated app has not been Lighthouse-audited**, because Lighthouse
    has no session. See `docs/PERFORMANCE.md`.
 
 ---
@@ -322,7 +356,7 @@ trusted past them.
 ```bash
 pnpm typecheck                 # no any, no unchecked access
 pnpm lint                      # includes the dal-boundary rule
-pnpm test                      # 52 suites, including the two above
+pnpm test                      # 54 suites, including the two above
 ```
 
 The audit is those three commands. It is not a document, and it does not depend
