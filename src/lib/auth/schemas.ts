@@ -35,7 +35,17 @@ export const passwordSchema = z
   .min(12, "Use at least 12 characters")
   .max(128, "Use at most 128 characters");
 
-/** What `authorize()` reads out of the sign-in POST body. */
+/**
+ * What `authorize()` reads out of the sign-in POST body.
+ *
+ * audit-allow: z.object — the ONE schema in the product that strips rather
+ * than rejects. Auth.js hands `authorize()` the whole credentials record,
+ * which carries its own envelope (csrfToken, callbackUrl) alongside our two
+ * fields; `strictObject` here would reject every sign-in. Stripping is safe
+ * precisely because the two fields below are the only ones ever read, and
+ * `src/lib/security/__tests__/action-surface.test.ts` counts this annotation
+ * so the exception cannot spread silently.
+ */
 export const credentialsSchema = z.object({
   email: emailSchema,
   // NOT `passwordSchema`: the policy applies when a password is CHOSEN. At
@@ -84,12 +94,16 @@ export const registerUserSchema = z
       .regex(/^[0-9a-fA-F]{24}$/, "Select a client")
       .optional(),
   })
-  .refine((value) => (value.role === "CLIENT" ? Boolean(value.clientId) : !value.clientId), {
-    // Mirrors the invariant enforced on the User model itself, so a bad payload
-    // is rejected with a field message instead of a database validation error.
-    path: ["clientId"],
-    message: "A CLIENT user needs a client; other roles must not have one.",
-  });
+  .refine(
+    (value) =>
+      value.role === "CLIENT" ? Boolean(value.clientId) : !value.clientId,
+    {
+      // Mirrors the invariant enforced on the User model itself, so a bad payload
+      // is rejected with a field message instead of a database validation error.
+      path: ["clientId"],
+      message: "A CLIENT user needs a client; other roles must not have one.",
+    },
+  );
 
 export type RegisterUserInput = z.input<typeof registerUserSchema>;
 
@@ -102,7 +116,8 @@ export type RegisterUserInput = z.input<typeof registerUserSchema>;
  * "//evil.com" and "https://evil.com" and "/\evil.com" do not.
  */
 export function safeRedirectPath(value: unknown, fallback: string): string {
-  if (typeof value !== "string" || value.length === 0 || value.length > 2_048) return fallback;
+  if (typeof value !== "string" || value.length === 0 || value.length > 2_048)
+    return fallback;
   if (!value.startsWith("/")) return fallback;
   // "//host" is protocol-relative and "/\host" is treated as such by browsers.
   if (value.startsWith("//") || value.startsWith("/\\")) return fallback;
