@@ -54,6 +54,20 @@ export default async function PublicLayout({
      * taller than the visible viewport.
      */
     <div className="flex min-h-dvh flex-col bg-background">
+      {/*
+        The scroll-reveal animations render their initial state — `opacity: 0` —
+        into the prerendered HTML, so without JavaScript nothing would ever fade
+        in and the page would read as blank. This puts it back.
+
+        A marketing page is the one place where "it looked broken to somebody
+        with JS off" is a real cost rather than a hypothetical one, and three
+        lines of CSS remove it entirely. It is inside `<noscript>`, so it costs
+        a scripted visitor nothing at all.
+      */}
+      <noscript>
+        <style>{`[data-reveal]{opacity:1!important;transform:none!important}`}</style>
+      </noscript>
+
       <MarketingHeader locale={locale} />
       <main className="flex-1">{children}</main>
       <MarketingFooter locale={locale} />

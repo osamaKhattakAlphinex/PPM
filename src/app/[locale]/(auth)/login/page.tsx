@@ -8,6 +8,7 @@ import { getCurrentUser } from "@/lib/auth/guard";
 import { safeRedirectPath } from "@/lib/auth/schemas";
 import { DEFAULT_LOCALE, isLocale, localeHref } from "@/lib/i18n/config";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { PlantRoomScene } from "@/components/artwork/schematic";
 import { LoginForm } from "./login-form";
 
 export const metadata: Metadata = {
@@ -64,7 +65,22 @@ export default async function LoginPage({
           backgroundSize: "56px 56px",
         }}
       >
-        <div className="flex h-full flex-col justify-between p-10">
+        {/*
+          The same plant-room drawing as the landing page and the sign-up page,
+          bled off the corner and dimmed into the petrol. Continuity, not
+          decoration: somebody who arrived from the marketing site should be in
+          no doubt they are still in the same place.
+        */}
+        <PlantRoomScene className="pointer-events-none absolute -bottom-6 -start-16 w-[130%] text-petrol-200 opacity-[0.13]" />
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage:
+              "radial-gradient(80% 60% at 20% 0%, rgb(212 169 94 / 0.14) 0%, transparent 70%)",
+          }}
+        />
+
+        <div className="relative flex h-full flex-col justify-between p-10">
           <p className="font-display text-sm font-semibold uppercase tracking-[0.2em] text-brass-300">
             PPM Platform
           </p>

@@ -16,11 +16,15 @@ import { PasswordInput } from "@/components/ui/password-input";
  *
  * Two fields on this form are not what they look like.
  *
- * `website` is a honeypot: rendered, positioned off-screen rather than
+ * `companyReference` is a honeypot: rendered, positioned off-screen rather than
  * `display: none` (which some bots skip), hidden from assistive technology with
  * `aria-hidden` and taken out of the tab order. A person never sees it and
  * never fills it; a form-filling bot fills everything. The server answers a
  * filled one as though it succeeded, so the bot learns nothing.
+ *
+ * It is deliberately NOT called `website` or `url`. Browser profile autofill
+ * targets those names, and a visitor whose browser helpfully filled the trap
+ * would have their registration silently discarded.
  *
  * `locale` is a hidden field rather than a question: somebody registering on
  * the Arabic site wants an Arabic workspace, and one fewer question is worth
@@ -52,10 +56,10 @@ export function SignupForm() {
         aria-hidden
         className="pointer-events-none absolute -left-[9999px] h-px w-px overflow-hidden"
       >
-        <label htmlFor="website">Website</label>
+        <label htmlFor="companyReference">Company reference</label>
         <input
-          id="website"
-          name="website"
+          id="companyReference"
+          name="companyReference"
           type="text"
           tabIndex={-1}
           autoComplete="off"

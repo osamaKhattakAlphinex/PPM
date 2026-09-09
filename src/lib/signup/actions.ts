@@ -1,6 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
+import { unstable_rethrow } from "next/navigation";
 import { AuthError } from "next-auth";
 
 import { signIn } from "@/lib/auth/auth";
@@ -43,6 +44,8 @@ import { hashInviteToken } from "./tokens";
  */
 
 const RATE_LIMITED_ERROR = "Too many attempts. Wait a while and try again.";
+const UNEXPECTED_ERROR =
+  "Something went wrong on our side. Please try again in a moment.";
 const CLOSED_ERROR = "Registration is not open on this deployment.";
 const TAKEN_ERROR =
   "That email address cannot be used to register. If you already have an account, sign in instead.";
@@ -72,6 +75,41 @@ async function clientIp(): Promise<string> {
 }
 
 /**
+ * Turn any unexpected failure into a sentence, the way `defineAction` does for
+ * every other mutation in the product.
+ *
+ * These two actions cannot use that wrapper — its first step is authenticating,
+ * and the whole point of these is that nobody is signed in — so the wrapper's
+ * error handling has to be repeated here. Without it an unreachable database, a
+ * duplicate index or any other surprise escapes the action, React answers the
+ * POST with a 500, and the browser replaces the page with a crash screen. From
+ * the visitor's side that is indistinguishable from the button doing nothing,
+ * which is exactly how it was reported.
+ *
+ * `unstable_rethrow` is what keeps that from swallowing the framework's own
+ * control-flow signals: a successful `signIn` works by THROWING a redirect, so
+ * catching it would leave somebody signed in and still looking at the form.
+ * Next owns the list of those signals, so this asks Next rather than sniffing
+ * for a digest prefix that could change.
+ *
+ * The message is deliberately generic and the detail goes to the server log.
+ * These endpoints are unauthenticated, so anything specific is something an
+ * anonymous caller learns about the inside of the system.
+ */
+async function guarded(
+  name: string,
+  run: () => Promise<PublicFormState>,
+): Promise<PublicFormState> {
+  try {
+    return await run();
+  } catch (error) {
+    unstable_rethrow(error);
+    console.error(`[signup] ${name} failed`, error);
+    return { error: UNEXPECTED_ERROR };
+  }
+}
+
+/**
  * Register a new company and its first administrator.
  *
  * The order below is the security design, so it is worth reading as a sequence:
@@ -96,6 +134,10 @@ export async function signupAction(
   _previous: PublicFormState,
   formData: FormData,
 ): Promise<PublicFormState> {
+  return guarded("signup", () => runSignup(formData));
+}
+
+async function runSignup(formData: FormData): Promise<PublicFormState> {
   if (!isSignupEnabled()) return { error: CLOSED_ERROR };
 
   try {
@@ -111,7 +153,7 @@ export async function signupAction(
     email: formData.get("email"),
     password: formData.get("password"),
     locale: formData.get("locale") ?? undefined,
-    website: formData.get("website") ?? undefined,
+    companyReference: formData.get("companyReference") ?? undefined,
     acceptTerms: formData.get("acceptTerms") ?? undefined,
   });
 
@@ -123,7 +165,7 @@ export async function signupAction(
      * field message, no account. Telling a bot which field gave it away is
      * how the next version of the bot stops filling that field.
      */
-    if (fieldErrors.website) return {};
+    if (fieldErrors.companyReference) return {};
 
     return { error: undefined, fieldErrors };
   }
@@ -200,6 +242,10 @@ export async function acceptInviteAction(
   _previous: PublicFormState,
   formData: FormData,
 ): Promise<PublicFormState> {
+  return guarded("acceptInvite", () => runAcceptInvite(formData));
+}
+
+async function runAcceptInvite(formData: FormData): Promise<PublicFormState> {
   try {
     enforceRateLimit(inviteRateLimiter, await clientIp());
   } catch (error) {

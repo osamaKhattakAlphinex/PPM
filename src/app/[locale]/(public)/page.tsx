@@ -11,7 +11,12 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { DEFAULT_LOCALE, isLocale, localeHref, type Locale } from "@/lib/i18n/config";
+import {
+  DEFAULT_LOCALE,
+  isLocale,
+  localeHref,
+  type Locale,
+} from "@/lib/i18n/config";
 import {
   absoluteUrl,
   alternatesFor,
@@ -20,6 +25,17 @@ import {
   softwareJsonLd,
 } from "@/lib/seo/site";
 import { STARTING_PRICE_SAR } from "./pricing/plans";
+import {
+  BlueprintGrid,
+  ContourField,
+  PlantRoomScene,
+} from "@/components/artwork/schematic";
+import {
+  HeroReveal,
+  Reveal,
+  RevealGroup,
+  RevealItem,
+} from "./_components/reveal";
 
 /**
  * The landing page.
@@ -91,7 +107,14 @@ export async function generateMetadata({
   };
 }
 
-const FEATURE_ICONS = [Boxes, CalendarCheck, ShieldCheck, FileText, Sparkles, Languages];
+const FEATURE_ICONS = [
+  Boxes,
+  CalendarCheck,
+  ShieldCheck,
+  FileText,
+  Sparkles,
+  Languages,
+];
 
 export default async function LandingPage({
   params,
@@ -105,7 +128,14 @@ export default async function LandingPage({
   setRequestLocale(locale);
   const t = await getTranslations("marketing");
 
-  const features = ["assets", "planned", "approvals", "invoicing", "insights", "bilingual"] as const;
+  const features = [
+    "assets",
+    "planned",
+    "approvals",
+    "invoicing",
+    "insights",
+    "bilingual",
+  ] as const;
 
   return (
     <>
@@ -125,112 +155,181 @@ export default async function LandingPage({
       {/* ---- Hero ---------------------------------------------------- */}
       <section className="relative overflow-hidden border-b border-border">
         {/*
-          A single CSS gradient rather than an image: it is a few bytes, it
-          costs no request, it cannot fail to load, and it adapts to both themes
-          without a second asset. `aria-hidden` because it carries no meaning.
+          Three layers, cheapest first: a gradient wash, a drafting grid, and
+          the plant-room drawing itself. All of it is CSS and inline SVG — no
+          request, nothing to 404, and every colour comes from the same tokens
+          as the text, so the whole thing restyles itself in dark mode.
         */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_50%_at_50%_0%,var(--color-petrol-200)_0%,transparent_70%)] opacity-40 dark:opacity-20"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_55%_at_50%_0%,var(--color-petrol-200)_0%,transparent_72%)] opacity-45 dark:opacity-20"
+        />
+        <BlueprintGrid
+          id="hero-grid"
+          opacity={0.35}
+          className="pointer-events-none absolute inset-0 h-full w-full text-petrol-700 dark:text-petrol-300"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-background"
         />
 
-        <div className="relative mx-auto w-full max-w-4xl px-5 py-20 text-center sm:py-28">
-          <p className="font-display text-xs font-semibold uppercase tracking-[0.2em] text-accent-text">
-            {t("hero.eyebrow")}
-          </p>
+        <div className="relative mx-auto w-full max-w-4xl px-5 pt-20 text-center sm:pt-28">
+          <HeroReveal>
+            <p className="font-display text-xs font-semibold uppercase tracking-[0.2em] text-accent-text">
+              {t("hero.eyebrow")}
+            </p>
+          </HeroReveal>
 
-          <h1 className="mt-4 font-display text-4xl font-semibold leading-tight text-foreground sm:text-5xl">
-            {t("hero.title")}
-          </h1>
+          <HeroReveal delay={0.06}>
+            <h1 className="mt-4 font-display text-4xl font-semibold leading-tight text-foreground sm:text-5xl">
+              {t("hero.title")}
+            </h1>
+          </HeroReveal>
 
-          <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-            {t("hero.body")}
-          </p>
+          <HeroReveal delay={0.12}>
+            <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+              {t("hero.body")}
+            </p>
+          </HeroReveal>
 
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link href={localeHref("/login", locale)}>
-              <Button size="lg">{t("hero.primaryCta")}</Button>
-            </Link>
-            <Link href={localeHref("/pricing", locale)}>
-              <Button size="lg" variant="outline">
-                {t("hero.secondaryCta")}
-              </Button>
-            </Link>
-          </div>
+          <HeroReveal delay={0.18}>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <Link href={localeHref("/signup", locale)}>
+                <Button size="lg">{t("nav.signUp")}</Button>
+              </Link>
+              <Link href={localeHref("/login", locale)}>
+                <Button size="lg" variant="outline">
+                  {t("hero.primaryCta")}
+                </Button>
+              </Link>
+            </div>
 
-          <p className="mt-6 text-sm text-muted-foreground">{t("hero.note")}</p>
+            <p className="mt-6 text-sm text-muted-foreground">
+              {t("hero.note")}
+            </p>
+          </HeroReveal>
         </div>
+
+        {/*
+          The drawing sits under the copy rather than beside it, so the hero
+          reads top-to-bottom on a phone without the illustration being shrunk
+          into illegibility. It is clipped at the bottom on purpose — a plant
+          room continues past the frame, and a fully contained drawing floating
+          in white space looks like a sticker.
+        */}
+        <HeroReveal delay={0.24} className="relative mt-4 sm:mt-6">
+          <PlantRoomScene className="mx-auto -mb-8 block h-auto w-full max-w-4xl px-5 text-foreground opacity-80 sm:-mb-12 dark:opacity-70" />
+        </HeroReveal>
       </section>
 
       {/* ---- What it does -------------------------------------------- */}
       <section className="mx-auto w-full max-w-6xl px-5 py-16 sm:py-20">
-        <h2 className="font-display text-2xl font-semibold text-foreground sm:text-3xl">
-          {t("features.title")}
-        </h2>
-        <p className="mt-2 max-w-2xl text-muted-foreground">{t("features.body")}</p>
+        <Reveal>
+          <h2 className="font-display text-2xl font-semibold text-foreground sm:text-3xl">
+            {t("features.title")}
+          </h2>
+          <p className="mt-2 max-w-2xl text-muted-foreground">
+            {t("features.body")}
+          </p>
+        </Reveal>
 
-        <ul className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <RevealGroup
+          as="ul"
+          className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+        >
           {features.map((key, index) => {
             const Icon = FEATURE_ICONS[index] ?? Boxes;
 
             return (
-              <li key={key} className="rounded-md border border-border bg-surface p-5">
-                <span className="mb-3 flex size-9 items-center justify-center rounded-md bg-accent/10 text-accent-text">
-                  <Icon className="size-4" aria-hidden />
-                </span>
-                <h3 className="font-display text-lg font-semibold text-foreground">
-                  {t(`features.${key}.title`)}
-                </h3>
-                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                  {t(`features.${key}.body`)}
-                </p>
-              </li>
+              <RevealItem as="li" key={key}>
+                {/*
+                  The lift on hover is 2px and the border warms to the accent.
+                  Deliberately small: these are not buttons, and a card that
+                  jumps invites a click that leads nowhere.
+                */}
+                <div className="group h-full rounded-md border border-border bg-surface p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-md">
+                  <span className="mb-3 flex size-9 items-center justify-center rounded-md bg-accent/10 text-accent-text transition-colors duration-200 group-hover:bg-accent/20">
+                    <Icon
+                      className="size-4 transition-transform duration-200 group-hover:scale-110"
+                      aria-hidden
+                    />
+                  </span>
+                  <h3 className="font-display text-lg font-semibold text-foreground">
+                    {t(`features.${key}.title`)}
+                  </h3>
+                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                    {t(`features.${key}.body`)}
+                  </p>
+                </div>
+              </RevealItem>
             );
           })}
-        </ul>
+        </RevealGroup>
       </section>
 
       {/* ---- The isolation promise ----------------------------------- */}
-      <section className="border-y border-border bg-surface-sunken">
-        <div className="mx-auto w-full max-w-4xl px-5 py-16 text-center sm:py-20">
-          <h2 className="font-display text-2xl font-semibold text-foreground sm:text-3xl">
-            {t("trust.title")}
-          </h2>
-          <p className="mx-auto mt-3 max-w-2xl leading-relaxed text-muted-foreground">
-            {t("trust.body")}
-          </p>
+      <section className="relative overflow-hidden border-y border-border bg-surface-sunken">
+        {/* Survey contours — the site, rather than the plant. */}
+        <ContourField
+          id="trust-contour"
+          className="pointer-events-none absolute inset-0 h-full w-full text-petrol-700 opacity-[0.18] dark:text-petrol-300 dark:opacity-[0.12]"
+        />
 
-          <dl className="mt-10 grid gap-6 text-start sm:grid-cols-3">
+        <div className="relative mx-auto w-full max-w-4xl px-5 py-16 text-center sm:py-20">
+          <Reveal>
+            <h2 className="font-display text-2xl font-semibold text-foreground sm:text-3xl">
+              {t("trust.title")}
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl leading-relaxed text-muted-foreground">
+              {t("trust.body")}
+            </p>
+          </Reveal>
+
+          <RevealGroup
+            as="dl"
+            className="mt-10 grid gap-6 text-start sm:grid-cols-3"
+          >
             {(["isolation", "audit", "residency"] as const).map((key) => (
-              <div key={key}>
+              <RevealItem key={key}>
                 <dt className="font-display text-base font-semibold text-foreground">
                   {t(`trust.${key}.title`)}
                 </dt>
                 <dd className="mt-1 text-sm leading-relaxed text-muted-foreground">
                   {t(`trust.${key}.body`)}
                 </dd>
-              </div>
+              </RevealItem>
             ))}
-          </dl>
+          </RevealGroup>
         </div>
       </section>
 
       {/* ---- Closing CTA --------------------------------------------- */}
-      <section className="mx-auto w-full max-w-4xl px-5 py-16 text-center sm:py-20">
-        <h2 className="font-display text-2xl font-semibold text-foreground sm:text-3xl">
-          {t("cta.title")}
-        </h2>
-        <p className="mx-auto mt-3 max-w-xl text-muted-foreground">{t("cta.body")}</p>
+      <section className="relative overflow-hidden">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(55%_60%_at_50%_100%,var(--color-brass-200)_0%,transparent_70%)] opacity-40 dark:opacity-[0.12]"
+        />
+        <div className="relative mx-auto w-full max-w-4xl px-5 py-16 text-center sm:py-20">
+          <Reveal>
+            <h2 className="font-display text-2xl font-semibold text-foreground sm:text-3xl">
+              {t("cta.title")}
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
+              {t("cta.body")}
+            </p>
 
-        <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-          <Link href={localeHref("/contact", locale)}>
-            <Button size="lg">{t("cta.primary")}</Button>
-          </Link>
-          <Link href={localeHref("/pricing", locale)}>
-            <Button size="lg" variant="outline">
-              {t("cta.secondary")}
-            </Button>
-          </Link>
+            <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+              <Link href={localeHref("/signup", locale)}>
+                <Button size="lg">{t("nav.signUp")}</Button>
+              </Link>
+              <Link href={localeHref("/contact", locale)}>
+                <Button size="lg" variant="outline">
+                  {t("cta.primary")}
+                </Button>
+              </Link>
+            </div>
+          </Reveal>
         </div>
       </section>
     </>

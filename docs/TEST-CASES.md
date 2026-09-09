@@ -495,6 +495,25 @@ Sign in as ADMIN and open the account menu (top right) → Administration.
 | 24.23 | Sign out from the public site | Click Sign out there | You are signed out and stay on the public page | |
 | 24.24 | The scenarios page | Open What it does from the public menu | Every module is listed with its scenarios, in plain language | |
 | 24.25 | In Arabic too | Open the same page at `/ar/scenarios` | Fully Arabic and mirrored, with the same number of scenarios | |
+| 24.26 | A failure is reported, not silent | Stop the database, then submit the sign-up form | A message saying something went wrong. The page must NOT be replaced by a crash screen, and the button must not simply do nothing | |
+| 24.27 | Autofill does not break sign-up | Let the browser autofill the form from a saved profile, then submit | It registers normally. No hidden field is filled on your behalf in a way that silently discards the attempt | |
+
+---
+
+## 25. Look, feel and motion on the public site
+
+| # | Test | What to do | What should happen | Result |
+|---|---|---|---|---|
+| 25.1 | The illustration | Open the home page | A technical drawing of a plant room sits under the headline: a chiller, a pipe run, an air handling unit and a distribution board | |
+| 25.2 | It moves, gently | Watch it for a few seconds | The fans turn slowly, chilled water travels the pipe, and one fault light pulses. Nothing else moves | |
+| 25.3 | Dark mode | Switch to dark | The drawing recolours itself and stays readable. It does not become a white box | |
+| 25.4 | Sections arrive as you scroll | Scroll down the home page | Each block fades up as it comes into view, once. Scrolling back up does not replay it | |
+| 25.5 | Reduced motion is obeyed | Turn on "reduce motion" in your operating system and reload | Nothing animates at all. The drawing is still, the sections are simply there, and nothing is missing | |
+| 25.6 | Cards respond to the pointer | Hover a feature card or a pricing plan | It lifts very slightly and its border warms. It does not jump | |
+| 25.7 | Everything pressable says so | Move the pointer over every button, toggle, checkbox and plan | The cursor becomes a hand on all of them. On a disabled control it becomes the "not allowed" cursor | |
+| 25.8 | The sign-in and sign-up panels | Open both | The same plant-room drawing appears faintly on the coloured panel, so the pages feel like one product | |
+| 25.9 | Nothing is hidden without JavaScript | Disable JavaScript and reload the home page | All the text is visible. Nothing is stuck invisible waiting for an animation | |
+| 25.10 | Backgrounds stay behind | Look at the grid and contour patterns | They sit behind the text and never make it hard to read, in either theme | |
 
 ---
 
@@ -525,8 +544,9 @@ Sign in as ADMIN and open the account menu (top right) → Administration.
 | 21. Look and feel | 10 | | | | |
 | 22. Automatic tests | 5 | | | | |
 | 23. User administration | 16 | | | | |
-| 24. Sign-up and account | 25 | | | | |
-| **Total** | **255** | | | | |
+| 24. Sign-up and account | 27 | | | | |
+| 25. Look, feel and motion | 10 | | | | |
+| **Total** | **267** | | | | |
 
 **A release needs every case in section 19 to pass.** A failure there is not a
 bug to schedule — it is one company seeing another company's data, and nothing

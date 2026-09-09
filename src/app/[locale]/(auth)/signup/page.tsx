@@ -9,6 +9,7 @@ import { isSignupEnabled } from "@/lib/env";
 import { DEFAULT_LOCALE, isLocale, localeHref } from "@/lib/i18n/config";
 import { alternatesFor } from "@/lib/seo/site";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { PlantRoomScene } from "@/components/artwork/schematic";
 import { SignupForm } from "./signup-form";
 
 export async function generateMetadata({
@@ -78,7 +79,23 @@ export default async function SignupPage({
           backgroundSize: "56px 56px",
         }}
       >
-        <div className="flex h-full flex-col justify-between p-10">
+        {/*
+          The plant-room drawing, bled off the bottom-left corner and dimmed
+          into the petrol. It is the same illustration as the landing page, so
+          somebody arriving here from the marketing site recognises where they
+          are — and it turns a plain colour field into something that belongs
+          to this product rather than to any product.
+        */}
+        <PlantRoomScene className="pointer-events-none absolute -bottom-6 -start-16 w-[130%] text-petrol-200 opacity-[0.13]" />
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage:
+              "radial-gradient(80% 60% at 20% 0%, rgb(212 169 94 / 0.14) 0%, transparent 70%)",
+          }}
+        />
+
+        <div className="relative flex h-full flex-col justify-between p-10">
           <p className="font-display text-sm font-semibold uppercase tracking-[0.2em] text-brass-300">
             PPM Platform
           </p>

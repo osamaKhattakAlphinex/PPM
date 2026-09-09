@@ -26,6 +26,12 @@ import { localeSchema } from "@/lib/i18n/config";
  * input, and it costs a real visitor nothing — no puzzle, no third-party
  * script, no image of squashed letters.
  *
+ * The field is called `companyReference` and NOT `website`, `url` or `email`,
+ * which is not cosmetic: browser profile autofill targets those names, so a
+ * real visitor's browser would fill the trap for them. A filled honeypot is
+ * answered with silence, so that false positive costs somebody their
+ * registration and tells them nothing — the worst possible failure.
+ *
  * It is NOT a security control, and nothing downstream depends on it. Anyone
  * who reads the page source defeats it in a minute; the rate limit is what
  * holds against somebody actually trying.
@@ -55,7 +61,7 @@ export const signupSchema = z.strictObject({
    */
   locale: localeSchema.catch("en").default("en"),
   /** Must be empty. See above. */
-  website: honeypotSchema,
+  companyReference: honeypotSchema,
   /**
    * Explicit consent, rather than a pre-ticked box or a line of small print.
    * `literal(true)` because an unchecked HTML checkbox submits nothing at all,

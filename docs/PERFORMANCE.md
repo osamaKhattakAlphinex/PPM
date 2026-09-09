@@ -127,9 +127,21 @@ which carries no session cookie, so every thumbnail behind `/api/files/[id]`
 would come back 401. The component is still worth using for the layout
 reservation and the lazy loading.
 
-The marketing pages ship **no images at all**. The hero is a CSS radial
-gradient: a few bytes, no request, cannot fail to load, and it adapts to both
-themes without a second asset.
+The marketing pages ship **no raster images at all**. What looks like
+illustration — the plant-room schematic on the landing and auth pages, the
+drafting grid, the survey contours — is inline SVG drawn from the same CSS
+custom properties as the text.
+
+That is a deliberate choice rather than a shortage of assets. An
+`<img src="hero.svg">` is an opaque document: it cannot see `currentColor`, so
+matching it to both themes means shipping two files and keeping them in step.
+Inline, one drawing recolours itself in dark mode for free, costs no request,
+cannot 404, and carries no third-party licence on the product's front door.
+
+`next/image` is therefore not involved on these pages, and CLAUDE.md's rule
+about it is not being skirted: that rule is about raster assets with intrinsic
+dimensions and a network cost. The one place the product renders a real
+uploaded image — the attachment gallery — does use it.
 
 ## 5. Measured result
 
@@ -139,8 +151,22 @@ production build.
 | Page | Performance | Accessibility | Best practices | SEO |
 |---|---|---|---|---|
 | `/en` | 99 | 100 | 100 | 100 |
-| `/en/pricing` | 100 | 100 | 100 | 100 |
+| `/en/pricing` | 99 | 100 | 100 | 100 |
+| `/en/contact` | 99 | 100 | 100 | 100 |
+| `/en/scenarios` | 99 | 100 | 100 | 100 |
+| `/en/signup` | 100 | 100 | 100 | 100 |
 | `/ar` | 99 | 100 | 100 | 100 |
+
+Measured again after the artwork and the scroll animations were added, which is
+the point of the table: the illustration is inline SVG and the motion is a few
+kilobytes of Framer Motion that the app already ships, so neither cost a point.
+
+The accessibility column is the one that moved during that work, and it is worth
+recording why. Wrapping list items in an animation component silently replaced
+`<dl>` and `<ol>` elements with `<div>`s — semantically, a pile of `<dt>`s with
+no list around them. Lighthouse caught it at 92 and 96 before anybody read the
+markup. The reveal components now take the element they should render as, so
+animation cannot cost semantics.
 
 Before the static-CSP fix recorded in `docs/SEO.md`, best practices scored **92**
 with the console full of CSP violations — the public pages were shipping HTML

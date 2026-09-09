@@ -56,6 +56,24 @@ describe("signupSchema", () => {
     ).toBe(false);
   });
 
+  /**
+   * The trap is named so that browser autofill leaves it alone. `website` and
+   * `url` are exactly what profile autofill targets, and a filled honeypot is
+   * answered with silence — so that false positive would cost a real visitor
+   * their registration and tell them nothing.
+   */
+  it("uses a honeypot name browser autofill does not target", () => {
+    for (const attractive of ["website", "url", "homepage"]) {
+      expect(
+        signupSchema.safeParse({ ...VALID_SIGNUP, [attractive]: "x" }).success,
+      ).toBe(false);
+    }
+    expect(
+      signupSchema.safeParse({ ...VALID_SIGNUP, companyReference: "x" })
+        .success,
+    ).toBe(false);
+  });
+
   it("refuses a filled honeypot", () => {
     expect(
       signupSchema.safeParse({
@@ -67,7 +85,7 @@ describe("signupSchema", () => {
 
   it("accepts an empty or absent honeypot", () => {
     expect(
-      signupSchema.safeParse({ ...VALID_SIGNUP, website: "" }).success,
+      signupSchema.safeParse({ ...VALID_SIGNUP, companyReference: "" }).success,
     ).toBe(true);
     expect(signupSchema.safeParse(VALID_SIGNUP).success).toBe(true);
   });
