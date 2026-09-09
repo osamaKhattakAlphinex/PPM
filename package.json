@@ -19,6 +19,7 @@
   "dependencies": {
     "@node-rs/argon2": "^2.1.0",
     "@radix-ui/react-dialog": "^1.1.23",
+    "@react-pdf/renderer": "^4.9.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^13.1.1",

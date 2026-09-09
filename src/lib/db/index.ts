@@ -159,6 +159,14 @@ export {
 } from "./repositories/approvals";
 
 export {
+  invoicesRepository,
+  summariseInvoices,
+  type InvoiceCreateInput,
+  type InvoiceSummaryTotals,
+  type InvoiceUpdateInput,
+} from "./repositories/invoices";
+
+export {
   checklistsRepository,
   type ChecklistCreateInput,
   type ChecklistUpdateInput,
@@ -252,6 +260,12 @@ export {
   type ApprovalDocument,
   type ApprovalHistoryEntry,
 } from "./models/approval";
+
+// And again: the stored and display status vocabularies, the VAT arithmetic and
+// the derived-status functions are domain constants
+// (`src/lib/domain/invoicing.ts`) that the ledger, its filters, its KPI header
+// and its badge import as values, so they are not re-exported here.
+export { invoiceInputSchema, type InvoiceDocument } from "./models/invoice";
 
 export {
   checklistRunInputSchema,
