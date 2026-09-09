@@ -139,8 +139,9 @@ host the default is fine.
 
 ## 4. Hosting
 
-The build is `output: "standalone"`, so both paths below work from the same
-artifact.
+Both paths below build from the same source. A container build additionally
+sets `NEXT_OUTPUT=standalone`, which produces a self-contained server bundle;
+without it the build is an ordinary one that `pnpm start` can serve.
 
 ### Vercel
 
@@ -160,15 +161,23 @@ Two Vercel-specific notes:
 
 ```bash
 pnpm install --frozen-lockfile
-pnpm build
+NEXT_OUTPUT=standalone pnpm build
 
-# `next build --output standalone` does not copy these two — they are served
-# straight from disk and would otherwise 404.
+# The standalone build does not copy these two — they are served straight from
+# disk and would otherwise 404.
 cp -r public .next/standalone/public
 cp -r .next/static .next/standalone/.next/static
 
 NODE_ENV=production node .next/standalone/server.js   # listens on PORT, default 3000
 ```
+
+Without `NEXT_OUTPUT=standalone` the same build is served with `pnpm start`,
+which is what a developer runs locally. `next start` refuses to serve a
+standalone build, which is why the flag is opt-in rather than always on.
+
+Set `AUTH_TRUST_HOST=true` when the app sits behind a proxy on a host Auth.js
+cannot infer — otherwise every `/api/auth/*` request answers "Host must be
+trusted".
 
 Run it behind a TLS-terminating reverse proxy. The proxy must forward
 `X-Forwarded-Proto` and `X-Forwarded-For`: the first is how the app knows to

@@ -116,6 +116,38 @@
       "submit": "Create user"
     }
   },
+  "account": {
+    "title": "Your account",
+    "subtitle": "Your name, your password, and where you are signed in.",
+    "identity": {
+      "title": "Signed in as",
+      "role": "Role",
+      "organization": "Company",
+      "client": "Client",
+      "lastLogin": "Last sign-in",
+      "never": "This is your first session"
+    },
+    "profile": {
+      "title": "Profile",
+      "description": "The name colleagues see beside the work you do.",
+      "name": "Full name",
+      "email": "Work email",
+      "emailFixed": "Your email is how you sign in, so it can only be changed by an administrator.",
+      "submit": "Save changes",
+      "saved": "Profile updated. Your name in the top bar catches up within a few minutes."
+    },
+    "password": {
+      "title": "Password",
+      "description": "You need your current password to set a new one.",
+      "current": "Current password",
+      "next": "New password",
+      "confirm": "Confirm new password",
+      "hint": "At least 12 characters. Length matters more than symbols.",
+      "sessionsNote": "Changing your password does not sign you out on other devices. If you think somebody else has your password, tell an administrator as well.",
+      "submit": "Change password",
+      "saved": "Password changed."
+    }
+  },
   "dashboard": {
     "title": "Dashboard",
     "subtitle": "Your organisation this morning — what you own, how much of the plan is being kept, and what is on fire.",
@@ -838,7 +870,12 @@
     "nav": {
       "pricing": "Pricing",
       "contact": "Contact",
-      "signIn": "Sign in"
+      "signIn": "Sign in",
+      "account": "Account",
+      "goToApp": "Go to the app",
+      "signOut": "Sign out",
+      "signingOut": "Signing out…",
+      "signUp": "Start free"
     },
     "meta": {
       "description": "A bilingual maintenance management platform for Gulf facility providers: assets, planned and reactive work, contracts, approvals and VAT invoicing — with every tenant's data isolated by design."
